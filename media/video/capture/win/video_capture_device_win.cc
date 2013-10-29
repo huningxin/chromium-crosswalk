@@ -15,6 +15,8 @@
 #include "base/win/scoped_variant.h"
 #include "media/base/media_switches.h"
 #include "media/video/capture/win/video_capture_device_mf_win.h"
+#include "media/video/capture/win/video_capture_device_pxc_win.h"
+
 
 using base::win::ScopedCoMem;
 using base::win::ScopedComPtr;
@@ -160,6 +162,12 @@ void VideoCaptureDevice::GetDeviceNames(Names* device_names) {
       !cmd_line->HasSwitch(switches::kForceDirectShowVideoCapture)) {
     VideoCaptureDeviceMFWin::GetDeviceNames(device_names);
   } else {
+#if defined(USE_PXC_CAPTURE)
+    if (VideoCaptureDevicePxcWin::PlatformSupported()) {
+      VideoCaptureDevicePxcWin::GetDeviceNames(device_names);
+      return;
+    }
+#endif
     VideoCaptureDeviceWin::GetDeviceNames(device_names);
   }
 }
@@ -186,7 +194,16 @@ VideoCaptureDevice* VideoCaptureDevice::Create(const Name& device_name) {
     DVLOG(1) << " DirectShow Device: " << device_name.name();
     if (device->Init())
       ret = device.release();
-  } else{
+#if defined(USE_PXC_CAPTURE)
+  } else if (device_name.capture_api_type() == Name::PXC_CAPTURE) {
+    DCHECK(VideoCaptureDevicePxcWin::PlatformSupported());
+    scoped_ptr<VideoCaptureDevicePxcWin> device(
+        new VideoCaptureDevicePxcWin(device_name));
+    DVLOG(1) << " PxcCapture Device: " << device_name.name();
+    if (device->Init())
+      ret = device.release();
+#endif
+  } else {
     NOTREACHED() << " Couldn't recognize VideoCaptureDevice type";
   }
 
