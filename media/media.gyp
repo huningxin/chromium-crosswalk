@@ -42,6 +42,9 @@
         'pkg-config': 'pkg-config'
       }],
     ],
+    # Use PxcCapture API (Intel PCSDK) on Windows to implement Video Capture
+    # Device.
+    'use_pxc_capture%': 0,
   },
   'includes': [
     'media_cdm.gypi',
@@ -562,6 +565,24 @@
         ],
       },
       'conditions': [
+        ['OS=="win"' and 'use_pxc_capture==1', {
+          'defines': ['USE_PXC_CAPTURE=1'],
+          'sources': [
+            'video/capture/win/video_capture_device_pxc_win.cc',
+            'video/capture/win/video_capture_device_pxc_win.h',
+          ],
+          'include_dirs': [
+            '<!(echo %PCSDK_DIR%\include)',
+          ],
+          'link_settings': {
+            'library_dirs': [
+              '<!(echo %PCSDK_DIR%\lib\Win32)',
+            ],
+            'libraries': [
+              '-llibpxc.lib',
+            ],
+          },
+        }],
         ['arm_neon==1', {
           'defines': [
             'USE_NEON'
