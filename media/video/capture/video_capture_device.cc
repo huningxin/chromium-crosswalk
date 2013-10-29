@@ -66,6 +66,10 @@ const char* VideoCaptureDevice::Name::GetCaptureApiTypeString() const {
       return "Direct Show";
     case DIRECT_SHOW_WDM_CROSSBAR:
       return "Direct Show WDM Crossbar";
+#if defined(USE_PXC_CAPTURE)
+    case PXC_CAPTURE:
+      return "PXC Capture";
+#endif
     default:
       NOTREACHED() << "Unknown Video Capture API type!";
       return "Unknown API";

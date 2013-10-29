@@ -47,6 +47,9 @@ class MEDIA_EXPORT VideoCaptureDevice {
       MEDIA_FOUNDATION,
       DIRECT_SHOW,
       DIRECT_SHOW_WDM_CROSSBAR,
+#if defined(USE_PXC_CAPTURE)
+      PXC_CAPTURE,
+#endif
       API_TYPE_UNKNOWN
     };
 #endif

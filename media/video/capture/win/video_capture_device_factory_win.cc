@@ -18,6 +18,9 @@
 #include "base/win/windows_version.h"
 #include "media/base/media_switches.h"
 #include "media/video/capture/win/video_capture_device_mf_win.h"
+#if defined(USE_PXC_CAPTURE)
+#include "media/video/capture/win/video_capture_device_pxc_win.h"
+#endif
 #include "media/video/capture/win/video_capture_device_win.h"
 
 using base::win::ScopedCoMem;
@@ -406,6 +409,14 @@ scoped_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryWin::Create(
     }
     if (!static_cast<VideoCaptureDeviceMFWin*>(device.get())->Init(source))
       device.reset();
+#if defined(USE_PXC_CAPTURE)
+  } else if (device_name.capture_api_type() == Name::PXC_CAPTURE) {
+    DCHECK(VideoCaptureDevicePxcWin::PlatformSupported());
+    device.reset(new VideoCaptureDevicePxcWin(device_name));
+    DVLOG(1) << " PxcCapture Device: " << device_name.name();
+    if (!static_cast<VideoCaptureDevicePxcWin*>(device.get())->Init())
+      device.reset();
+#endif 
   } else {
     DCHECK(device_name.capture_api_type() == Name::DIRECT_SHOW ||
            device_name.capture_api_type() == Name::DIRECT_SHOW_WDM_CROSSBAR);
@@ -419,6 +430,12 @@ scoped_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryWin::Create(
 
 void VideoCaptureDeviceFactoryWin::GetDeviceNames(Names* device_names) {
   DCHECK(thread_checker_.CalledOnValidThread());
+#if defined(USE_PXC_CAPTURE)
+  if (VideoCaptureDevicePxcWin::PlatformSupported()) {
+    VideoCaptureDevicePxcWin::GetDeviceNames(device_names);
+    return;
+  }
+#endif
   if (use_media_foundation_) {
     GetDeviceNamesMediaFoundation(device_names);
   } else {
