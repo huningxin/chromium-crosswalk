@@ -88,6 +88,10 @@ const char* VideoCaptureDevice::Name::GetCaptureApiTypeString() const {
       return "Media Foundation";
     case DIRECT_SHOW:
       return "Direct Show";
+#if defined(USE_PXC_CAPTURE)
+    case PXC_CAPTURE:
+      return "PXC Capture";
+#endif
     default:
       NOTREACHED() << "Unknown Video Capture API type!";
       return "Unknown API";
