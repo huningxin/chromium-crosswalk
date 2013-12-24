@@ -1234,6 +1234,24 @@
         'browser/gamepad/gamepad_platform_data_fetcher.cc',
       ]
     }],
+    ['OS=="win"' and 'use_pxc_speech_recognition==1', {
+      'defines': ['USE_PXC_SPEECH_RECOGNITION=1'],
+      'sources': [
+        'browser/speech/intel_pcsdk_local_engine.h',
+        'browser/speech/intel_pcsdk_local_engine.cc',
+      ],
+      'include_dirs': [
+        '<!(echo %PCSDK_DIR%\include)',
+      ],
+      'link_settings': {
+        'library_dirs': [
+          '<!(echo %PCSDK_DIR%\lib\Win32)',
+        ],
+        'libraries': [
+          '-llibpxc.lib',
+        ],
+      },
+    }],
     ['OS=="ios"', {
       'sources/': [
         # iOS only needs a small portion of content; exclude all the
