@@ -15,6 +15,7 @@ namespace media {
 // This needs to be aligned with definition in
 // content/renderer/media/media_stream_impl.cc
 const char kVirtualDepthDeviceId[] = "depth";
+const char kVirtualRgbdDeviceId[] = "rgbd";
 
 static const size_t kBytesPerPixelRGB32 = 4;
 
@@ -113,18 +114,26 @@ void VideoCaptureDevicePxcWin::GetDeviceNames(Names* device_names) {
         g_real_depth_device_id = base::WideToUTF8(std::wstring(device_info.did));
         device_names->push_back(name);
       }
+      if (found_color_stream && found_depth_stream) {
+        Name name(base::WideToUTF8(std::wstring(device_info.name)),
+          kVirtualRgbdDeviceId,
+          Name::PXC_CAPTURE);
+        DLOG(INFO) << "RGBD video capture device, " << name.name()
+                   << " : " << name.id();
+        g_real_depth_device_id = base::WideToUTF8(std::wstring(device_info.did));
+        device_names->push_back(name);
+      }
     }  // Enumerate devices.
   }  // Enumerate modules.
 }
 
 VideoCaptureDevicePxcWin::VideoCaptureDevicePxcWin(const Name& device_name)
-    : is_capturing_depth_(false),
-      device_name_(device_name),
+    : device_name_(device_name),
       state_(kIdle),
       pxc_capture_thread_("PxcCaptureThread") {
   DLOG(INFO) << device_name.name() << ": " << device_name.id();
   if (device_name.id() == kVirtualDepthDeviceId) {
-    is_capturing_depth_ = true;
+    capture_mode_ = kCaptureDepth;
     const CommandLine* cmd_line = CommandLine::ForCurrentProcess();
     std::string encoding_option(
         cmd_line->GetSwitchValueASCII(switches::kDepthEncoding));
@@ -137,6 +146,10 @@ VideoCaptureDevicePxcWin::VideoCaptureDevicePxcWin(const Name& device_name)
     } else {
       depth_encoding_ = kGrayscaleRGB32;
     }
+  } else if (device_name.id() == kVirtualRgbdDeviceId) {
+    capture_mode_ = kCaptureRGBD;
+  } else {
+    capture_mode_ = kCaptureRGBA;
   }
 }
 
@@ -173,7 +186,7 @@ bool VideoCaptureDevicePxcWin::Init() {
 
       std::string device_name = device_name_.name();
       std::string device_id = device_name_.id();
-      if (is_capturing_depth_) {
+      if (capture_mode_ == kCaptureDepth || capture_mode_ == kCaptureRGBD) {
         device_id = g_real_depth_device_id;
       }
       if (base::WideToUTF8(std::wstring(device_info.name)) != device_name ||
@@ -233,6 +246,7 @@ void VideoCaptureDevicePxcWin::OnAllocateAndStart(
   }
 
   pxcStatus status;
+  PXCCapture::VideoStream::ProfileInfo rgbd_profile;
   for (int stream_index = 0; ; stream_index++) {
     PXCCapture::Device::StreamInfo stream_info;
     status = device_->QueryStream(stream_index, &stream_info);
@@ -244,18 +258,23 @@ void VideoCaptureDevicePxcWin::OnAllocateAndStart(
     if (stream_info.cuid != PXCCapture::VideoStream::CUID)
       continue;
 
-    if (!is_capturing_depth_ &&
+    if (capture_mode_ == kCaptureRGBA &&
         stream_info.imageType != PXCImage::IMAGE_TYPE_COLOR)
       continue;
 
-    if (is_capturing_depth_ &&
+    if (capture_mode_ == kCaptureDepth &&
         stream_info.imageType != PXCImage::IMAGE_TYPE_DEPTH)
+      continue;
+
+    if (capture_mode_ == kCaptureRGBD &&
+        stream_info.imageType != PXCImage::IMAGE_TYPE_DEPTH &&
+        stream_info.imageType != PXCImage::IMAGE_TYPE_COLOR)
       continue;
 
     PXCSmartPtr<PXCCapture::VideoStream> stream;
     status =
         device_->CreateStream<PXCCapture::VideoStream>(stream_index,
-                                                              &stream);
+                                                       &stream);
     if (status < PXC_STATUS_NO_ERROR)
       continue;
 
@@ -263,7 +282,7 @@ void VideoCaptureDevicePxcWin::OnAllocateAndStart(
     PXCCapture::VideoStream::ProfileInfo best_profile;
     bool best_profile_found = false;
     uint32 best = 0xFFFFFFFF;
-    for (int porfile_index = 0; !stream_.IsValid(); porfile_index++) {
+    for (int porfile_index = 0; ; porfile_index++) {
       PXCCapture::VideoStream::ProfileInfo video_profile;
       status = stream->QueryProfile(porfile_index, &video_profile);
       if (status < PXC_STATUS_NO_ERROR) {
@@ -300,7 +319,22 @@ void VideoCaptureDevicePxcWin::OnAllocateAndStart(
     status = stream->SetProfile(&best_profile);
     if (status < PXC_STATUS_NO_ERROR)
       break;
-    stream_ = stream.ReleasePtr();
+
+    if (capture_mode_ == kCaptureRGBD &&
+        stream_info.imageType == PXCImage::IMAGE_TYPE_DEPTH)
+      rgbd_profile = best_profile;
+
+    if (stream_info.imageType == PXCImage::IMAGE_TYPE_COLOR)
+      color_stream_ = stream.ReleasePtr();
+    else if (stream_info.imageType == PXCImage::IMAGE_TYPE_DEPTH)
+      depth_stream_ = stream.ReleasePtr();
+
+    if (capture_mode_ == kCaptureRGBD &&
+        (!color_stream_.IsValid() || !depth_stream_.IsValid()))
+      continue;
+
+    if (capture_mode_ == kCaptureRGBD)
+      best_profile = rgbd_profile;
 
     // TODO(nhu): fix the potential color conversions caused by hardcoding
     //            PIXEL_FORMAT_ARGB.
@@ -316,9 +350,9 @@ void VideoCaptureDevicePxcWin::OnAllocateAndStart(
     capture_format_.frame_rate = frame_rate;
     capture_format_.pixel_format = PIXEL_FORMAT_ARGB;
 
-    if (is_capturing_depth_) {
+    if (capture_mode_ == kCaptureDepth || capture_mode_ == kCaptureRGBD) {
       GetDepthDeviceProperties();
-      depth_rgb32_image_.reset(
+      rgb32_image_.reset(
           new uint8[capture_format_.frame_size.width() *
                     capture_format_.frame_size.height() *
                     kBytesPerPixelRGB32]);
@@ -339,59 +373,98 @@ void VideoCaptureDevicePxcWin::OnStopAndDeAllocate() {
   DCHECK_EQ(pxc_capture_thread_.message_loop(), base::MessageLoop::current());
 
   state_ = kIdle;
-  stream_.ReleaseRef();
+  color_stream_.ReleaseRef();
+  depth_stream_.ReleaseRef();
   device_.ReleaseRef();
   client_.reset();
-  depth_rgb32_image_.reset();
+  rgb32_image_.reset();
 }
 
 void VideoCaptureDevicePxcWin::OnCaptureTask() {
   DCHECK_EQ(pxc_capture_thread_.message_loop(), base::MessageLoop::current());
 
-  if (state_ != kCapturing || !stream_.IsValid())
+  if (state_ != kCapturing)
     return;
 
-  PXCSmartSP sp;
-  PXCSmartPtr<PXCImage> image;
-  pxcStatus status = stream_->ReadStreamAsync(&image, &sp);
-  if (status < PXC_STATUS_NO_ERROR) {
-    SetErrorState("Read stream error");
-    return;
+  PXCSmartSP color_sp, depth_sp;
+  PXCSmartPtr<PXCImage> color_image, depth_image;
+  pxcStatus status;
+
+  if (capture_mode_ == kCaptureRGBA || capture_mode_ == kCaptureRGBD) {
+    status = color_stream_->ReadStreamAsync(&color_image, &color_sp);
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Read color stream error");
+      return;
+    }
   }
 
-  status = sp->Synchronize();
-  if (status < PXC_STATUS_NO_ERROR) {
-    SetErrorState("Read synchronization EOF");
-    return;
+  if (capture_mode_ == kCaptureDepth || capture_mode_ == kCaptureRGBD) {
+    status = depth_stream_->ReadStreamAsync(&depth_image, &depth_sp);
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Read depth stream error");
+      return;
+    }
   }
 
-  PXCImage::ImageInfo info;
-  status = image->QueryInfo(&info);
-  if (status < PXC_STATUS_NO_ERROR) {
-    SetErrorState("Get image info error");
-    return;
+  if (capture_mode_ == kCaptureRGBA || capture_mode_ == kCaptureRGBD) {
+    status = color_sp->Synchronize();
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Color read synchronization EOF");
+      return;
+    }
   }
 
-  PXCImage::ImageData data;
-  PXCImage::ColorFormat format = PXCImage::COLOR_FORMAT_RGB32;
-  if (is_capturing_depth_)
-    format = PXCImage::COLOR_FORMAT_DEPTH;
-  status = image->AcquireAccess(
-      PXCImage::ACCESS_READ, format, &data);
-  if (status < PXC_STATUS_NO_ERROR) {
-    SetErrorState("Access image data error");
-    return;
+  if (capture_mode_ == kCaptureDepth || capture_mode_ == kCaptureRGBD) {
+    status = depth_sp->Synchronize();
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Depth read synchronization EOF");
+      return;
+    }
   }
 
-  DCHECK_EQ(data.type, PXCImage::SURFACE_TYPE_SYSTEM_MEMORY);
-
-  if (!is_capturing_depth_) {
-    CaptureColorImage(info, data);
-  } else {
-    CaptureDepthImage(info, data);
+  PXCImage::ImageInfo color_info, depth_info;
+  PXCImage::ImageData color_data, depth_data;
+  if (capture_mode_ == kCaptureRGBA || capture_mode_ == kCaptureRGBD) {
+    status = color_image->QueryInfo(&color_info);
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Get color image info error");
+      return;
+    }
+    status = color_image->AcquireAccess(
+    PXCImage::ACCESS_READ, PXCImage::COLOR_FORMAT_RGB32, &color_data);
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Access color image data error");
+      return;
+    }
+  }
+  
+  if (capture_mode_ == kCaptureDepth || capture_mode_ == kCaptureRGBD) {
+    status = depth_image->QueryInfo(&depth_info);
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Get depth image info error");
+      return;
+    }
+    status = depth_image->AcquireAccess(
+      PXCImage::ACCESS_READ, PXCImage::COLOR_FORMAT_DEPTH, &depth_data);
+    if (status < PXC_STATUS_NO_ERROR) {
+      SetErrorState("Access depth image data error");
+      return;
+    }
   }
 
-  image->ReleaseAccess(&data);
+  if (capture_mode_ == kCaptureRGBA) {
+    CaptureColorImage(color_info, color_data);
+  } else if (capture_mode_ == kCaptureDepth) {
+    CaptureDepthImage(depth_info, depth_data);
+  } else if (capture_mode_ == kCaptureRGBD) {
+    CaptureRgbdImage(color_info, color_data, depth_info, depth_data);
+  }
+
+  if (color_image.IsValid())
+    color_image->ReleaseAccess(&color_data);
+
+  if (depth_image.IsValid())
+    depth_image->ReleaseAccess(&depth_data);
 
   pxc_capture_thread_.message_loop()->PostTask(
     FROM_HERE,
@@ -435,14 +508,14 @@ void VideoCaptureDevicePxcWin::CaptureColorImage(
     const PXCImage::ImageInfo& info, const PXCImage::ImageData& data) {
   int length = info.width * info.height * kBytesPerPixelRGB32;
   client_->OnIncomingCapturedFrame(
-      static_cast<uint8*> (data.planes[0]),
-      length, base::TimeTicks::Now(), 0, capture_format_);
+      static_cast<uint8*> (data.planes[0]), length,
+      base::TimeTicks::Now(), 0, capture_format_);
 }
 
 void VideoCaptureDevicePxcWin::CaptureDepthImage(
     const PXCImage::ImageInfo& info, const PXCImage::ImageData& data) {
   unsigned int length = info.width * info.height;
-  uint8* rgb_data = depth_rgb32_image_.get();
+  uint8* rgb_data = rgb32_image_.get();
   memset(rgb_data, 0, sizeof(uint8) * length * kBytesPerPixelRGB32);
   int16* depth_data = reinterpret_cast<int16*>(data.planes[0]);
 
@@ -455,21 +528,49 @@ void VideoCaptureDevicePxcWin::CaptureDepthImage(
   }
 
   client_->OnIncomingCapturedFrame(
-      rgb_data,
-      length, base::TimeTicks::Now(), 0, capture_format_);
+      rgb_data, length, base::TimeTicks::Now(), 0, capture_format_);
+}
+
+void VideoCaptureDevicePxcWin::CaptureRgbdImage(
+    const PXCImage::ImageInfo& rgb_info, const PXCImage::ImageData& rgb_data,
+    const PXCImage::ImageInfo& d_info, const PXCImage::ImageData& d_data) {
+  unsigned int length = d_info.width * d_info.height;
+  uint8* rgbd_data = rgb32_image_.get();
+  memset(rgbd_data, 0, sizeof(uint8) * length * kBytesPerPixelRGB32);
+  uint8* color_data = static_cast<uint8*>(rgb_data.planes[0]);
+  int16* depth_data = reinterpret_cast<int16*>(d_data.planes[0]);
+  float* uv_data = reinterpret_cast<float*>(d_data.planes[2]);
+  for (unsigned int i = 0; i < length; i++) {
+    int rgbd_index = i * kBytesPerPixelRGB32;
+    float uv_x = uv_data[i * 2 + 0];
+    float uv_y = uv_data[i * 2 + 1];
+		int color_x = (int)(uv_x * rgb_info.width + 0.5f);
+    int color_y = (int)(uv_y * rgb_info.height + 0.5f);
+    if (color_x < 0 || color_x > static_cast<int>(rgb_info.width) ||
+        color_y < 0 || color_y > static_cast<int>(rgb_info.height))
+      continue;
+    int color_index =
+        (color_x + color_y * rgb_info.width) * kBytesPerPixelRGB32;
+    rgbd_data[rgbd_index + 0] = color_data[color_index + 0];
+    rgbd_data[rgbd_index + 1] = color_data[color_index + 1];
+    rgbd_data[rgbd_index + 2] = color_data[color_index + 2];
+  }
+  client_->OnIncomingCapturedFrame(
+    rgbd_data, length, base::TimeTicks::Now(), 0, capture_format_);
 }
 
 void VideoCaptureDevicePxcWin::DepthToGrayscaleRGB32(
     int16* depth, uint8* rgb, unsigned int length) {
   for (unsigned int i = 0; i < length; i++) {
-    int16 raw_depth_value = depth[i];
+    int raw_depth_value = depth[i];
     if (raw_depth_value == depth_saturation_value_ ||
         raw_depth_value == depth_low_confidence_value_) {
       continue;
     }
     float depth_value_in_millimeters =
         raw_depth_value * depth_unit_in_micrometers_ / 1000;
-    if (depth_value_in_millimeters > kMaxDepthValue) {
+    if (depth_value_in_millimeters < kMinDepthValue ||
+        depth_value_in_millimeters > kMaxDepthValue) {
       continue;
     }
 

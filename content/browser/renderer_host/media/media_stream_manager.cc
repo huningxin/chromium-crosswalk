@@ -1275,6 +1275,8 @@ bool MediaStreamManager::SetupDeviceCaptureRequest(DeviceRequest* request) {
       // This is a temporary solution.
       // TODO(nhu): fix it in formal depth video capture device infrastructure.
       video_device_id = kMediaStreamDepth;
+    } else if (depth_constraint == kMediaStreamDepthRgbd) {
+      video_device_id = kMediaStreamDepthRgbd;
     }
   }
   request->CreateUIRequest(audio_device_id, video_device_id);

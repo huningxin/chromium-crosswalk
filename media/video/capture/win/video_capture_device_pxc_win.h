@@ -48,6 +48,12 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
     kError  // Error reported by PXCCapture API.
   };
 
+  enum CaptureMode {
+    kCaptureRGBA,
+    kCaptureDepth,
+    kCaptureRGBD
+  };
+  
   enum DepthEncoding {
     // Convert 16-bit depth value into 1 8-bit channel.
     kGrayscaleRGB32,
@@ -72,11 +78,16 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
                          const PXCImage::ImageData& data);
   void CaptureDepthImage(const PXCImage::ImageInfo& info,
                          const PXCImage::ImageData& data);
+  void CaptureRgbdImage(const PXCImage::ImageInfo& color_info,
+                        const PXCImage::ImageData& color_data,
+                        const PXCImage::ImageInfo& depth_info,
+                        const PXCImage::ImageData& depth_data);
   void DepthToGrayscaleRGB32(int16* depth, uint8* rgb, unsigned int length);
   void DepthToRawRGB32(int16* depth, uint8* rgb, unsigned int length);
   void DepthToAdaptiveRGB32(int16* depth, uint8* rgb, unsigned int length);
+  bool RawDepthValueTo8BitGrayscale(int16 raw_depth, uint8* depth_8bit);
 
-  bool is_capturing_depth_;
+  CaptureMode capture_mode_;
   InternalState state_;
   scoped_ptr<VideoCaptureDevice::Client> client_;
   Name device_name_;
@@ -86,7 +97,8 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
   base::Thread pxc_capture_thread_;
 
   PXCSmartPtr<PXCCapture::Device> device_;
-  PXCSmartPtr<PXCCapture::VideoStream> stream_;
+  PXCSmartPtr<PXCCapture::VideoStream> color_stream_;
+  PXCSmartPtr<PXCCapture::VideoStream> depth_stream_;
 
   VideoCaptureFormat capture_format_;
 
@@ -96,8 +108,8 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
   pxcF32 depth_unit_in_micrometers_;
   PXCRangeF32 depth_range_in_millimeters_;
 
-  // Depth image in RGB32 format.
-  scoped_ptr<uint8[]> depth_rgb32_image_;
+  // Working image in RGB32 format.
+  scoped_ptr<uint8[]> rgb32_image_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDevicePxcWin);
 };
