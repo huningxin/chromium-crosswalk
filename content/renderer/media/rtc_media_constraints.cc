@@ -26,8 +26,10 @@ void GetNativeMediaConstraints(
     new_constraint.value = constraints[i].m_value.utf8();
 
     // Ignore Chrome specific Tab capture constraints.
+    // Ignore depth video constraint.
     if (new_constraint.key == kMediaStreamSource ||
-        new_constraint.key == kMediaStreamSourceId)
+        new_constraint.key == kMediaStreamSourceId ||
+        new_constraint.key == kMediaStreamDepth)
       continue;
 
     // Ignore sourceId constraint since that has nothing to do with webrtc.

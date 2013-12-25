@@ -1260,6 +1260,23 @@ bool MediaStreamManager::SetupDeviceCaptureRequest(DeviceRequest* request) {
                                    &video_device_id)) {
     return false;
   }
+
+  // Handle depth video capture constraint
+  if (request->video_type() == MEDIA_DEVICE_VIDEO_CAPTURE) {
+    std::string depth_constraint;
+    bool mandatory = true;
+    request->options.GetFirstVideoConstraintByName(kMediaStreamDepth,
+                                                   &depth_constraint,
+                                                   &mandatory);
+    if (depth_constraint == "true") {
+      // If a depth video capture device would like to support 'depth'
+      // constraint in getUserMedia. It needs to set kMediaStreamDepth as
+      // device ID.
+      // This is a temporary solution.
+      // TODO(nhu): fix it in formal depth video capture device infrastructure.
+      video_device_id = kMediaStreamDepth;
+    }
+  }
   request->CreateUIRequest(audio_device_id, video_device_id);
   DVLOG(3) << "Audio requested " << request->options.audio_requested
            << " device id = " << audio_device_id
