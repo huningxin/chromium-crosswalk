@@ -94,4 +94,11 @@ const char kUseCras[] = "use-cras";
 // Disables system sounds manager.
 const char kDisableSystemSoundsManager[] = "disable-system-sounds-manager";
 
+#if defined(OS_WIN) && defined(USE_PXC_CAPTURE)
+// Define the depth image encoding in RGB32 format.
+// Options are "grayscale", "raw" and "adaptive". The default is "grayscale".
+const char kDepthEncoding[] = "depth-encoding";
+#endif
+
+
 }  // namespace switches
