@@ -283,7 +283,8 @@ std::string MediaStreamManager::GenerateStream(
   }
 
   if (options.video_type == MEDIA_DEVICE_VIDEO_CAPTURE &&
-      options.video_device_id == kMediaStreamDepth) {
+      (options.video_device_id == kMediaStreamDepth ||
+       options.video_device_id == kMediaStreamDepthRgbd)) {
     translated_video_device_id = options.video_device_id;
   }
 
