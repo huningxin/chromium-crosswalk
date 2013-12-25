@@ -21,6 +21,7 @@ const char kMediaStreamRenderToAssociatedSink[] =
 // constraints for audio.
 const char kMediaStreamAudioDucking[] = "googDucking";
 const char kMediaStreamDepth[] = "depth";
+const char kMediaStreamDepthRgbd[] = "rgbd";
 
 namespace {
 
