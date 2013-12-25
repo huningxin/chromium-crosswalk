@@ -18,6 +18,7 @@ const char kMediaStreamSourceSystem[] = "system";
 const char kMediaStreamRenderToAssociatedSink[] =
     "chromeRenderToAssociatedSink";
 const char kMediaStreamDepth[] = "depth";
+const char kMediaStreamDepthRgbd[] = "rgbd";
 
 namespace {
 
