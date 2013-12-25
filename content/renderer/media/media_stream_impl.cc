@@ -33,6 +33,9 @@
 namespace content {
 namespace {
 
+
+const char kVirtualDepthDeviceId[] = "depth_camera_id";
+
 std::string GetStreamConstraint(
     const WebKit::WebMediaConstraints& constraints, const std::string& key,
     bool is_mandatory) {
@@ -81,6 +84,17 @@ void UpdateRequestOptions(
       options->video_device_id = GetStreamConstraint(
           user_media_request.videoConstraints(),
           kMediaStreamSourceId, true);
+    }
+
+    std::string depth_constraint = GetStreamConstraint(
+        user_media_request.videoConstraints(), kMediaStreamDepth, true);
+    if (depth_constraint == "true") {
+      // If a depth video capture device would like to support 'depth'
+      // constraint in getUserMedia. It needs to set kMediaStreamDepth as
+      // device ID.
+      // This is a temporary solution.
+      // TODO(nhu): fix it in formal depth video capture device infrastructure.
+      options->video_device_id = kMediaStreamDepth;
     }
   }
 }

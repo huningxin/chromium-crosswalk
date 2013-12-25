@@ -17,6 +17,7 @@ const char kMediaStreamSourceDesktop[] = "desktop";
 const char kMediaStreamSourceSystem[] = "system";
 const char kMediaStreamRenderToAssociatedSink[] =
     "chromeRenderToAssociatedSink";
+const char kMediaStreamDepth[] = "depth";
 
 StreamOptions::StreamOptions()
     : audio_type(MEDIA_NO_SERVICE),

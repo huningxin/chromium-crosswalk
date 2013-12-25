@@ -282,6 +282,11 @@ std::string MediaStreamManager::GenerateStream(
     DCHECK(found_match || translated_video_device_id.empty());
   }
 
+  if (options.video_type == MEDIA_DEVICE_VIDEO_CAPTURE &&
+      options.video_device_id == kMediaStreamDepth) {
+    translated_video_device_id = options.video_device_id;
+  }
+
   if (options.video_type == MEDIA_DESKTOP_VIDEO_CAPTURE ||
       options.audio_type == MEDIA_LOOPBACK_AUDIO_CAPTURE) {
     // For screen capture we only support two valid combinations:

@@ -11,6 +11,7 @@
 #include "pxcgesture.h"  // NOLINT(*)
 #include "pxcsmartptr.h"  // NOLINT(*)
 
+#include "base/memory/scoped_ptr.h"
 #include "base/threading/thread.h"
 #include "media/video/capture/video_capture_device.h"
 #include "media/video/capture/video_capture_types.h"
@@ -47,6 +48,16 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
     kError  // Error reported by PXCCapture API.
   };
 
+  enum DepthEncoding {
+    // Convert 16bpp depth image into 8bpp grayscale.
+    kGrayscaleRGB32,
+    // Map 16bpp depth image into 8bit Red (Low) and Green (High) channel.
+    kRawRGB32,
+    // Implement the ecoding schema described in
+    // http://web4.cs.ucl.ac.uk/staff/j.kautz/publications/depth-streaming.pdf
+    kAdaptiveRGB32
+  };
+
   // Called on the pxc_capture_thread_.
   void OnAllocateAndStart(int width,
                           int height,
@@ -55,17 +66,36 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
   void OnStopAndDeAllocate();
   void OnCaptureTask();
 
+  void GetDepthDeviceProperties();
   void SetErrorState(const std::string& reason);
+  void CaptureColorImage(const PXCImage::ImageInfo& info,
+                         const PXCImage::ImageData& data);
+  void CaptureDepthImage(const PXCImage::ImageInfo& info,
+                         const PXCImage::ImageData& data);
+  void DepthToGrayscaleRGB32(int16* depth, uint8* rgb, unsigned int length);
+  void DepthToRawRGB32(int16* depth, uint8* rgb, unsigned int length);
+  void DepthToAdaptiveRGB32(int16* depth, uint8* rgb, unsigned int length);
 
+  bool is_capturing_depth_;
   InternalState state_;
   scoped_ptr<VideoCaptureDevice::Client> client_;
   Name device_name_;
+  DepthEncoding depth_encoding_;
 
   // Thread used for reading data from the device.
   base::Thread pxc_capture_thread_;
 
   PXCSmartPtr<PXCCapture::Device> device_;
   PXCSmartPtr<PXCCapture::VideoStream> stream_;
+
+  // Depth capturing properties.
+  pxcF32 depth_saturation_value_;
+  pxcF32 depth_low_confidence_value_;
+  pxcF32 depth_unit_in_micrometers_;
+  PXCRangeF32 depth_range_in_millimeters_;
+
+  // Depth image in RGB32 format.
+  scoped_ptr<uint8[]> depth_rgb32_image_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDevicePxcWin);
 };
