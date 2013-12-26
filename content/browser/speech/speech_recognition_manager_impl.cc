@@ -28,6 +28,10 @@
 #include "content/browser/speech/speech_recognizer_impl_android.h"
 #endif
 
+#if defined(USE_PXC_SPEECH_RECOGNITION)
+#include "content/browser/speech/intel_pcsdk_local_engine.h"
+#endif
+
 using base::Callback;
 
 namespace content {
@@ -133,6 +137,13 @@ int SpeechRecognitionManagerImpl::CreateSession(
   remote_engine_config.origin_url =
       can_report_metrics ? config.origin_url : std::string();
 
+#if defined(USE_PXC_SPEECH_RECOGNITION)
+  SpeechRecognitionEngine* speech_recognition_engine;
+  speech_recognition_engine = new IntelPcsdkLocalEngine();
+  speech_recognition_engine->SetConfig(remote_engine_config);
+  session->recognizer = new SpeechRecognizerImpl(
+      this, session_id, !config.continuous, speech_recognition_engine);
+#else
   SpeechRecognitionEngine* google_remote_engine;
   if (config.is_legacy_api) {
     google_remote_engine =
@@ -149,6 +160,8 @@ int SpeechRecognitionManagerImpl::CreateSession(
       session_id,
       !config.continuous,
       google_remote_engine);
+#endif
+
 #else
   session->recognizer = new SpeechRecognizerImplAndroid(this, session_id);
 #endif
