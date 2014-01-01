@@ -15,7 +15,9 @@
 #include "base/win/scoped_variant.h"
 #include "media/base/media_switches.h"
 #include "media/video/capture/win/video_capture_device_mf_win.h"
+#if defined(USE_PXC_CAPTURE)
 #include "media/video/capture/win/video_capture_device_pxc_win.h"
+#endif
 
 
 using base::win::ScopedCoMem;
