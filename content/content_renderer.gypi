@@ -14,6 +14,7 @@
     '../third_party/libjingle/libjingle.gyp:libjingle',
     '../third_party/npapi/npapi.gyp:npapi',
     '../third_party/widevine/cdm/widevine_cdm.gyp:widevine_cdm_version_h',
+    '../third_party/box2d/box2d.gyp:box2d',
     '../ui/native_theme/native_theme.gyp:native_theme',
     '../ui/surface/surface.gyp:surface',
     '../ui/ui.gyp:keycode_converter',
@@ -30,6 +31,7 @@
   'include_dirs': [
     '..',
     '<(SHARED_INTERMEDIATE_DIR)',  # Needed by key_systems_info.cc.
+    '../third_party/box2d/',
   ],
   'sources': [
     'public/renderer/android_content_detection_prefixes.cc',
@@ -79,6 +81,8 @@
     'renderer/android/phone_number_detector.h',
     'renderer/android/synchronous_compositor_factory.cc',
     'renderer/android/synchronous_compositor_factory.h',
+    'renderer/box2d_extension.cc',
+    'renderer/box2d_extension.h',
     'renderer/clipboard_utils.cc',
     'renderer/clipboard_utils.h',
     'renderer/cursor_utils.cc',

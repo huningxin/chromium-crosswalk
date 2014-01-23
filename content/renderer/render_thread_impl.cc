@@ -57,6 +57,7 @@
 #include "content/public/renderer/content_renderer_client.h"
 #include "content/public/renderer/render_process_observer.h"
 #include "content/public/renderer/render_view_visitor.h"
+#include "content/renderer/box2d_extension.h"
 #include "content/renderer/devtools/devtools_agent_filter.h"
 #include "content/renderer/dom_storage/dom_storage_dispatcher.h"
 #include "content/renderer/dom_storage/webstoragearea_impl.h"
@@ -388,6 +389,8 @@ void RenderThreadImpl::Init() {
     LOG(WARNING) << "Enabling unsafe Skia benchmarking extension.";
     RegisterExtension(SkiaBenchmarkingExtension::Get());
   }
+
+  RegisterExtension(Box2DExtension::Get());
 
   // Note that under Linux, the media library will normally already have
   // been initialized by the Zygote before this instance became a Renderer.
