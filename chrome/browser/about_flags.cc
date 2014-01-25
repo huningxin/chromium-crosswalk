@@ -890,6 +890,13 @@ const Experiment kExperiments[] = {
     SINGLE_VALUE_TYPE_AND_VALUE(switches::kJavaScriptFlags, "--harmony")
   },
   {
+    "enable-javascript-simd",
+    IDS_FLAGS_ENABLE_JAVASCRIPT_SIMD_NAME,
+    IDS_FLAGS_ENABLE_JAVASCRIPT_SIMD_DESCRIPTION,
+    kOsAll,
+    SINGLE_VALUE_TYPE_AND_VALUE(switches::kJavaScriptFlags, "--simd_object")
+  },
+  {
     "enable-tab-browser-dragging",
     IDS_FLAGS_ENABLE_TAB_BROWSER_DRAGGING_NAME,
     IDS_FLAGS_ENABLE_TAB_BROWSER_DRAGGING_DESCRIPTION,
