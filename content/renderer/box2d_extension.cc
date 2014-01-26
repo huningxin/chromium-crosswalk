@@ -149,8 +149,7 @@ class Box2DExtensionWrapper : public v8::Extension {
   Box2DExtensionWrapper();
   virtual ~Box2DExtensionWrapper();
 
-  virtual v8::Handle<v8::FunctionTemplate> GetNativeFunctionTemplate(
-      v8::Isolate* isolate,
+  virtual v8::Handle<v8::FunctionTemplate> GetNativeFunction(
       v8::Handle<v8::String> name) OVERRIDE;
   static void createWorld(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void deleteBody(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -191,64 +190,63 @@ Box2DExtensionWrapper::Box2DExtensionWrapper()
 Box2DExtensionWrapper::~Box2DExtensionWrapper() {}
 
 v8::Handle<v8::FunctionTemplate>
-Box2DExtensionWrapper::GetNativeFunctionTemplate(v8::Isolate* isolate,
-                                                 v8::Handle<v8::String> name) {
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "createWorld")))
-    return v8::FunctionTemplate::New(isolate, createWorld);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "deleteBody")))
-    return v8::FunctionTemplate::New(isolate, deleteBody);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "createDistanceJoint")))
-    return v8::FunctionTemplate::New(isolate, createDistanceJoint);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setContinuous")))
-    return v8::FunctionTemplate::New(isolate, setContinuous);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setGravity")))
-    return v8::FunctionTemplate::New(isolate, setGravity);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "step")))
-    return v8::FunctionTemplate::New(isolate, step);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "getLastContacts")))
-    return v8::FunctionTemplate::New(isolate, getLastContacts);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "clearForces")))
-    return v8::FunctionTemplate::New(isolate, clearForces);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setSensor")))
-    return v8::FunctionTemplate::New(isolate, setSensor);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setDensity")))
-    return v8::FunctionTemplate::New(isolate, setDensity);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setFriction")))
-    return v8::FunctionTemplate::New(isolate, setFriction);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setRestitution")))
-    return v8::FunctionTemplate::New(isolate, setRestitution);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "createBody")))
-    return v8::FunctionTemplate::New(isolate, createBody);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "createFixture")))
-    return v8::FunctionTemplate::New(isolate, createFixture);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setBodyTransform")))
-    return v8::FunctionTemplate::New(isolate, setBodyTransform);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "getLinearVelocity")))
-    return v8::FunctionTemplate::New(isolate, getLinearVelocity);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "getWorldCenter")))
-    return v8::FunctionTemplate::New(isolate, getWorldCenter);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "getLocalCenter")))
-    return v8::FunctionTemplate::New(isolate, getLocalCenter);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "applyImpulse")))
-    return v8::FunctionTemplate::New(isolate, applyImpulse);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "isAwake")))
-    return v8::FunctionTemplate::New(isolate, isAwake);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "getAngularVelocity")))
-    return v8::FunctionTemplate::New(isolate, getAngularVelocity);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setAwake")))
-    return v8::FunctionTemplate::New(isolate, setAwake);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setLinearVelocity")))
-    return v8::FunctionTemplate::New(isolate, setLinearVelocity);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "applyForceToCenter")))
-    return v8::FunctionTemplate::New(isolate, applyForceToCenter);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setLinearDamping")))
-    return v8::FunctionTemplate::New(isolate, setLinearDamping);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setAngularVelocity")))
-    return v8::FunctionTemplate::New(isolate, setAngularVelocity);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "setActive")))
-    return v8::FunctionTemplate::New(isolate, setActive);
-  if (name->Equals(v8::String::NewFromUtf8(isolate, "getObjectContacts")))
-    return v8::FunctionTemplate::New(isolate, getObjectContacts);
+Box2DExtensionWrapper::GetNativeFunction(v8::Handle<v8::String> name) {
+  if (name->Equals(v8::String::New("createWorld")))
+    return v8::FunctionTemplate::New(createWorld);
+  if (name->Equals(v8::String::New("deleteBody")))
+    return v8::FunctionTemplate::New(deleteBody);
+  if (name->Equals(v8::String::New("createDistanceJoint")))
+    return v8::FunctionTemplate::New(createDistanceJoint);
+  if (name->Equals(v8::String::New("setContinuous")))
+    return v8::FunctionTemplate::New(setContinuous);
+  if (name->Equals(v8::String::New("setGravity")))
+    return v8::FunctionTemplate::New(setGravity);
+  if (name->Equals(v8::String::New("step")))
+    return v8::FunctionTemplate::New(step);
+  if (name->Equals(v8::String::New("getLastContacts")))
+    return v8::FunctionTemplate::New(getLastContacts);
+  if (name->Equals(v8::String::New("clearForces")))
+    return v8::FunctionTemplate::New(clearForces);
+  if (name->Equals(v8::String::New("setSensor")))
+    return v8::FunctionTemplate::New(setSensor);
+  if (name->Equals(v8::String::New("setDensity")))
+    return v8::FunctionTemplate::New(setDensity);
+  if (name->Equals(v8::String::New("setFriction")))
+    return v8::FunctionTemplate::New(setFriction);
+  if (name->Equals(v8::String::New("setRestitution")))
+    return v8::FunctionTemplate::New(setRestitution);
+  if (name->Equals(v8::String::New("createBody")))
+    return v8::FunctionTemplate::New(createBody);
+  if (name->Equals(v8::String::New("createFixture")))
+    return v8::FunctionTemplate::New(createFixture);
+  if (name->Equals(v8::String::New("setBodyTransform")))
+    return v8::FunctionTemplate::New(setBodyTransform);
+  if (name->Equals(v8::String::New("getLinearVelocity")))
+    return v8::FunctionTemplate::New(getLinearVelocity);
+  if (name->Equals(v8::String::New("getWorldCenter")))
+    return v8::FunctionTemplate::New(getWorldCenter);
+  if (name->Equals(v8::String::New("getLocalCenter")))
+    return v8::FunctionTemplate::New(getLocalCenter);
+  if (name->Equals(v8::String::New("applyImpulse")))
+    return v8::FunctionTemplate::New(applyImpulse);
+  if (name->Equals(v8::String::New("isAwake")))
+    return v8::FunctionTemplate::New(isAwake);
+  if (name->Equals(v8::String::New("getAngularVelocity")))
+    return v8::FunctionTemplate::New(getAngularVelocity);
+  if (name->Equals(v8::String::New("setAwake")))
+    return v8::FunctionTemplate::New(setAwake);
+  if (name->Equals(v8::String::New("setLinearVelocity")))
+    return v8::FunctionTemplate::New(setLinearVelocity);
+  if (name->Equals(v8::String::New("applyForceToCenter")))
+    return v8::FunctionTemplate::New(applyForceToCenter);
+  if (name->Equals(v8::String::New("setLinearDamping")))
+    return v8::FunctionTemplate::New(setLinearDamping);
+  if (name->Equals(v8::String::New("setAngularVelocity")))
+    return v8::FunctionTemplate::New(setAngularVelocity);
+  if (name->Equals(v8::String::New("setActive")))
+    return v8::FunctionTemplate::New(setActive);
+  if (name->Equals(v8::String::New("getObjectContacts")))
+    return v8::FunctionTemplate::New(getObjectContacts);
   return v8::Handle<v8::FunctionTemplate>();
 }
 
@@ -302,10 +300,7 @@ void Box2DExtensionWrapper::createWorld(
   g_world_map.insert(std::make_pair<std::string, b2World*>(id, world));
   world->SetAllowSleeping(do_sleep);
   DLOG(INFO) << __FUNCTION__ << " return: " << id;
-  args.GetReturnValue().Set(v8::String::NewFromUtf8(args.GetIsolate(),
-                                                    id.c_str(),
-                                                    v8::String::kNormalString,
-                                                    id.length()));
+  args.GetReturnValue().Set(v8::String::New(id.c_str(), id.length()));
 }
 
 // static
@@ -340,13 +335,13 @@ void Box2DExtensionWrapper::createDistanceJoint(
     return;
   std::string world_id = *v8::String::Utf8Value(args[0]->ToString());
   v8::Local<v8::Object> def = args[1]->ToObject();
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "bodyA")))
+  if (!def->Has(v8::String::New("bodyA")))
     return;
-  v8::Local<v8::Value> v8_body_a = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "bodyA"));
+  v8::Local<v8::Value> v8_body_a = def->Get(v8::String::New("bodyA"));
   std::string body_a_id = *v8::String::Utf8Value(v8_body_a->ToString());
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "bodyB")))
+  if (!def->Has(v8::String::New("bodyB")))
     return;
-  v8::Local<v8::Value> v8_body_b = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "bodyB"));
+  v8::Local<v8::Value> v8_body_b = def->Get(v8::String::New("bodyB"));
   std::string body_b_id = *v8::String::Utf8Value(v8_body_b->ToString());
   DLOG(INFO) << __FUNCTION__ << " args: " << world_id << ", " << body_a_id << ", " << body_b_id;
   b2World* world = getWorldById(world_id);
@@ -436,9 +431,9 @@ void Box2DExtensionWrapper::step(
     next_body = next_body->GetNext();
   }
   v8::Handle<v8::Array> array(
-      v8::Array::New(args.GetIsolate(), body_num * 4 + 1));
-  array->Set(v8::Integer::New(args.GetIsolate(), 0),
-             v8::Integer::New(args.GetIsolate(), body_num));
+      v8::Array::New(body_num * 4 + 1));
+  array->Set(v8::Integer::New(0, args.GetIsolate()),
+             v8::Integer::New(body_num, args.GetIsolate()));
   
   int i = 1;
   next_body = world->GetBodyList();
@@ -447,13 +442,13 @@ void Box2DExtensionWrapper::step(
     float32 x = next_body->GetPosition().x;
     float32 y = next_body->GetPosition().y;
     float32 angle = next_body->GetAngle();
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
-               v8::String::NewFromUtf8(args.GetIsolate(), body_id.c_str()));
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
+               v8::String::New(body_id.c_str()));
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
                v8::Number::New(args.GetIsolate(), x));
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
                v8::Number::New(args.GetIsolate(), y));
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
                v8::Number::New(args.GetIsolate(), angle));
     next_body = next_body->GetNext();
   }
@@ -481,9 +476,9 @@ void Box2DExtensionWrapper::getLastContacts(
     next_contact = next_contact->GetNext();
   }
   v8::Handle<v8::Array> array(
-      v8::Array::New(args.GetIsolate(), contact_num * 3 + 1));
-  array->Set(v8::Integer::New(args.GetIsolate(), 0),
-             v8::Integer::New(args.GetIsolate(), contact_num));
+      v8::Array::New(contact_num * 3 + 1));
+  array->Set(v8::Integer::New(0, args.GetIsolate()),
+             v8::Integer::New(contact_num, args.GetIsolate()));
 
   int i = 1;
   next_contact = world->GetContactList();
@@ -493,12 +488,12 @@ void Box2DExtensionWrapper::getLastContacts(
     std::string fa_id = *(reinterpret_cast<std::string*>(fa->GetUserData()));
     std::string fb_id = *(reinterpret_cast<std::string*>(fb->GetUserData()));
     bool is_touching = next_contact->IsTouching();
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
-               v8::String::NewFromUtf8(args.GetIsolate(), fa_id.c_str()));
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
-               v8::String::NewFromUtf8(args.GetIsolate(), fb_id.c_str()));
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
-               v8::Boolean::New(args.GetIsolate(), is_touching));
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
+               v8::String::New(fa_id.c_str()));
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
+               v8::String::New(fb_id.c_str()));
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
+               v8::Boolean::New(is_touching));
   }
 
   args.GetReturnValue().Set(array);
@@ -622,21 +617,21 @@ void Box2DExtensionWrapper::createBody(const v8::FunctionCallbackInfo<v8::Value>
     return;
   std::string world_id = *v8::String::Utf8Value(args[0]->ToString());
   v8::Local<v8::Object> def = args[1]->ToObject();
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "type")))
+  if (!def->Has(v8::String::New("type")))
     return;
-  v8::Local<v8::Value> type_value = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "type"));
+  v8::Local<v8::Value> type_value = def->Get(v8::String::New("type"));
   int type = type_value->Int32Value();
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "position")))
+  if (!def->Has(v8::String::New("position")))
     return;
-  v8::Local<v8::Value> position_value = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "position"));
+  v8::Local<v8::Value> position_value = def->Get(v8::String::New("position"));
   v8::Local<v8::Object> position_object = position_value->ToObject();
-  if (!position_object->Has(v8::String::NewFromUtf8(args.GetIsolate(), "x")))
+  if (!position_object->Has(v8::String::New("x")))
     return;
-  v8::Local<v8::Value> x_value = position_object->Get(v8::String::NewFromUtf8(args.GetIsolate(), "x"));
+  v8::Local<v8::Value> x_value = position_object->Get(v8::String::New("x"));
   double x = x_value->NumberValue();
-  if (!position_object->Has(v8::String::NewFromUtf8(args.GetIsolate(), "y")))
+  if (!position_object->Has(v8::String::New("y")))
     return;
-  v8::Local<v8::Value> y_value = position_object->Get(v8::String::NewFromUtf8(args.GetIsolate(), "y"));
+  v8::Local<v8::Value> y_value = position_object->Get(v8::String::New("y"));
   double y = y_value->NumberValue();
 
   DLOG(INFO) << __FUNCTION__ << " args: " << world_id << ", " << type << ", " << x << ", " << y;
@@ -659,10 +654,7 @@ void Box2DExtensionWrapper::createBody(const v8::FunctionCallbackInfo<v8::Value>
 
   DLOG(INFO) << __FUNCTION__ << " return: " << body_id;
   
-  args.GetReturnValue().Set(v8::String::NewFromUtf8(args.GetIsolate(),
-                                                    body_id.c_str(),
-                                                    v8::String::kNormalString,
-                                                    body_id.length()));
+  args.GetReturnValue().Set(v8::String::New(body_id.c_str(), body_id.length()));
   return;
 }
 
@@ -676,38 +668,38 @@ void Box2DExtensionWrapper::createFixture(const v8::FunctionCallbackInfo<v8::Val
   std::string world_id = *v8::String::Utf8Value(args[0]->ToString());
   std::string body_id = *v8::String::Utf8Value(args[1]->ToString());
   v8::Local<v8::Object> def = args[2]->ToObject();
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "friction")))
+  if (!def->Has(v8::String::New("friction")))
     return;
-  v8::Local<v8::Value> friction_value = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "friction"));
+  v8::Local<v8::Value> friction_value = def->Get(v8::String::New("friction"));
   double friction = friction_value->NumberValue();
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "restitution")))
+  if (!def->Has(v8::String::New("restitution")))
     return;
-  v8::Local<v8::Value> restitution_value = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "restitution"));
+  v8::Local<v8::Value> restitution_value = def->Get(v8::String::New("restitution"));
   double restitution = restitution_value->NumberValue();
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "density")))
+  if (!def->Has(v8::String::New("density")))
     return;
-  v8::Local<v8::Value> density_value = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "density"));
+  v8::Local<v8::Value> density_value = def->Get(v8::String::New("density"));
   double density = density_value->NumberValue();
 
-  if (!def->Has(v8::String::NewFromUtf8(args.GetIsolate(), "shape")))
+  if (!def->Has(v8::String::New("shape")))
     return;
-  v8::Local<v8::Value> shape_value = def->Get(v8::String::NewFromUtf8(args.GetIsolate(), "shape"));
+  v8::Local<v8::Value> shape_value = def->Get(v8::String::New("shape"));
   v8::Local<v8::Object> shape_object = shape_value->ToObject();
-  if (!shape_object->Has(v8::String::NewFromUtf8(args.GetIsolate(), "type")))
+  if (!shape_object->Has(v8::String::New("type")))
     return;
-  v8::Local<v8::Value> type_value = shape_object->Get(v8::String::NewFromUtf8(args.GetIsolate(), "type"));
+  v8::Local<v8::Value> type_value = shape_object->Get(v8::String::New("type"));
   std::string type = *v8::String::Utf8Value(type_value);
 
   b2Shape* shape = NULL;
   if (type == std::string("circle")) {
-    v8::Local<v8::Value> radius_value = shape_object->Get(v8::String::NewFromUtf8(args.GetIsolate(), "radius"));
+    v8::Local<v8::Value> radius_value = shape_object->Get(v8::String::New("radius"));
     double radius = radius_value->NumberValue();
     shape = new b2CircleShape();
     shape->m_radius = radius;
   } else if (type == std::string("box")) {
-    v8::Local<v8::Value> width_value = shape_object->Get(v8::String::NewFromUtf8(args.GetIsolate(), "width"));
+    v8::Local<v8::Value> width_value = shape_object->Get(v8::String::New("width"));
     double width = width_value->NumberValue();
-    v8::Local<v8::Value> height_value = shape_object->Get(v8::String::NewFromUtf8(args.GetIsolate(), "height"));
+    v8::Local<v8::Value> height_value = shape_object->Get(v8::String::New("height"));
     double height = height_value->NumberValue();
     shape = new b2PolygonShape();
     static_cast<b2PolygonShape*>(shape)->SetAsBox(width/2, height/2);
@@ -750,10 +742,7 @@ void Box2DExtensionWrapper::createFixture(const v8::FunctionCallbackInfo<v8::Val
 
   DLOG(INFO) << __FUNCTION__ << " return: " << fixture_id;
   
-  args.GetReturnValue().Set(v8::String::NewFromUtf8(args.GetIsolate(),
-                                                    fixture_id.c_str(),
-                                                    v8::String::kNormalString,
-                                                    fixture_id.length()));
+  args.GetReturnValue().Set(v8::String::New(fixture_id.c_str(), fixture_id.length()));
 
   if (shape)
     delete shape;
@@ -812,10 +801,10 @@ void Box2DExtensionWrapper::getLinearVelocity(const v8::FunctionCallbackInfo<v8:
   b2Vec2 v = body->GetLinearVelocity();
 
   v8::Handle<v8::Array> array(
-      v8::Array::New(args.GetIsolate(), 2));
-  array->Set(v8::Integer::New(args.GetIsolate(), 0),
+      v8::Array::New(2));
+  array->Set(v8::Integer::New(0, args.GetIsolate()),
              v8::Number::New(args.GetIsolate(), v.x));
-  array->Set(v8::Integer::New(args.GetIsolate(), 1),
+  array->Set(v8::Integer::New(1, args.GetIsolate()),
              v8::Number::New(args.GetIsolate(), v.y));
   DLOG(INFO) << "x " << v.x << ", y " << v.y;
   args.GetReturnValue().Set(array);
@@ -844,10 +833,10 @@ void Box2DExtensionWrapper::getWorldCenter(const v8::FunctionCallbackInfo<v8::Va
   b2Vec2 p = body->GetWorldCenter();
 
   v8::Handle<v8::Array> array(
-      v8::Array::New(args.GetIsolate(), 2));
-  array->Set(v8::Integer::New(args.GetIsolate(), 0),
+      v8::Array::New(2));
+  array->Set(v8::Integer::New(0, args.GetIsolate()),
              v8::Number::New(args.GetIsolate(), p.x));
-  array->Set(v8::Integer::New(args.GetIsolate(), 1),
+  array->Set(v8::Integer::New(1, args.GetIsolate()),
              v8::Number::New(args.GetIsolate(), p.y));
   args.GetReturnValue().Set(array);
   DLOG(INFO) << __FUNCTION__ << " DONE";
@@ -875,10 +864,10 @@ void Box2DExtensionWrapper::getLocalCenter(const v8::FunctionCallbackInfo<v8::Va
   b2Vec2 p = body->GetLocalCenter();
 
   v8::Handle<v8::Array> array(
-      v8::Array::New(args.GetIsolate(), 2));
-  array->Set(v8::Integer::New(args.GetIsolate(), 0),
+      v8::Array::New(2));
+  array->Set(v8::Integer::New(0, args.GetIsolate()),
              v8::Number::New(args.GetIsolate(), p.x));
-  array->Set(v8::Integer::New(args.GetIsolate(), 1),
+  array->Set(v8::Integer::New(1, args.GetIsolate()),
              v8::Number::New(args.GetIsolate(), p.y));
   args.GetReturnValue().Set(array);
   DLOG(INFO) << __FUNCTION__ << " DONE";
@@ -941,7 +930,7 @@ void Box2DExtensionWrapper::isAwake(const v8::FunctionCallbackInfo<v8::Value>& a
     return;
 
   bool wake = body->IsAwake();
-  args.GetReturnValue().Set(v8::Boolean::New(args.GetIsolate(), wake));
+  args.GetReturnValue().Set(v8::Boolean::New(wake));
   DLOG(INFO) << __FUNCTION__ << " DONE";
   return;
 }
@@ -1153,15 +1142,15 @@ void Box2DExtensionWrapper::getObjectContacts(const v8::FunctionCallbackInfo<v8:
     next_edge = next_edge->next;
   }
   v8::Handle<v8::Array> array(
-      v8::Array::New(args.GetIsolate(), edge_num));
+      v8::Array::New(edge_num));
   
   int i = 0;
   next_edge = body->GetContactList();
   while(next_edge) {
     b2Body* other = next_edge->other;
     std::string other_id = *(reinterpret_cast<std::string*>(other->GetUserData()));
-    array->Set(v8::Integer::New(args.GetIsolate(), i++),
-               v8::String::NewFromUtf8(args.GetIsolate(), other_id.c_str()));
+    array->Set(v8::Integer::New(i++, args.GetIsolate()),
+               v8::String::New(other_id.c_str()));
     next_edge = next_edge->next;
   }
 
