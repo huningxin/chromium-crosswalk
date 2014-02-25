@@ -49,6 +49,9 @@ class MEDIA_EXPORT VideoCaptureDevice {
 #if defined(USE_PXC_CAPTURE)
       PXC_CAPTURE,
 #endif
+#if defined(USE_NUI_CAPTURE)
+      NUI_CAPTURE,
+#endif
       API_TYPE_UNKNOWN
     };
 #endif

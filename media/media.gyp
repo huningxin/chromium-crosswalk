@@ -45,6 +45,9 @@
     # Use PxcCapture API (Intel PCSDK) on Windows to implement Video Capture
     # Device.
     'use_pxc_capture%': 0,
+    # Use NUI (Microsoft Kinect SDK) on Windows to implement Video Capture
+    # Device.
+    'use_nui_capture%': 0,
   },
   'includes': [
     'media_cdm.gypi',
@@ -580,6 +583,24 @@
             ],
             'libraries': [
               '-llibpxc.lib',
+            ],
+          },
+        }],
+        ['OS=="win"' and 'use_nui_capture==1', {
+          'defines': ['USE_NUI_CAPTURE=1'],
+          'sources': [
+            'video/capture/win/video_capture_device_nui_win.cc',
+            'video/capture/win/video_capture_device_nui_win.h',
+          ],
+          'include_dirs': [
+            '<!(echo %KINECTSDK10_DIR%\\inc)',
+          ],
+          'link_settings': {
+            'library_dirs': [
+              '<!(echo %KINECTSDK10_DIR%\\lib\\x86)',
+            ],
+            'libraries': [
+              '-lKinect10.lib',
             ],
           },
         }],
