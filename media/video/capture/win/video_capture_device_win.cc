@@ -19,6 +19,9 @@
 #if defined(USE_PXC_CAPTURE)
 #include "media/video/capture/win/video_capture_device_pxc_win.h"
 #endif
+#if defined(USE_NUI_CAPTURE)
+#include "media/video/capture/win/video_capture_device_nui_win.h"
+#endif
 
 
 using base::win::ScopedCoMem;
@@ -194,6 +197,12 @@ void VideoCaptureDevice::GetDeviceNames(Names* device_names) {
       cmd_line->HasSwitch(switches::kForceMediaFoundationVideoCapture))) {
     VideoCaptureDeviceMFWin::GetDeviceNames(device_names);
   } else {
+#if defined(USE_NUI_CAPTURE)
+    if (VideoCaptureDeviceNuiWin::PlatformSupported()) {
+      VideoCaptureDeviceNuiWin::GetDeviceNames(device_names);
+      return;
+    }
+#endif
 #if defined(USE_PXC_CAPTURE)
     if (VideoCaptureDevicePxcWin::PlatformSupported()) {
       VideoCaptureDevicePxcWin::GetDeviceNames(device_names);
@@ -244,6 +253,15 @@ VideoCaptureDevice* VideoCaptureDevice::Create(const Name& device_name) {
     scoped_ptr<VideoCaptureDevicePxcWin> device(
         new VideoCaptureDevicePxcWin(device_name));
     DVLOG(1) << " PxcCapture Device: " << device_name.name();
+    if (device->Init())
+      ret = device.release();
+#endif
+#if defined(USE_NUI_CAPTURE)
+  } else if (device_name.capture_api_type() == Name::NUI_CAPTURE) {
+    DCHECK(VideoCaptureDeviceNuiWin::PlatformSupported());
+    scoped_ptr<VideoCaptureDeviceNuiWin> device(
+        new VideoCaptureDeviceNuiWin(device_name));
+    DVLOG(1) << " NuiCapture Device: " << device_name.name();
     if (device->Init())
       ret = device.release();
 #endif
