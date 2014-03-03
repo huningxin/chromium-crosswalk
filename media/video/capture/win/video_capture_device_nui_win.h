@@ -11,6 +11,7 @@
 #include <string>
 
 #include "base/threading/thread.h"
+#include "base/synchronization/waitable_event.h"
 #include "media/video/capture/video_capture_device.h"
 #include "media/video/capture/video_capture_types.h"
 
@@ -38,34 +39,23 @@ class VideoCaptureDeviceNuiWin : public VideoCaptureDevice {
   static void GetDeviceNames(Names* device_names);
 
  private:
-  enum InternalState {
-    kIdle,  // The device is created but the camera is not in use.
-    kCapturing,  // Video is being captured.
-    kError  // Error reported by NUI API.
+  friend class NuiCaptureHelper;
+
+  enum CaptureMode {
+    kCaptureRGBA,
+    kCaptureDepth,
+    kCaptureRGBD
   };
 
-  // Called on the nui_capture_thread_.
-  void OnAllocateAndStart(int width,
-                          int height,
-                          int frame_rate,
-                          scoped_ptr<Client> client);
-  void OnStopAndDeAllocate();
-  void OnCaptureTask();
+  void OnIncomingCapturedFrame(const uint8* bits, int length);
+  void OnSetErrorState(const std::string& reason);
 
-  void SetErrorState(const std::string& reason);
-
-  InternalState state_;
+  CaptureMode capture_mode_;
   scoped_ptr<VideoCaptureDevice::Client> client_;
   Name device_name_;
-
-  // Thread used for reading data from the device.
-  base::Thread nui_capture_thread_;
-
   VideoCaptureFormat capture_format_;
 
-  INuiSensor *nui_sensor_;
-  HANDLE nui_stream_handle_;
-  HANDLE nui_nextframe_event_;
+  base::WaitableEvent stop_event_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDeviceNuiWin);
 };
