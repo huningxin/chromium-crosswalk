@@ -50,9 +50,7 @@ MEDIA_EXPORT extern const char kUseCras[];
 MEDIA_EXPORT extern const char kUseFakeDeviceForMediaStream[];
 MEDIA_EXPORT extern const char kUseFileForFakeVideoCapture[];
 
-#if defined(OS_WIN) && defined(USE_PXC_CAPTURE)
 MEDIA_EXPORT extern const char kDepthEncoding[];
-#endif
 
 }  // namespace switches
 
