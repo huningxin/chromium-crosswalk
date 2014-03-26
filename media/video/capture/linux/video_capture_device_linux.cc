@@ -22,6 +22,9 @@
 #include "base/files/scoped_file.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/strings/stringprintf.h"
+#if defined(USE_DS_CAPTURE)
+#include "media/video/capture/linux/video_capture_device_ds_linux.h"
+#endif
 
 namespace media {
 
@@ -111,6 +114,12 @@ static bool HasUsableFormats(int fd) {
 }
 
 void VideoCaptureDevice::GetDeviceNames(Names* device_names) {
+#if defined(USE_DS_CAPTURE)
+  if (VideoCaptureDeviceDsLinux::PlatformSupported()) {
+    VideoCaptureDeviceDsLinux::GetDeviceNames(device_names);
+    return;
+  }
+#endif
   DCHECK(device_names->empty());
   base::FilePath path("/dev/");
   base::FileEnumerator enumerator(
@@ -144,6 +153,28 @@ void VideoCaptureDevice::GetDeviceNames(Names* device_names) {
 void VideoCaptureDevice::GetDeviceSupportedFormats(
     const Name& device,
     VideoCaptureFormats* supported_formats) {
+#if defined(USE_DS_CAPTURE)
+  if (device.id() == std::string("color") ||
+      device.id() == std::string("rgbd")) {
+    /*
+    VideoCaptureformat supported_format;
+    supported_format.pixel_format = PIXEL_FORMAT_YUY2;
+    supported_format.frame_size.SetSize(320, 240);
+    supported_format.frame_rate = 30;
+    supported_formats->push_back(supported_format);
+    */
+    return;
+  } else if (device.id() == std::string("depth")) {
+    /*
+    VideoCaptureformat supported_format;
+    supported_format.pixel_format = PIXEL_FORMAT_ARGB;
+    supported_format.frame_size.SetSize(320, 240);
+    supported_format.frame_rate = 30;
+    supported_formats->push_back(supported_format);
+    */
+    return;
+  }
+#endif
   if (device.id().empty())
     return;
   base::ScopedFD fd(HANDLE_EINTR(open(device.id().c_str(), O_RDONLY)));
@@ -228,6 +259,9 @@ static bool ReadIdFile(const std::string path, std::string* id) {
 
 const std::string VideoCaptureDevice::Name::GetModel() const {
   // |unique_id| is of the form "/dev/video2".  |file_name| is "video2".
+#if defined(USE_DS_CAPTURE)
+  return unique_id_;
+#endif
   const std::string dev_dir = "/dev/";
   DCHECK_EQ(0, unique_id_.compare(0, dev_dir.length(), dev_dir));
   const std::string file_name =
@@ -249,6 +283,14 @@ const std::string VideoCaptureDevice::Name::GetModel() const {
 }
 
 VideoCaptureDevice* VideoCaptureDevice::Create(const Name& device_name) {
+#if defined(USE_DS_CAPTURE)
+  if (device_name.id() == std::string("color") ||
+      device_name.id() == std::string("depth") ||
+      device_name.id() == std::string("rgbd")) {
+    if (VideoCaptureDeviceDsLinux::PlatformSupported())
+      return new VideoCaptureDeviceDsLinux(device_name);
+  }
+#endif
   VideoCaptureDeviceLinux* self = new VideoCaptureDeviceLinux(device_name);
   if (!self)
     return NULL;
