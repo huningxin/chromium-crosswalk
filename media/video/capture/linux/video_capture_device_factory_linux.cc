@@ -21,6 +21,9 @@
 #include "media/video/capture/linux/video_capture_device_chromeos.h"
 #endif
 #include "media/video/capture/linux/video_capture_device_linux.h"
+#if defined(USE_DS_CAPTURE)
+#include "media/video/capture/linux/video_capture_device_ds_linux.h"
+#endif
 
 namespace media {
 
@@ -55,6 +58,14 @@ VideoCaptureDeviceFactoryLinux::~VideoCaptureDeviceFactoryLinux() {
 scoped_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryLinux::Create(
     const VideoCaptureDevice::Name& device_name) {
   DCHECK(thread_checker_.CalledOnValidThread());
+#if defined(USE_DS_CAPTURE)
+  if (device_name.id() == std::string("color") ||
+      device_name.id() == std::string("depth") ||
+      device_name.id() == std::string("rgbd")) {
+    if (VideoCaptureDeviceDsLinux::PlatformSupported())
+      return new VideoCaptureDeviceDsLinux(device_name);
+  }
+#endif
 #if defined(OS_CHROMEOS)
   VideoCaptureDeviceChromeOS* self =
       new VideoCaptureDeviceChromeOS(ui_task_runner_, device_name);
@@ -78,6 +89,12 @@ scoped_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryLinux::Create(
 
 void VideoCaptureDeviceFactoryLinux::GetDeviceNames(
     VideoCaptureDevice::Names* const device_names) {
+#if defined(USE_DS_CAPTURE)
+  if (VideoCaptureDeviceDsLinux::PlatformSupported()) {
+    VideoCaptureDeviceDsLinux::GetDeviceNames(device_names);
+    return;
+  }
+#endif
   DCHECK(thread_checker_.CalledOnValidThread());
   DCHECK(device_names->empty());
   base::FilePath path("/dev/");
@@ -114,6 +131,28 @@ void VideoCaptureDeviceFactoryLinux::GetDeviceSupportedFormats(
     const VideoCaptureDevice::Name& device,
     VideoCaptureFormats* supported_formats) {
   DCHECK(thread_checker_.CalledOnValidThread());
+#if defined(USE_DS_CAPTURE)
+  if (device.id() == std::string("color") ||
+      device.id() == std::string("rgbd")) {
+    /*
+    VideoCaptureformat supported_format;
+    supported_format.pixel_format = PIXEL_FORMAT_YUY2;
+    supported_format.frame_size.SetSize(320, 240);
+    supported_format.frame_rate = 30;
+    supported_formats->push_back(supported_format);
+    */
+    return;
+  } else if (device.id() == std::string("depth")) {
+    /*
+    VideoCaptureformat supported_format;
+    supported_format.pixel_format = PIXEL_FORMAT_ARGB;
+    supported_format.frame_size.SetSize(320, 240);
+    supported_format.frame_rate = 30;
+    supported_formats->push_back(supported_format);
+    */
+    return;
+  }
+#endif
   if (device.id().empty())
     return;
   base::ScopedFD fd(HANDLE_EINTR(open(device.id().c_str(), O_RDONLY)));

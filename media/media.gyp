@@ -48,6 +48,8 @@
     # Use NUI (Microsoft Kinect SDK) on Windows to implement Video Capture
     # Device.
     'use_nui_capture%': 0,
+    # Use DepthSense SDK on Linux to implement Video Capture Device.
+    'use_ds_capture%': 0,
   },
   'includes': [
     'media_cdm.gypi',
@@ -601,6 +603,24 @@
             ],
             'libraries': [
               '-lKinect10.lib',
+            ],
+          },
+        }],
+        ['OS=="linux"' and 'use_ds_capture==1', {
+          'defines': ['USE_DS_CAPTURE=1'],
+          'sources': [
+            'video/capture/linux/video_capture_device_ds_linux.cc',
+            'video/capture/linux/video_capture_device_ds_linux.h',
+          ],
+          'include_dirs': [
+            '<!(echo $DEPTHSENSESDK_DIR/include)',
+          ],
+          'link_settings': {
+            'library_dirs': [
+              '<!(echo $DEPTHSENSESDK_DIR/lib)',
+            ],
+            'libraries': [
+              '-lDepthSense -lDepthSensePlugins -lturbojpeg',
             ],
           },
         }],
