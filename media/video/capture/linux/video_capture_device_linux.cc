@@ -109,6 +109,9 @@ void VideoCaptureDeviceLinux::GetListOfUsableFourCCs(bool favour_mjpeg,
 
 const std::string VideoCaptureDevice::Name::GetModel() const {
   // |unique_id| is of the form "/dev/video2".  |file_name| is "video2".
+#if defined(USE_DS_CAPTURE)
+  return unique_id_;
+#endif
   const std::string dev_dir = "/dev/";
   DCHECK_EQ(0, unique_id_.compare(0, dev_dir.length(), dev_dir));
   const std::string file_name =
