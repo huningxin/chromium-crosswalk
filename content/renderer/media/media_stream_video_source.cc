@@ -73,6 +73,11 @@ bool UpdateFormatForConstraint(
       constraint_name == kMediaStreamSourceId)
     return true;
 
+  // Ignore Depth Stream constraints.
+  if (constraint_name == kMediaStreamDepth ||
+      constraint_name == kMediaStreamDepthRgbd)
+    return true;
+
   if (constraint_name == MediaStreamVideoSource::kMinAspectRatio ||
       constraint_name == MediaStreamVideoSource::kMaxAspectRatio) {
     double double_value = 0;
