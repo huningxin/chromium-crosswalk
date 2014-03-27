@@ -390,8 +390,8 @@ void VideoCaptureDeviceDsLinux::OnError(const std::string& reason) {
 void VideoCaptureDeviceDsLinux::OnColorImage(
     int length, const uint8* yuy2) {
   if (capture_mode_ == kCaptureColor) {
-    client_->OnIncomingCapturedFrame(
-        yuy2, length, base::TimeTicks::Now(), 0, capture_format_);
+    client_->OnIncomingCapturedData(
+        yuy2, length, capture_format_, 0, base::TimeTicks::Now());
   } else if (capture_mode_ == kCaptureRGBD) {
     uint8* yuy2_data = yuy2_image_.get();
     memcpy(yuy2_data, yuy2, sizeof(uint8) * length);
@@ -412,8 +412,8 @@ void VideoCaptureDeviceDsLinux::OnDepthImage(
     } else if (depth_encoding_ == kAdaptiveRGB32) {
       DepthToAdaptiveRGB32(depth_data, rgb_data, length);
     }
-    client_->OnIncomingCapturedFrame(
-        rgb_data, rgb_size, base::TimeTicks::Now(), 0, capture_format_);
+    client_->OnIncomingCapturedData(
+        rgb_data, rgb_size, capture_format_, 0, base::TimeTicks::Now());
   } else if (capture_mode_ == kCaptureRGBD) {
     int calibrated_size = sizeof(uint8) * length * kBytesPerPixelYUY2;
     uint8* calibrated_yuy2 = rgb32_image_.get();
@@ -436,9 +436,9 @@ void VideoCaptureDeviceDsLinux::OnDepthImage(
       calibrated_yuy2[index + 0] = yuy2[yuy2_index + 0];
       calibrated_yuy2[index + 1] = yuy2[yuy2_index + 1];
     }
-    client_->OnIncomingCapturedFrame(
-        calibrated_yuy2, calibrated_size,
-         base::TimeTicks::Now(), 0, capture_format_);
+    client_->OnIncomingCapturedData(
+        calibrated_yuy2, calibrated_size, capture_format_,
+        0, base::TimeTicks::Now());
   }
 }
 

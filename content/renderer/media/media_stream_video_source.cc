@@ -149,6 +149,11 @@ bool UpdateFormatForConstraint(
       constraint_name == kMediaStreamSourceId)
     return true;
 
+  // Ignore Depth Stream constraints.
+  if (constraint_name == kMediaStreamDepth ||
+      constraint_name == kMediaStreamDepthRgbd)
+    return true;
+
   if (constraint_name == MediaStreamVideoSource::kMinAspectRatio ||
       constraint_name == MediaStreamVideoSource::kMaxAspectRatio) {
     // These constraints are handled by cropping if the camera outputs the wrong
