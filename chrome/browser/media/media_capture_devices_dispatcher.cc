@@ -30,6 +30,7 @@
 #include "chrome/common/chrome_version_info.h"
 #include "chrome/common/pref_names.h"
 #include "components/pref_registry/pref_registry_syncable.h"
+#include "content/common/media/media_stream_options.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/desktop_media_id.h"
 #include "content/public/browser/media_capture_devices.h"
@@ -596,7 +597,17 @@ void MediaCaptureDevicesDispatcher::
   if (request.video_type == content::MEDIA_DEVICE_VIDEO_CAPTURE &&
       extension->permissions_data()->HasAPIPermission(
           extensions::APIPermission::kVideoCapture)) {
-    GetDefaultDevicesForProfile(profile, false, true, &devices);
+    if (request.requested_video_device_id == content::kMediaStreamDepth ||
+        request.requested_video_device_id == content::kMediaStreamDepthRgbd) {
+      const content::MediaStreamDevice* device =
+        GetRequestedVideoDevice(request.requested_video_device_id);
+      if (!device)
+        device = GetFirstAvailableVideoDevice();
+      if (device)
+        devices.push_back(*device);
+    } else {
+      GetDefaultDevicesForProfile(profile, false, true, &devices);
+    }
   }
 
   scoped_ptr<content::MediaStreamUI> ui;
