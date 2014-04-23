@@ -379,8 +379,8 @@ class NuiCaptureHelper {
     HRESULT  hresult;
     NUI_IMAGE_FRAME nui_color_image_frame;
     NUI_IMAGE_FRAME nui_depth_image_frame;
-    INuiFrameTexture *nui_color_frame_texture;
-    INuiFrameTexture *nui_depth_frame_texture;
+    INuiFrameTexture *nui_color_frame_texture = NULL;
+    INuiFrameTexture *nui_depth_frame_texture = NULL;
 
     NUI_LOCKED_RECT nui_color_lock_rect;
     NUI_LOCKED_RECT nui_depth_lock_rect;
@@ -440,13 +440,15 @@ class NuiCaptureHelper {
     }
 
     if (nui_color_stream_handle_ != INVALID_HANDLE_VALUE) {
-      nui_color_frame_texture->UnlockRect(0);
+      if (nui_color_frame_texture)
+        nui_color_frame_texture->UnlockRect(0);
       nui_sensor_->NuiImageStreamReleaseFrame(
           nui_color_stream_handle_, &nui_color_image_frame);
     }
 
     if (nui_depth_stream_handle_ != INVALID_HANDLE_VALUE) {
-      nui_depth_frame_texture->UnlockRect(0);
+      if (nui_depth_frame_texture)
+        nui_depth_frame_texture->UnlockRect(0);
       nui_sensor_->NuiImageStreamReleaseFrame(
           nui_depth_stream_handle_, &nui_depth_image_frame);
     }
@@ -621,8 +623,8 @@ void VideoCaptureDeviceNuiWin::StopAndDeAllocate() {
 
 void VideoCaptureDeviceNuiWin::OnIncomingCapturedFrame(
     const uint8* bits, int length) {
-  client_->OnIncomingCapturedFrame(
-      bits, length, base::TimeTicks::Now(), 0, capture_format_);
+  client_->OnIncomingCapturedData(
+      bits, length, capture_format_, 0, base::TimeTicks::Now());
 }
 
 void VideoCaptureDeviceNuiWin::OnSetErrorState(const std::string& reason) {
