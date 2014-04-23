@@ -507,9 +507,9 @@ void VideoCaptureDevicePxcWin::SetErrorState(const std::string& reason) {
 void VideoCaptureDevicePxcWin::CaptureColorImage(
     const PXCImage::ImageInfo& info, const PXCImage::ImageData& data) {
   int length = info.width * info.height * kBytesPerPixelRGB32;
-  client_->OnIncomingCapturedFrame(
+  client_->OnIncomingCapturedData(
       static_cast<uint8*> (data.planes[0]), length,
-      base::TimeTicks::Now(), 0, capture_format_);
+      capture_format_, 0, base::TimeTicks::Now());
 }
 
 void VideoCaptureDevicePxcWin::CaptureDepthImage(
@@ -527,8 +527,8 @@ void VideoCaptureDevicePxcWin::CaptureDepthImage(
     DepthToAdaptiveRGB32(depth_data, rgb_data, length);
   }
 
-  client_->OnIncomingCapturedFrame(
-      rgb_data, length, base::TimeTicks::Now(), 0, capture_format_);
+  client_->OnIncomingCapturedData(
+      rgb_data, length, capture_format_, 0, base::TimeTicks::Now());
 }
 
 void VideoCaptureDevicePxcWin::CaptureRgbdImage(
@@ -555,8 +555,8 @@ void VideoCaptureDevicePxcWin::CaptureRgbdImage(
     rgbd_data[rgbd_index + 1] = color_data[color_index + 1];
     rgbd_data[rgbd_index + 2] = color_data[color_index + 2];
   }
-  client_->OnIncomingCapturedFrame(
-    rgbd_data, length, base::TimeTicks::Now(), 0, capture_format_);
+  client_->OnIncomingCapturedData(
+    rgbd_data, length, capture_format_, 0, base::TimeTicks::Now());
 }
 
 void VideoCaptureDevicePxcWin::DepthToGrayscaleRGB32(
