@@ -1,4 +1,4 @@
-// Copyright (c) 2013 The Chromium Authors. All rights reserved.
+// Copyright (c) 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,17 +7,15 @@
 
 #include <string>
 
-#include "pxccapture.h"  // NOLINT(*)
-#include "pxcgesture.h"  // NOLINT(*)
-#include "pxcsmartptr.h"  // NOLINT(*)
-
 #include "base/threading/thread.h"
 #include "media/video/capture/video_capture_device.h"
 #include "media/video/capture/video_capture_types.h"
+#include "third_party/libpxc/include/pxccapture.h"
+#include "third_party/libpxc/include/pxcsmartptr.h"
 
 namespace media {
 
-// PXCCapture based implementation of VideoCaptureDevice.
+// PXCCapture based implementation of VideoCaptureDevice for "depth" camera.
 // PXCCapture does not provide its own thread for capturing so this
 // implementation uses a Chromium thread for fetching frames.
 
@@ -37,8 +35,10 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
   virtual void StopAndDeAllocate() OVERRIDE;
 
   static bool PlatformSupported();
-
-  static void GetDeviceNames(Names* device_names);
+  static void AppendDeviceNames(Names* device_names);
+  static bool IsDepthDevice(const Name& device_name);
+  static void GetDeviceSupportedFormats(const Name& device,
+                                        VideoCaptureFormats* formats);
 
  private:
   enum InternalState {
@@ -60,11 +60,12 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
   InternalState state_;
   scoped_ptr<VideoCaptureDevice::Client> client_;
   Name device_name_;
+  std::string pxc_device_id_;
+  int pxc_stream_index_;
 
   // Thread used for reading data from the device.
   base::Thread pxc_capture_thread_;
 
-  PXCSmartPtr<PXCCapture::Device> device_;
   PXCSmartPtr<PXCCapture::VideoStream> stream_;
 
   VideoCaptureFormat capture_format_;

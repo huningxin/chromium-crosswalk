@@ -42,9 +42,6 @@
         'pkg-config': 'pkg-config'
       }],
     ],
-    # Use PxcCapture API (Intel PCSDK) on Windows to implement Video Capture
-    # Device.
-    'use_pxc_capture%': 0,
   },
   'includes': [
     'media_cdm.gypi',
@@ -60,6 +57,7 @@
         '../crypto/crypto.gyp:crypto',
         '../gpu/gpu.gyp:command_buffer_common',
         '../skia/skia.gyp:skia',
+        '../third_party/libpxc/libpxc.gyp:libpxc',
         '../third_party/opus/opus.gyp:opus',
         '../ui/events/events.gyp:events_base',
         '../ui/gfx/gfx.gyp:gfx',
@@ -498,6 +496,8 @@
         'video/capture/win/sink_input_pin_win.h',
         'video/capture/win/video_capture_device_mf_win.cc',
         'video/capture/win/video_capture_device_mf_win.h',
+        'video/capture/win/video_capture_device_pxc_win.cc',
+        'video/capture/win/video_capture_device_pxc_win.h',
         'video/capture/win/video_capture_device_win.cc',
         'video/capture/win/video_capture_device_win.h',
         'video/picture.cc',
@@ -539,24 +539,6 @@
         ],
       },
       'conditions': [
-        ['OS=="win"' and 'use_pxc_capture==1', {
-          'defines': ['USE_PXC_CAPTURE=1'],
-          'sources': [
-            'video/capture/win/video_capture_device_pxc_win.cc',
-            'video/capture/win/video_capture_device_pxc_win.h',
-          ],
-          'include_dirs': [
-            '<!(echo %PCSDK_DIR%\include)',
-          ],
-          'link_settings': {
-            'library_dirs': [
-              '<!(echo %PCSDK_DIR%\lib\Win32)',
-            ],
-            'libraries': [
-              '-llibpxc.lib',
-            ],
-          },
-        }],
         ['arm_neon==1', {
           'defines': [
             'USE_NEON'

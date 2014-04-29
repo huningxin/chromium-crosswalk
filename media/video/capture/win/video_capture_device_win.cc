@@ -16,9 +16,7 @@
 #include "base/win/windows_version.h"
 #include "media/base/media_switches.h"
 #include "media/video/capture/win/video_capture_device_mf_win.h"
-#if defined(USE_PXC_CAPTURE)
 #include "media/video/capture/win/video_capture_device_pxc_win.h"
-#endif
 
 
 using base::win::ScopedCoMem;
@@ -223,13 +221,10 @@ void VideoCaptureDevice::GetDeviceNames(Names* device_names) {
       cmd_line->HasSwitch(switches::kForceMediaFoundationVideoCapture))) {
     VideoCaptureDeviceMFWin::GetDeviceNames(device_names);
   } else {
-#if defined(USE_PXC_CAPTURE)
-    if (VideoCaptureDevicePxcWin::PlatformSupported()) {
-      VideoCaptureDevicePxcWin::GetDeviceNames(device_names);
-      return;
-    }
-#endif
     VideoCaptureDeviceWin::GetDeviceNames(device_names);
+    if (VideoCaptureDevicePxcWin::PlatformSupported()) {
+      VideoCaptureDevicePxcWin::AppendDeviceNames(device_names);
+    }
   }
 }
 
@@ -247,6 +242,10 @@ void VideoCaptureDevice::GetDeviceSupportedFormats(const Name& device,
       cmd_line->HasSwitch(switches::kForceMediaFoundationVideoCapture))) {
     VideoCaptureDeviceMFWin::GetDeviceSupportedFormats(device, formats);
   } else {
+    if (VideoCaptureDevicePxcWin::IsDepthDevice(device)) {
+      VideoCaptureDevicePxcWin::GetDeviceSupportedFormats(device, formats);
+      return;
+    }
     VideoCaptureDeviceWin::GetDeviceSupportedFormats(device, formats);
   }
 }
@@ -267,7 +266,6 @@ VideoCaptureDevice* VideoCaptureDevice::Create(const Name& device_name) {
     DVLOG(1) << " DirectShow Device: " << device_name.name();
     if (device->Init())
       ret = device.release();
-#if defined(USE_PXC_CAPTURE)
   } else if (device_name.capture_api_type() == Name::PXC_CAPTURE) {
     DCHECK(VideoCaptureDevicePxcWin::PlatformSupported());
     scoped_ptr<VideoCaptureDevicePxcWin> device(
@@ -275,7 +273,6 @@ VideoCaptureDevice* VideoCaptureDevice::Create(const Name& device_name) {
     DVLOG(1) << " PxcCapture Device: " << device_name.name();
     if (device->Init())
       ret = device.release();
-#endif
   } else {
     NOTREACHED() << " Couldn't recognize VideoCaptureDevice type";
   }
