@@ -57,7 +57,6 @@
         '../crypto/crypto.gyp:crypto',
         '../gpu/gpu.gyp:command_buffer_common',
         '../skia/skia.gyp:skia',
-        '../third_party/libpxc/libpxc.gyp:libpxc',
         '../third_party/opus/opus.gyp:opus',
         '../ui/events/events.gyp:events_base',
         '../ui/gfx/gfx.gyp:gfx',
@@ -802,6 +801,9 @@
           },
         }],
         ['OS=="win"', {
+          'dependencies': [
+            '../third_party/libpxc/libpxc.gyp:libpxc',
+          ],
           'link_settings':  {
             'libraries': [
               '-lmf.lib',
