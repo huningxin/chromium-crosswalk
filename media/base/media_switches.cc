@@ -73,6 +73,9 @@ const char kTrySupportedChannelLayouts[] = "try-supported-channel-layouts";
 
 // Number of buffers to use for WaveOut.
 const char kWaveOutBuffers[] = "waveout-buffers";
+
+// Enable the Intel Perceptual Computing SDK based depth camera.
+const char kEnableDepthCamera[] = "enable-depth-camera";
 #endif
 
 #if defined(USE_CRAS)

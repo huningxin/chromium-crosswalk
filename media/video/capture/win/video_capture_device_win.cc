@@ -222,8 +222,10 @@ void VideoCaptureDevice::GetDeviceNames(Names* device_names) {
     VideoCaptureDeviceMFWin::GetDeviceNames(device_names);
   } else {
     VideoCaptureDeviceWin::GetDeviceNames(device_names);
-    if (VideoCaptureDevicePxcWin::PlatformSupported()) {
-      VideoCaptureDevicePxcWin::AppendDeviceNames(device_names);
+    if (cmd_line->HasSwitch(switches::kEnableDepthCamera)) {
+      if (VideoCaptureDevicePxcWin::PlatformSupported()) {
+        VideoCaptureDevicePxcWin::AppendDeviceNames(device_names);
+      }
     }
   }
 }
@@ -242,9 +244,11 @@ void VideoCaptureDevice::GetDeviceSupportedFormats(const Name& device,
       cmd_line->HasSwitch(switches::kForceMediaFoundationVideoCapture))) {
     VideoCaptureDeviceMFWin::GetDeviceSupportedFormats(device, formats);
   } else {
-    if (VideoCaptureDevicePxcWin::IsDepthDevice(device)) {
-      VideoCaptureDevicePxcWin::GetDeviceSupportedFormats(device, formats);
-      return;
+    if (cmd_line->HasSwitch(switches::kEnableDepthCamera)) {
+      if (VideoCaptureDevicePxcWin::IsDepthDevice(device)) {
+        VideoCaptureDevicePxcWin::GetDeviceSupportedFormats(device, formats);
+        return;
+      }
     }
     VideoCaptureDeviceWin::GetDeviceSupportedFormats(device, formats);
   }
@@ -252,6 +256,7 @@ void VideoCaptureDevice::GetDeviceSupportedFormats(const Name& device,
 
 // static
 VideoCaptureDevice* VideoCaptureDevice::Create(const Name& device_name) {
+  const CommandLine* cmd_line = CommandLine::ForCurrentProcess();
   VideoCaptureDevice* ret = NULL;
   if (device_name.capture_api_type() == Name::MEDIA_FOUNDATION) {
     DCHECK(VideoCaptureDeviceMFWin::PlatformSupported());
@@ -266,7 +271,8 @@ VideoCaptureDevice* VideoCaptureDevice::Create(const Name& device_name) {
     DVLOG(1) << " DirectShow Device: " << device_name.name();
     if (device->Init())
       ret = device.release();
-  } else if (device_name.capture_api_type() == Name::PXC_CAPTURE) {
+  } else if (cmd_line->HasSwitch(switches::kEnableDepthCamera) &&
+             device_name.capture_api_type() == Name::PXC_CAPTURE) {
     DCHECK(VideoCaptureDevicePxcWin::PlatformSupported());
     scoped_ptr<VideoCaptureDevicePxcWin> device(
         new VideoCaptureDevicePxcWin(device_name));

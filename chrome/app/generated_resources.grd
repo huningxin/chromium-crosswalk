@@ -6796,6 +6796,12 @@ Keep your key file in a safe place. You will need it to create new versions of y
       <message name="IDS_FLAGS_DISABLE_EMBEDDED_SHARED_WORKER_DESCRIPTION" desc="Description of the flag to disable In-renderer Shared Worker.">
         Disable In-Renderer Shared Worker to run Shared Worker in a legacy dedicated worker process.
       </message>
+      <message name="IDS_FLAGS_ENABLE_DEPTH_CAMERA_NAME" desc="Name of the flag to enable depth camera.">
+        Enable Depth Camera.
+      </message>
+      <message name="IDS_FLAGS_ENABLE_DEPTH_CAMERA_DESCRIPTION" desc="Description of the flag to enable depth camera.">
+        Enable Depth Camera allows Chrome to fetch depth video stream from depth camera if possible.
+      </message>
 
       <!-- Crashes -->
       <message name="IDS_CRASHES_TITLE" desc="Title for the chrome://crashes page.">

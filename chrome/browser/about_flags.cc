@@ -1796,6 +1796,15 @@ const Experiment kExperiments[] = {
     SINGLE_VALUE_TYPE(chromeos::switches::kEnableFileManagerMTP)
   },
 #endif
+#if defined(OS_WIN)
+  {
+    "enable-depth-camera",
+    IDS_FLAGS_ENABLE_DEPTH_CAMERA_NAME,
+    IDS_FLAGS_ENABLE_DEPTH_CAMERA_DESCRIPTION,
+    kOsWin,
+    SINGLE_VALUE_TYPE(switches::kEnableDepthCamera)
+  },
+#endif
 };
 
 const Experiment* experiments = kExperiments;
