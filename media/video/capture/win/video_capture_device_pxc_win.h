@@ -57,18 +57,26 @@ class VideoCaptureDevicePxcWin : public VideoCaptureDevice {
 
   void SetErrorState(const std::string& reason);
 
+  void DepthToGrayscaleRGB32(int16* depth, uint8* rgb, unsigned int length);
+
   InternalState state_;
   scoped_ptr<VideoCaptureDevice::Client> client_;
   Name device_name_;
-  std::string pxc_device_id_;
-  int pxc_stream_index_;
 
   // Thread used for reading data from the device.
   base::Thread pxc_capture_thread_;
 
   PXCSmartPtr<PXCCapture::VideoStream> stream_;
-
   VideoCaptureFormat capture_format_;
+
+  // Depth camera properties.
+  pxcF32 depth_saturation_value_;
+  pxcF32 depth_low_confidence_value_;
+  pxcF32 depth_unit_in_micrometers_;
+  PXCRangeF32 depth_range_in_millimeters_;
+
+  // Depth image in RGB32 format.
+  scoped_ptr<uint8[]> depth_rgb32_image_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDevicePxcWin);
 };
