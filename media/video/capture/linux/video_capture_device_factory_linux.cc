@@ -63,7 +63,7 @@ scoped_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryLinux::Create(
       device_name.id() == std::string("depth") ||
       device_name.id() == std::string("rgbd")) {
     if (VideoCaptureDeviceDsLinux::PlatformSupported())
-      return new VideoCaptureDeviceDsLinux(device_name);
+      return scoped_ptr<VideoCaptureDevice>(new VideoCaptureDeviceDsLinux(device_name));
   }
 #endif
 #if defined(OS_CHROMEOS)
