@@ -94,4 +94,9 @@ const char kUseFakeDeviceForMediaStream[] = "use-fake-device-for-media-stream";
 // Use a raw video file as fake video capture device.
 const char kUseFileForFakeVideoCapture[] = "use-file-for-fake-video-capture";
 
+// Define the depth image encoding in RGB32 format.
+// Options are "grayscale", "raw" and "adaptive". The default is "grayscale".
+const char kDepthEncoding[] = "depth-encoding";
+
+
 }  // namespace switches
