@@ -192,8 +192,6 @@ bool VideoCaptureDeviceDsLinux::PlatformSupported() {
 void VideoCaptureDeviceDsLinux::GetDeviceNames(Names* device_names) {
   device_names->clear();
 
-  if (!VideoCaptureDeviceDsLinux::PlatformSupported())
-    return;
   Name color_device_name(kDsColorDeviceName,
                          kVirtualColorDeviceId);
   DLOG(INFO) << "Video capture device, " << color_device_name.name()

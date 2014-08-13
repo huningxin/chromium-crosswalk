@@ -90,10 +90,8 @@ scoped_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryLinux::Create(
 void VideoCaptureDeviceFactoryLinux::GetDeviceNames(
     VideoCaptureDevice::Names* const device_names) {
 #if defined(USE_DS_CAPTURE)
-  if (VideoCaptureDeviceDsLinux::PlatformSupported()) {
-    VideoCaptureDeviceDsLinux::GetDeviceNames(device_names);
-    return;
-  }
+  VideoCaptureDeviceDsLinux::GetDeviceNames(device_names);
+  return;
 #endif
   DCHECK(thread_checker_.CalledOnValidThread());
   DCHECK(device_names->empty());
