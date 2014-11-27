@@ -49,6 +49,12 @@ RenderProcessImpl::RenderProcessImpl()
                                static_cast<int>(optimize_flag.size()));
   }
 
+  {
+    std::string simd_flags("--simd-object --typed_array_max_size_in_heap=15");
+    v8::V8::SetFlagsFromString(simd_flags.c_str(),
+                               static_cast<int>(simd_flags.size()));
+  }
+
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   if (command_line.HasSwitch(switches::kJavaScriptFlags)) {
     std::string flags(
