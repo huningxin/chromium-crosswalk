@@ -58,6 +58,11 @@ MEDIA_EXPORT extern const char kRequireAudioHardwareForTesting[];
 
 MEDIA_EXPORT extern const char kVideoUnderflowThresholdMs[];
 
+#if defined(OS_WIN) && defined(USE_PXC_CAPTURE)
+// flag for testing.
+MEDIA_EXPORT extern const char kPxcCaptureType[];
+#endif
+
 }  // namespace switches
 
 #endif  // MEDIA_BASE_MEDIA_SWITCHES_H_
