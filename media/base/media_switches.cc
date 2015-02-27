@@ -105,4 +105,9 @@ const char kUseFileForFakeAudioCapture[] = "use-file-for-fake-audio-capture";
 // Enables support for inband text tracks in media content.
 const char kEnableInbandTextTracks[] = "enable-inband-text-tracks";
 
+#if defined(OS_WIN) && defined(USE_PXC_CAPTURE)
+// flag for testing.
+const char kPxcCaptureType[] = "pxc-capture-type";
+#endif
+
 }  // namespace switches

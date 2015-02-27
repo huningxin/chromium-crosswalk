@@ -48,12 +48,23 @@ class VideoCaptureDevicePxcWin :
             // User needs to recover by destroying the object.
   };
 
+  enum CaptureType {
+    kCaptureColor,
+    kCaptureDepth
+  };
+
   void SetErrorState(const std::string& reason);
+
+  void CaptureColor(PXCCapture::Sample* sample);
+  void CaptureDepth(PXCCapture::Sample* sample);
 
   Name device_name_;
   InternalState state_;
   scoped_ptr<VideoCaptureDevice::Client> client_;
   VideoCaptureFormat capture_format_;
+  CaptureType capture_type_;
+
+  scoped_ptr<uint8[]> depth_argb_image_;
 
   PXCSenseManager *pxc_sense_manager_;
 

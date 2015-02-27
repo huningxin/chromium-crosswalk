@@ -53,6 +53,11 @@ MEDIA_EXPORT extern const char kUseFileForFakeAudioCapture[];
 
 MEDIA_EXPORT extern const char kEnableInbandTextTracks[];
 
+#if defined(OS_WIN) && defined(USE_PXC_CAPTURE)
+// flag for testing.
+MEDIA_EXPORT extern const char kPxcCaptureType[];
+#endif
+
 }  // namespace switches
 
 #endif  // MEDIA_BASE_MEDIA_SWITCHES_H_
