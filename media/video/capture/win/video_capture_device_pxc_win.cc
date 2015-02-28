@@ -297,10 +297,10 @@ void VideoCaptureDevicePxcWin::CaptureDepthCommon(PXCImage* image) {
 
   uint8* argb_data = depth_argb_image_.get();
   memset(argb_data, 0, sizeof(uint8) * length * kBytesPerPixelRGB32);
-  int16* depth_data = reinterpret_cast<int16*>(data.planes[0]);
+  uint16* depth_data = reinterpret_cast<uint16*>(data.planes[0]);
 
   for (int i = 0; i < length; ++i) {
-    int16 depth_value = depth_data[i];
+    uint16 depth_value = depth_data[i];
     // R for depth value low
     uint8 depth_value_low = static_cast<uint8>(depth_value & 0xFF);
     argb_data[i * kBytesPerPixelRGB32 + 2] = depth_value_low;
