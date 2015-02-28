@@ -8,6 +8,7 @@
 #include <string>
 
 #include "pxcsensemanager.h"
+#include "pxcprojection.h"
 
 #include "base/threading/non_thread_safe.h"
 #include "base/threading/thread.h"
@@ -50,13 +51,16 @@ class VideoCaptureDevicePxcWin :
 
   enum CaptureType {
     kCaptureColor,
-    kCaptureDepth
+    kCaptureDepth,
+    kCaptureAlignedDepth
   };
 
   void SetErrorState(const std::string& reason);
 
   void CaptureColor(PXCCapture::Sample* sample);
   void CaptureDepth(PXCCapture::Sample* sample);
+  void CaptureAlignedDepth(PXCCapture::Sample* sample);
+  void CaptureDepthCommon(PXCImage* image);
 
   Name device_name_;
   InternalState state_;
@@ -66,7 +70,8 @@ class VideoCaptureDevicePxcWin :
 
   scoped_ptr<uint8[]> depth_argb_image_;
 
-  PXCSenseManager *pxc_sense_manager_;
+  PXCSenseManager* pxc_sense_manager_;
+  PXCProjection* pxc_projection_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDevicePxcWin);
 };
