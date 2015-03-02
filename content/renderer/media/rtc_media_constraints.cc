@@ -30,6 +30,10 @@ void GetNativeMediaConstraints(
         new_constraint.key == kMediaStreamSourceId)
       continue;
 
+    // Ignore depth capture constraints.
+    if (new_constraint.key == kMediaStreamDepth)
+      continue;
+
     // Ignore sourceId constraint since that has nothing to do with webrtc.
     if (new_constraint.key == kMediaStreamSourceInfoId)
       continue;

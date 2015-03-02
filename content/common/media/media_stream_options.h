@@ -21,6 +21,8 @@ CONTENT_EXPORT extern const char kMediaStreamSourceTab[];
 CONTENT_EXPORT extern const char kMediaStreamSourceScreen[];
 CONTENT_EXPORT extern const char kMediaStreamSourceDesktop[];
 CONTENT_EXPORT extern const char kMediaStreamSourceSystem[];
+CONTENT_EXPORT extern const char kMediaStreamDepth[];
+CONTENT_EXPORT extern const char kMediaStreamDepthAligned[];
 
 // Experimental constraint to do device matching.  When this optional constraint
 // is set, WebRTC audio renderer will render audio from media streams to an

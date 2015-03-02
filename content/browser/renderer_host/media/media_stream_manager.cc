@@ -1056,6 +1056,31 @@ bool MediaStreamManager::GetRequestedDeviceCaptureId(
       }
     }
   }
+
+  // Check for depth constraints of video request.
+  // This is a proof of concept.
+  // TODO(nhu): introduce depth request in blink.
+  std::vector<std::string> values;
+  StreamOptions::GetConstraintsByName(*mandatory,
+                                      kMediaStreamDepth, &values);
+  if (values.size() > 1) {
+    LOG(ERROR) << "Only one mandatory " << kMediaStreamDepth
+        << " is supported.";
+    return false;
+  }
+  // If a depth video capture device would like to support 'depth' constraints
+  // in getUserMedia. It needs to set kMediaDepthCameraDeviceID and
+  // kMediaAlignedDepthCameraDeviceID as device ID.
+  // This is a temporary solution.
+  // TODO(nhu): fix it in formal depth video capture device infrastructure.
+  if (values.size() == 1) {
+    if (values[0] == "true") {
+      *device_id = kMediaDepthCameraDeviceID;
+    } else if (values[0] == kMediaStreamDepthAligned) {
+      *device_id = kMediaAlignedDepthCameraDeviceID;
+    }
+  }
+
   return true;
 }
 
