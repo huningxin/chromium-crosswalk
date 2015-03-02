@@ -15,11 +15,11 @@ namespace media {
 static const size_t kBytesPerPixelRGB32 = 4;
 
 const char kPxcColorCameraDeviceName[] = "pxc_color_camera";
-const char kPxcColorCameraDeviceId[] = "pxc_color_camera";
+const char kPxcColorCameraDeviceId[] = "color_camera_device_id";
 const char kPxcDepthCameraDeviceName[] = "pxc_depth_camera";
-const char kPxcDepthCameraDeviceId[] = "pxc_depth_camera";
+const char kPxcDepthCameraDeviceId[] = "depth_camera_device_id";
 const char kPxcAlignedDepthCameraDeviceName[] = "pxc_aligned_depth_camera";
-const char kPxcAlignedDepthCameraDeviceId[] = "pxc_aligned_depth_camera";
+const char kPxcAlignedDepthCameraDeviceId[] = "aligned_depth_camera_device_id";
 
 const char kPxcCaptureColorOption[] = "color";
 const char kPxcCaptureDepthOption[] = "depth";

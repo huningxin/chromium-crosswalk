@@ -19,6 +19,9 @@
 
 namespace content {
 
+CONTENT_EXPORT extern const char kMediaDepthCameraDeviceID[];
+CONTENT_EXPORT extern const char kMediaAlignedDepthCameraDeviceID[];
+
 // Generates a one-way hash of a device's unique ID usable by one
 // particular security origin.
 CONTENT_EXPORT std::string GetHMACForMediaDeviceID(

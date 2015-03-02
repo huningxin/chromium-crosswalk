@@ -12,6 +12,9 @@
 
 namespace content {
 
+const char kMediaDepthCameraDeviceID[] = "depth_camera_device_id";
+const char kMediaAlignedDepthCameraDeviceID[] = "aligned_depth_camera_device_id";
+
 std::string GetHMACForMediaDeviceID(const ResourceContext::SaltCallback& sc,
                                     const GURL& security_origin,
                                     const std::string& raw_unique_id) {
