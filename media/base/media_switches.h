@@ -56,6 +56,7 @@ MEDIA_EXPORT extern const char kEnableInbandTextTracks[];
 #if defined(OS_WIN) && defined(USE_PXC_CAPTURE)
 // flag for testing.
 MEDIA_EXPORT extern const char kPxcCaptureType[];
+MEDIA_EXPORT extern const char kDepthEncoding[];
 #endif
 
 }  // namespace switches

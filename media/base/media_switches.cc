@@ -106,8 +106,12 @@ const char kUseFileForFakeAudioCapture[] = "use-file-for-fake-audio-capture";
 const char kEnableInbandTextTracks[] = "enable-inband-text-tracks";
 
 #if defined(OS_WIN) && defined(USE_PXC_CAPTURE)
-// flag for testing.
+// Flag for testing different capture type.
+// Options are "color", "depth", "aligned-depth". The default is "color".
 const char kPxcCaptureType[] = "pxc-capture-type";
+// Define the depth image encoding in RGB32 format.
+// Options are "grayscale", "raw" and "adaptive". The default is "grayscale".
+const char kDepthEncoding[] = "depth-encoding";
 #endif
 
 }  // namespace switches

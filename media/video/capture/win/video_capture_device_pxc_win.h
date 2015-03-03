@@ -55,6 +55,16 @@ class VideoCaptureDevicePxcWin :
     kCaptureAlignedDepth
   };
 
+  enum DepthEncoding {
+    // Convert 16-bit depth value into 1 8-bit channel.
+    kGrayscaleRGB32,
+    // Map 16-bit depth value into 3 8-bit channels.
+    kRawRGB32,
+    // Implement the ecoding scheme proposed in paper
+    // "Adapting Standard Video Codecs for Depth Streaming"
+    kAdaptiveRGB32
+  };
+
   void SetErrorState(const std::string& reason);
 
   void CaptureColor(PXCCapture::Sample* sample);
@@ -62,16 +72,24 @@ class VideoCaptureDevicePxcWin :
   void CaptureAlignedDepth(PXCCapture::Sample* sample);
   void CaptureDepthCommon(PXCImage* image);
 
+  void EncodeDepthToGrayscaleRGB32(uint8* argb, uint16 depth);
+  void EncodeDepthToRawRGB32(uint8* argb, uint16 depth);
+  void EncodeDepthToAdaptiveRGB32(uint8* argb, uint16 depth);
+
   Name device_name_;
   InternalState state_;
   scoped_ptr<VideoCaptureDevice::Client> client_;
   VideoCaptureFormat capture_format_;
   CaptureType capture_type_;
+  DepthEncoding depth_encoding_;
 
   scoped_ptr<uint8[]> depth_argb_image_;
 
   PXCSenseManager* pxc_sense_manager_;
   PXCProjection* pxc_projection_;
+
+  pxcF32 depth_low_confidence_value_;
+  PXCRangeF32 depth_range_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDevicePxcWin);
 };
