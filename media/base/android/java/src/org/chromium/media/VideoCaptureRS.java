@@ -124,6 +124,11 @@ public class VideoCaptureRS extends VideoCapture {
             mCameraNativeOrientation = 90;
             if (null != color) {
                 color.getImageBuffer().get(mCapturedData);
+                for (int i = 0; i < mCaptureFormat.mWidth * mCaptureFormat.mHeight; i++) {
+                    byte b0 = mCapturedData[i * 4];
+                    mCapturedData[i * 4] = mCapturedData[i * 4 + 2];
+                    mCapturedData[i * 4 + 2] = b0;
+                }
                 nativeOnFrameAvailable(mNativeVideoCaptureDeviceAndroid,
                                        mCapturedData,
                                        mCapturedData.length,
