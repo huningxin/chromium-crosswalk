@@ -123,6 +123,7 @@ public class VideoCaptureRS extends VideoCapture {
             mInvertDeviceOrientationReadings = true;
             mCameraNativeOrientation = 90;
             if (null != color) {
+                color.getImageBuffer().rewind();
                 color.getImageBuffer().get(mCapturedData);
                 for (int i = 0; i < mCaptureFormat.mWidth * mCaptureFormat.mHeight; i++) {
                     byte b0 = mCapturedData[i * 4];
@@ -134,6 +135,11 @@ public class VideoCaptureRS extends VideoCapture {
                                        mCapturedData.length,
                                        getCameraRotation());
             }
+
+            if (color != null)
+                images.releaseImage(color);
+            if (depth != null)
+                images.releaseImage(depth);
         }
 
 
