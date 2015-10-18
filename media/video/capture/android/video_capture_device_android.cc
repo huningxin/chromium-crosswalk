@@ -190,6 +190,8 @@ VideoPixelFormat VideoCaptureDeviceAndroid::GetColorspace() {
       return media::PIXEL_FORMAT_I420;
     case ANDROID_IMAGE_FORMAT_NV21:
       return media::PIXEL_FORMAT_NV21;
+    case ANDROID_IMAGE_FORMAT_RGBA:
+      return media::PIXEL_FORMAT_RGB32;
     case ANDROID_IMAGE_FORMAT_UNKNOWN:
     default:
       return media::PIXEL_FORMAT_UNKNOWN;

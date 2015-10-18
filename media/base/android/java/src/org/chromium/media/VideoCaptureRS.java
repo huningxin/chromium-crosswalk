@@ -36,6 +36,10 @@ import com.intel.camera.toolkit.depth.StreamType;
 import com.intel.camera.toolkit.depth.StreamTypeSet;
 import com.intel.camera.toolkit.depth.sensemanager.SenseManager;
 
+import java.lang.Thread;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.ConditionVariable;
 
 /**
  * This class implements Video Capture using Camera2 API, introduced in Android
@@ -54,10 +58,15 @@ public class VideoCaptureRS extends VideoCapture {
 
     private static SenseManager mSenseManager = null;
 
+    private SenseManagerThread mSenseManagerThread;
+
     VideoCaptureRS(Context context,
                    int id,
                    long nativeVideoCaptureDeviceAndroid) {
         super(context, id, nativeVideoCaptureDeviceAndroid);
+
+        mSenseManagerThread = new SenseManagerThread();
+        mSenseManagerThread.start();
     }
 
     public static void setSenseManager(SenseManager sm) {
@@ -70,7 +79,7 @@ public class VideoCaptureRS extends VideoCapture {
 
     private StreamProfileSet getUserProfiles() {
         StreamProfileSet set = new StreamProfileSet();
-        StreamProfile colorProfile = new StreamProfile(640, 480, RSPixelFormat.YV12, 30, StreamType.COLOR);
+        StreamProfile colorProfile = new StreamProfile(640, 480, RSPixelFormat.RGBA_8888, 30, StreamType.COLOR);
         StreamProfile depthProfile = new StreamProfile(480, 360, RSPixelFormat.Z16, 30, StreamType.DEPTH);
         set.set(StreamType.COLOR, colorProfile);
         set.set(StreamType.DEPTH, depthProfile);
@@ -111,12 +120,10 @@ public class VideoCaptureRS extends VideoCapture {
             if (depth == null) Log.i(TAG, "depth is null");
 
             
+            mInvertDeviceOrientationReadings = true;
+            mCameraNativeOrientation = 90;
             if (null != color) {
-                byte[] imageBuffer = color.getImageBuffer().array();
-                Log.i(TAG, "imageBuffer length " + imageBuffer.length + " " + "mCapturedData length " + mCapturedData.length);
-                for (int i = 0; i < mCapturedData.length; ++i) {
-                    mCapturedData[i] = imageBuffer[i];
-                }
+                color.getImageBuffer().get(mCapturedData);
                 nativeOnFrameAvailable(mNativeVideoCaptureDeviceAndroid,
                                        mCapturedData,
                                        mCapturedData.length,
@@ -131,40 +138,75 @@ public class VideoCaptureRS extends VideoCapture {
         }
     };
 
+    ConditionVariable mThreadStarted = new ConditionVariable(false);
+
+    class SenseManagerThread extends Thread {
+        public Handler mHandler;
+
+        public void run() {
+            Looper.prepare();
+
+            mHandler = new Handler();
+
+            mThreadStarted.open();
+
+            Looper.loop();
+        }
+
+        public void post(Runnable task) {
+            if (mHandler != null)
+                mHandler.post(task);
+        }
+    }
+
+    protected class stop implements Runnable {
+        @Override
+        public void run() {
+            Log.i(TAG, "stopCapture");
+            try {
+                getSenseManager().close();
+            } catch(Exception e) {
+               Log.e(TAG, "Exception:" + e.getMessage());
+               e.printStackTrace();
+            }
+        }
+    }
+
+    protected class start implements Runnable {
+        @Override
+        public void run() {
+            Log.i(TAG, "startCapture");
+            try {
+                getSenseManager().enableStreams(mSenseEventHandler, getUserProfiles(), null);
+            } catch(Exception e) {
+               Log.e(TAG, "Exception:" + e.getMessage());
+               e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     public boolean allocate(int width, int height, int frameRate) {
         Log.i(TAG, "allocate: requested (" + width + "x" + height + ")@" + frameRate + "fps");
 
         // |mCaptureFormat| is also used to configure the ImageReader.
-        mCaptureFormat = new CaptureFormat(width, height, frameRate, ImageFormat.YV12);
-        int expectedFrameSize = mCaptureFormat.mWidth * mCaptureFormat.mHeight
-                * ImageFormat.getBitsPerPixel(mCaptureFormat.mPixelFormat) / 8;
+        mCaptureFormat = new VideoCaptureFormat(width, height, frameRate, ImageFormat.FLEX_RGBA_8888);
+        int expectedFrameSize = mCaptureFormat.mWidth * mCaptureFormat.mHeight * 4;
+        Log.i(TAG, "expectedFrameSize: " + expectedFrameSize);
         mCapturedData = new byte[expectedFrameSize];
         return true;
     }
 
     @Override
     public boolean startCapture() {
-        Log.i(TAG, "startCapture");
-        try {
-            getSenseManager().enableStreams(mSenseEventHandler, getUserProfiles(), null);
-        } catch(Exception e) {
-           Log.e(TAG, "Exception:" + e.getMessage());
-           e.printStackTrace();
-        }
+        mThreadStarted.block();
+        mSenseManagerThread.post(new start());
         return true;
     }
 
     @Override
     public boolean stopCapture() {
-        Log.i(TAG, "stopCapture");
-        try {
-            getSenseManager().close();
-        } catch(Exception e) {
-           Log.e(TAG, "Exception:" + e.getMessage());
-           e.printStackTrace();
-        }
+        mSenseManagerThread.post(new stop());
         return true;
     }
 

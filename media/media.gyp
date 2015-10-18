@@ -1810,14 +1810,11 @@
           ],
           'variables': {
             'java_in_dir': 'base/android/java',
-            'rssdk_path': '/home/nhu/devel/realsense/Android_SDK_Packager_20150803.2/intel_realsense_android/intel_realsense_sdk',
+            'rssdk_path': '/home/nhu/devel/realsense/intel_realsense_android_AM4/intel_realsense_sdk',
             'input_jars_paths': [
-              '<(rssdk_path)/libs/PXCACommon.jar',
-              '<(rssdk_path)/libs/PXCASenseManager.jar',
-              '<(rssdk_path)/libs/PXCADepthUtils_x86.jar',
-              '<(rssdk_path)/libs/PXCACore_x86.jar',
-              '<(rssdk_path)/libs/PXCAPlayback.jar',
-              '<(rssdk_path)/libs/PXCAPlayback_Camera_x86.jar',
+              '<(rssdk_path)/libs/PXCACore/classes.jar',
+              '<(rssdk_path)/libs/PXCAPlayback/classes.jar',
+              '<(rssdk_path)/libs/PXCASenseManager/classes.jar',
             ],
           },
           'includes': ['../build/java.gypi'],

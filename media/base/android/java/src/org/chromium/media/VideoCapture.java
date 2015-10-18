@@ -80,6 +80,8 @@ public abstract class VideoCapture {
                 return AndroidImageFormat.YUV_420_888;
             case ImageFormat.NV21:
                 return AndroidImageFormat.NV21;
+            case ImageFormat.FLEX_RGBA_8888:
+                return AndroidImageFormat.RGBA;
             case ImageFormat.UNKNOWN:
             default:
                 return AndroidImageFormat.UNKNOWN;
