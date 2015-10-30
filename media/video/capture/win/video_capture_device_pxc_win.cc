@@ -282,6 +282,35 @@ void VideoCaptureDevicePxcWin::CaptureAlignedDepth(PXCCapture::Sample* sample) {
   }
 }
 
+static void DepthToGrayscaleRGB32(
+    uint16* depth, uint8* rgb, unsigned int length) {
+  for (unsigned int i = 0; i < length; i++) {
+    uint16 raw_depth_value = depth[i];
+    if (raw_depth_value == 0) {
+      continue;
+    }
+    float depth_value_in_millimeters = raw_depth_value;
+    if (depth_value_in_millimeters < 15 ||
+        depth_value_in_millimeters > 1000) {
+      continue;
+    }
+
+    // Implement the algorithm as equation (4) in paper
+    // "3-D Video Representation Using Depth Maps".
+    float value = 255.0 *
+        ((1.0 / depth_value_in_millimeters -
+          1.0 / 1000) /
+         (1.0 / 15 -
+          1.0 / 1000));
+
+    // Layout is BGRA.
+    rgb[i * kBytesPerPixelRGB32 + 0] = static_cast<uint8>(value);
+    rgb[i * kBytesPerPixelRGB32 + 1] = static_cast<uint8>(value);
+    rgb[i * kBytesPerPixelRGB32 + 2] = static_cast<uint8>(value);
+  }
+}
+
+
 void VideoCaptureDevicePxcWin::CaptureDepthCommon(PXCImage* image) {
   PXCImage::ImageInfo info = image->QueryInfo();
 
@@ -299,15 +328,7 @@ void VideoCaptureDevicePxcWin::CaptureDepthCommon(PXCImage* image) {
   memset(argb_data, 0, sizeof(uint8) * length * kBytesPerPixelRGB32);
   uint16* depth_data = reinterpret_cast<uint16*>(data.planes[0]);
 
-  for (int i = 0; i < length; ++i) {
-    uint16 depth_value = depth_data[i];
-    // R for depth value low
-    uint8 depth_value_low = static_cast<uint8>(depth_value & 0xFF);
-    argb_data[i * kBytesPerPixelRGB32 + 2] = depth_value_low;
-    // G for depth value high
-    uint8 depth_value_high = static_cast<uint8>((depth_value >> 8) & 0xFF);
-    argb_data[i * kBytesPerPixelRGB32 + 1] = depth_value_high;
-  }
+  DepthToGrayscaleRGB32(depth_data, argb_data, length);
 
   client_->OnIncomingCapturedData(
       argb_data,
