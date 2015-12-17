@@ -476,6 +476,8 @@
         'capture/video/win/video_capture_device_factory_win.h',
         'capture/video/win/video_capture_device_mf_win.cc',
         'capture/video/win/video_capture_device_mf_win.h',
+        'capture/video/win/video_capture_device_rs_win.cc',
+        'capture/video/win/video_capture_device_rs_win.h',
         'capture/video/win/video_capture_device_win.cc',
         'capture/video/win/video_capture_device_win.h',
         'capture/webm_muxer.cc',
@@ -992,6 +994,9 @@
           },
         }],
         ['OS=="win"', {
+          'dependencies': [
+            '../third_party/libpxc/libpxc.gyp:libpxc',
+          ],
           'link_settings':  {
             'libraries': [
               '-lmf.lib',

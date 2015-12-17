@@ -68,6 +68,8 @@ const char kForceDirectShowVideoCapture[] = "force-directshow";
 // troubleshoot problems in Windows platforms.
 const char kForceMediaFoundationVideoCapture[] = "force-mediafoundation";
 
+const char kForceRssdkVideoCapture[] = "force-rssdk-video-capture";
+
 // Use Windows WaveOut/In audio API even if Core Audio is supported.
 const char kForceWaveAudio[] = "force-wave-audio";
 
