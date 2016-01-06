@@ -712,6 +712,9 @@ GL_FUNCTIONS = [
   'names': ['glGetTexParameteriv'],
   'arguments': 'GLenum target, GLenum pname, GLint* params', },
 { 'return_type': 'void',
+  'names': ['glGetTexturePointervANGLE'],
+  'arguments': 'GLuint texture, GLenum pname, void** params', },
+{ 'return_type': 'void',
   'versions': [{ 'name': 'glGetTransformFeedbackVarying' }],
   'arguments': 'GLuint program, GLuint index, GLsizei bufSize, '
                'GLsizei* length, GLsizei* size, GLenum* type, char* name', },

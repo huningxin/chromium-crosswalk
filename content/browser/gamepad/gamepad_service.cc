@@ -100,6 +100,18 @@ void GamepadService::RegisterForUserGesture(const base::Closure& closure) {
   provider_->RegisterForUserGesture(closure);
 }
 
+void GamepadService::Vibrate(int index, int duration) {
+  if (!provider_ || num_active_consumers_ == 0)
+    return;
+  provider_->Vibrate(index, duration);
+}
+
+void GamepadService::CancelVibration(int index) {
+  if (!provider_ || num_active_consumers_ == 0)
+    return;
+  provider_->CancelVibration(index);
+}
+
 void GamepadService::Terminate() {
   provider_.reset();
 }

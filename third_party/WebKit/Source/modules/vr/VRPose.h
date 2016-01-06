@@ -8,6 +8,7 @@
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "core/dom/DOMTypedArray.h"
 #include "platform/heap/Handle.h"
+#include "public/platform/WebGamepad.h"
 #include "public/platform/modules/vr/vr_service.mojom-blink.h"
 #include "wtf/Forward.h"
 
@@ -30,6 +31,7 @@ public:
     DOMFloat32Array* linearAcceleration() const { return m_linearAcceleration; }
 
     void setPose(const mojom::blink::VRPosePtr&);
+    void setPose(const WebGamepadPose&);
 
     DECLARE_VIRTUAL_TRACE();
 

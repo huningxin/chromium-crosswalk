@@ -24,12 +24,46 @@
  */
 
 #include "modules/gamepad/Gamepad.h"
+#include "modules/gamepad/GamepadDispatcher.h"
+
+// Maximum number of entries in a vibration pattern.
+const unsigned kVibrationPatternLengthMax = 99;
+
+// Maximum duration of a vibration is 10 seconds.
+const unsigned kVibrationDurationMsMax = 10000;
+
+blink::Gamepad::VibrationPattern sanitizeGamepadVibrationPatternInternal(const blink::Gamepad::VibrationPattern& pattern)
+{
+    blink::Gamepad::VibrationPattern sanitized = pattern;
+    size_t length = sanitized.size();
+
+    // If the pattern is too long then truncate it.
+    if (length > kVibrationPatternLengthMax) {
+        sanitized.shrink(kVibrationPatternLengthMax);
+        length = kVibrationPatternLengthMax;
+    }
+
+    // If any pattern entry is too long then truncate it.
+    for (size_t i = 0; i < length; ++i) {
+        if (sanitized[i] > kVibrationDurationMsMax)
+            sanitized[i] = kVibrationDurationMsMax;
+    }
+
+    // If the last item in the pattern is a pause then discard it.
+    if (length && !(length % 2))
+        sanitized.removeLast();
+
+    return sanitized;
+}
 
 namespace blink {
 
 Gamepad::Gamepad()
     : m_index(0)
     , m_timestamp(0)
+    , m_timerStart(this, &Gamepad::timerStartFired)
+    , m_timerStop(this, &Gamepad::timerStopFired)
+    , m_isVibrating(false)
 {
 }
 
@@ -54,12 +88,95 @@ void Gamepad::setButtons(unsigned count, const WebGamepadButton* data)
     for (unsigned i = 0; i < count; ++i) {
         m_buttons[i]->setValue(data[i].value);
         m_buttons[i]->setPressed(data[i].pressed);
+        m_buttons[i]->setTouched(data[i].touched);
+    }
+}
+
+void Gamepad::setPose(const WebGamepadPose& pose) {
+    if (pose.isNull) {
+        if (m_pose)
+            m_pose = nullptr;
+        return;
+    }
+
+    if (!m_pose)
+        m_pose = VRPose::create();
+
+    m_pose->setPose(pose);
+}
+
+bool Gamepad::vibrate(unsigned time)
+{
+    VibrationPattern pattern;
+    pattern.append(time);
+    return vibrate(pattern);
+}
+
+bool Gamepad::vibrate(const VibrationPattern& pattern)
+{
+    // Cancelling clears the stored pattern so do it before setting the new one.
+    if (m_isVibrating)
+        cancelVibration();
+
+    m_pattern = sanitizeGamepadVibrationPatternInternal(pattern);
+
+    if (m_timerStart.isActive())
+        m_timerStart.stop();
+
+    if (!m_pattern.size())
+        return true;
+
+    if (m_pattern.size() == 1 && !m_pattern[0]) {
+        m_pattern.clear();
+        return true;
+    }
+
+    m_timerStart.startOneShot(0, BLINK_FROM_HERE);
+    m_isVibrating = true;
+    return true;
+}
+
+void Gamepad::cancelVibration()
+{
+    m_pattern.clear();
+    if (m_isVibrating) {
+        //Platform::current()->cancelVibration();
+        GamepadDispatcher::instance().cancelVibration(m_index);
+        m_isVibrating = false;
+        m_timerStop.stop();
+    }
+}
+
+void Gamepad::timerStartFired(Timer<Gamepad>* timer)
+{
+    ASSERT_UNUSED(timer, timer == &m_timerStart);
+
+    if (m_pattern.size()) {
+        m_isVibrating = true;
+        //Platform::current()->vibrate(m_pattern[0]);
+        GamepadDispatcher::instance().vibrate(m_index, m_pattern[0]);
+        m_timerStop.startOneShot(m_pattern[0] / 1000.0, BLINK_FROM_HERE);
+        m_pattern.remove(0);
+    }
+}
+
+void Gamepad::timerStopFired(Timer<Gamepad>* timer)
+{
+    ASSERT_UNUSED(timer, timer == &m_timerStop);
+
+    if (m_pattern.isEmpty())
+        m_isVibrating = false;
+
+    if (m_pattern.size()) {
+        m_timerStart.startOneShot(m_pattern[0] / 1000.0, BLINK_FROM_HERE);
+        m_pattern.remove(0);
     }
 }
 
 DEFINE_TRACE(Gamepad)
 {
     visitor->trace(m_buttons);
+    visitor->trace(m_pose);
 }
 
 } // namespace blink

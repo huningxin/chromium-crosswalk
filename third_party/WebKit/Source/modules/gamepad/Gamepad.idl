@@ -32,4 +32,10 @@
     readonly attribute DOMString mapping;
     readonly attribute double[] axes;
     readonly attribute GamepadButton[] buttons;
+
+    readonly attribute VRPose? pose;
+
+    // FIXME: should be union type http://crbug.com/240176
+    boolean vibrate([Clamp] unsigned long pattern);
+    boolean vibrate(sequence<unsigned long> pattern);
 };

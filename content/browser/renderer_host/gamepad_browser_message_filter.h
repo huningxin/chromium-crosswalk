@@ -37,6 +37,9 @@ class GamepadBrowserMessageFilter :
   void OnGamepadStartPolling(base::SharedMemoryHandle* renderer_handle);
   void OnGamepadStopPolling();
 
+  void OnGamepadVibrate(int index, int duration);
+  void OnGamepadCancelVibration(int index);
+
   bool is_started_;
 
   DISALLOW_COPY_AND_ASSIGN(GamepadBrowserMessageFilter);

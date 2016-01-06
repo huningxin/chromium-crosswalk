@@ -26,6 +26,8 @@ class RendererGamepadProvider
 
   // Provides latest snapshot of gamepads.
   virtual void SampleGamepads(blink::WebGamepads& gamepads) = 0;
+  virtual void VibrateGamepad(unsigned index, unsigned duration) = 0;
+  virtual void CancelGamepadVibration(unsigned index) = 0;
 
  protected:
   DISALLOW_COPY_AND_ASSIGN(RendererGamepadProvider);

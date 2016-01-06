@@ -6,6 +6,7 @@
 #define CONTENT_BROWSER_GAMEPAD_GAMEPAD_PROVIDER_H_
 
 #include <memory>
+#include <stdint.h>
 #include <utility>
 #include <vector>
 
@@ -13,9 +14,9 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/shared_memory.h"
-#include "base/memory/weak_ptr.h"
 #include "base/synchronization/lock.h"
 #include "base/system_monitor/system_monitor.h"
+#include "content/browser/gamepad/gamepad_standard_mappings.h"
 #include "content/common/content_export.h"
 #include "third_party/WebKit/public/platform/WebGamepads.h"
 
@@ -28,6 +29,59 @@ namespace content {
 
 class GamepadDataFetcher;
 struct GamepadHardwareBuffer;
+
+enum GamepadSource {
+  GAMEPAD_SOURCE_NONE = 0,
+  GAMEPAD_SOURCE_ANDROID,
+  GAMEPAD_SOURCE_LINUX_UDEV,
+  GAMEPAD_SOURCE_MAC_HID,
+  GAMEPAD_SOURCE_MAC_XBOX,
+  GAMEPAD_SOURCE_OCULUS,
+  GAMEPAD_SOURCE_OPENVR,
+  GAMEPAD_SOURCE_TEST,
+  GAMEPAD_SOURCE_WIN_XINPUT,
+  GAMEPAD_SOURCE_WIN_RAW,
+};
+
+enum GamepadActiveState {
+  GAMEPAD_INACTIVE = 0,
+  GAMEPAD_ACTIVE,
+  GAMEPAD_NEWLY_ACTIVE,
+};
+
+struct PadState {
+  // Which data fetcher provided this gamepad's data.
+  GamepadSource source;
+  // Data fetcher-specific identifier for this gamepad.
+  int source_id;
+
+  // Indicates whether or not the gamepad is actively being updated
+  GamepadActiveState active_state;
+
+  // Gamepad data, unmapped.
+  blink::WebGamepad data;
+
+  // Functions to map from device data to standard layout, if available. May
+  // be null if no mapping is available or needed.
+  GamepadStandardMappingFunction mapper;
+
+  // Sanitization masks
+  // axis_mask and button_mask are bitfields that represent the reset state of
+  // each input. If a button or axis has ever reported 0 in the past the
+  // corresponding bit will be set to 1.
+
+  // If we ever increase the max axis count this will need to be updated.
+  static_assert(blink::WebGamepad::axesLengthCap <=
+      std::numeric_limits<uint32_t>::digits,
+      "axis_mask is not large enough");
+  uint32_t axis_mask;
+
+  // If we ever increase the max button count this will need to be updated.
+  static_assert(blink::WebGamepad::buttonsLengthCap <=
+      std::numeric_limits<uint32_t>::digits,
+      "button_mask is not large enough");
+  uint32_t button_mask;
+};
 
 class CONTENT_EXPORT GamepadProvider :
   public base::SystemMonitor::DevicesChangedObserver {
@@ -44,6 +98,9 @@ class CONTENT_EXPORT GamepadProvider :
   base::SharedMemoryHandle GetSharedMemoryHandleForProcess(
       base::ProcessHandle renderer_process);
 
+  void AddGamepadDataFetcher(GamepadDataFetcher* fetcher);
+  void RemoveGamepadDataFetcher(GamepadDataFetcher* fetcher);
+
   void GetCurrentGamepadData(blink::WebGamepads* data);
 
   // Pause and resume the background polling thread. Can be called from any
@@ -58,12 +115,25 @@ class CONTENT_EXPORT GamepadProvider :
   // base::SystemMonitor::DevicesChangedObserver implementation.
   void OnDevicesChanged(base::SystemMonitor::DeviceType type) override;
 
+  // Add a gamepad data fetcher. Takes ownership of |fetcher|.
+  void AddGamepadDataFetcher(std::unique_ptr<GamepadDataFetcher> fetcher);
+
+  // Gets a PadState object for the given source and id. If the device hasn't
+  // been encountered before one of the remaining slots will be reserved for it.
+  // If no slots are available will return NULL.
+  PadState* GetPadState(GamepadSource source, int source_id);
+
+  void SetSanitizationEnabled(bool sanitize) { sanitize_ = sanitize; }
+
+  void Vibrate(int index, int duration);
+  void CancelVibration(int index);
+
  private:
   void Initialize(std::unique_ptr<GamepadDataFetcher> fetcher);
 
   // Method for setting up the platform-specific data fetcher. Takes ownership
   // of |fetcher|.
-  void DoInitializePollingThread(std::unique_ptr<GamepadDataFetcher> fetcher);
+  void DoAddGamepadDataFetcher(std::unique_ptr<GamepadDataFetcher> fetcher);
 
   // Method for sending pause hints to the low-level data fetcher. Runs on
   // polling_thread_.
@@ -84,8 +154,12 @@ class CONTENT_EXPORT GamepadProvider :
 
   // Checks the gamepad state to see if the user has interacted with it.
   void CheckForUserGesture();
+  void ClearPadState(PadState& state);
 
-  enum { kDesiredSamplingIntervalMs = 16 };
+  void MapAndSanitizeGamepadData(PadState* pad_state,
+                                 blink::WebGamepad* pad);
+
+  enum { kDesiredSamplingIntervalMs = 10 }; // FIXME: Bumped from 16 for WebVR build
 
   // Keeps track of when the background thread is paused. Access to is_paused_
   // must be guarded by is_paused_lock_.
@@ -124,33 +198,14 @@ class CONTENT_EXPORT GamepadProvider :
   bool devices_changed_;
 
   bool ever_had_user_gesture_;
+  bool sanitize_;
 
-  class PadState {
-   public:
-    PadState() {
-      SetDisconnected();
-    }
-
-    bool Match(const blink::WebGamepad& pad) const;
-    void SetPad(const blink::WebGamepad& pad);
-    void SetDisconnected();
-    void AsWebGamepad(blink::WebGamepad* pad);
-
-    bool connected() const { return connected_; }
-
-   private:
-    bool connected_;
-    unsigned axes_length_;
-    unsigned buttons_length_;
-    blink::WebUChar id_[blink::WebGamepad::idLengthCap];
-    blink::WebUChar mapping_[blink::WebGamepad::mappingLengthCap];
-  };
-
-  // Used to detect connections and disconnections.
+  // Tracks the state of each gamepad slot.
   std::unique_ptr<PadState[]> pad_states_;
 
   // Only used on the polling thread.
-  std::unique_ptr<GamepadDataFetcher> data_fetcher_;
+  typedef std::vector<std::unique_ptr<GamepadDataFetcher>> GamepadFetcherVector;
+  GamepadFetcherVector data_fetchers_;
 
   base::Lock shared_memory_lock_;
   base::SharedMemory gamepad_shared_memory_;
@@ -158,7 +213,7 @@ class CONTENT_EXPORT GamepadProvider :
   // Polling is done on this background thread.
   std::unique_ptr<base::Thread> polling_thread_;
 
-  static GamepadProvider* instance_;
+  //static GamepadProvider* instance_;
 
   DISALLOW_COPY_AND_ASSIGN(GamepadProvider);
 };

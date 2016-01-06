@@ -28,6 +28,8 @@
 
 #include "bindings/core/v8/ScriptWrappable.h"
 #include "modules/gamepad/GamepadButton.h"
+#include "modules/vr/VRPose.h"
+#include "platform/Timer.h"
 #include "platform/heap/Handle.h"
 #include "public/platform/WebGamepad.h"
 #include "wtf/Vector.h"
@@ -38,6 +40,8 @@ namespace blink {
 class Gamepad final : public GarbageCollectedFinalized<Gamepad>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
+    typedef Vector<unsigned> VibrationPattern;
+
     static Gamepad* create()
     {
         return new Gamepad;
@@ -67,6 +71,18 @@ public:
     const GamepadButtonVector& buttons() const { return m_buttons; }
     void setButtons(unsigned count, const WebGamepadButton* data);
 
+    VRPose* pose() const { return m_pose; }
+    void setPose(const WebGamepadPose& pose);
+
+    // Vibration
+    bool vibrate(unsigned time);
+    bool vibrate(const VibrationPattern&);
+    void cancelVibration();
+    void timerStartFired(Timer<Gamepad>*);
+    void timerStopFired(Timer<Gamepad>*);
+    bool isVibrating() const { return m_isVibrating; }
+    VibrationPattern pattern() const { return m_pattern; }
+
     DECLARE_TRACE();
 
 private:
@@ -79,6 +95,12 @@ private:
     String m_mapping;
     DoubleVector m_axes;
     GamepadButtonVector m_buttons;
+    Member<VRPose> m_pose;
+
+    Timer<Gamepad> m_timerStart;
+    Timer<Gamepad> m_timerStop;
+    bool m_isVibrating;
+    VibrationPattern m_pattern;
 };
 
 } // namespace blink

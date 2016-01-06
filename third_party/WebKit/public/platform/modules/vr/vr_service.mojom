@@ -46,8 +46,16 @@ struct VRStageParameters {
 };
 
 struct VRDisplay {
+  enum CompositorType {
+    NONE,
+    CARDBOARD,
+    OCULUS,
+    OPENVR
+  };
+
    uint32 index;
    string displayName;
+   CompositorType compositorType;
    VRDisplayCapabilities capabilities;
    VRStageParameters? stageParameters;
    VREyeParameters leftEye;

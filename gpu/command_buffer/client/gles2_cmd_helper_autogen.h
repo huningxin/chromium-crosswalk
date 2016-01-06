@@ -3145,4 +3145,54 @@ void UniformMatrix4fvStreamTextureMatrixCHROMIUMImmediate(
   }
 }
 
+void CreateVRCompositorCHROMIUM(GLenum compositorType) {
+  gles2::cmds::CreateVRCompositorCHROMIUM* c =
+      GetCmdSpace<gles2::cmds::CreateVRCompositorCHROMIUM>();
+  if (c) {
+    c->Init(compositorType);
+  }
+}
+
+void SubmitVRCompositorFrameCHROMIUM(GLuint compositor,
+                                     GLuint frameTexture,
+                                     GLfloat x,
+                                     GLfloat y,
+                                     GLfloat z,
+                                     GLfloat w) {
+  gles2::cmds::SubmitVRCompositorFrameCHROMIUM* c =
+      GetCmdSpace<gles2::cmds::SubmitVRCompositorFrameCHROMIUM>();
+  if (c) {
+    c->Init(compositor, frameTexture, x, y, z, w);
+  }
+}
+
+void VRCompositorTextureBoundsCHROMIUM(GLuint compositor,
+                                       GLuint eye,
+                                       GLfloat x,
+                                       GLfloat y,
+                                       GLfloat width,
+                                       GLfloat height) {
+  gles2::cmds::VRCompositorTextureBoundsCHROMIUM* c =
+      GetCmdSpace<gles2::cmds::VRCompositorTextureBoundsCHROMIUM>();
+  if (c) {
+    c->Init(compositor, eye, x, y, width, height);
+  }
+}
+
+void ResetVRCompositorPoseCHROMIUM(GLuint compositor) {
+  gles2::cmds::ResetVRCompositorPoseCHROMIUM* c =
+      GetCmdSpace<gles2::cmds::ResetVRCompositorPoseCHROMIUM>();
+  if (c) {
+    c->Init(compositor);
+  }
+}
+
+void DeleteVRCompositorCHROMIUM(GLuint compositor) {
+  gles2::cmds::DeleteVRCompositorCHROMIUM* c =
+      GetCmdSpace<gles2::cmds::DeleteVRCompositorCHROMIUM>();
+  if (c) {
+    c->Init(compositor);
+  }
+}
+
 #endif  // GPU_COMMAND_BUFFER_CLIENT_GLES2_CMD_HELPER_AUTOGEN_H_

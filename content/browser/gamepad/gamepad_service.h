@@ -65,6 +65,9 @@ class CONTENT_EXPORT GamepadService {
   // while a consumer is active.
   void RegisterForUserGesture(const base::Closure& closure);
 
+  void Vibrate(int index, int duration);
+  void CancelVibration(int index);
+
   // Returns the shared memory handle of the gamepad data duplicated into the
   // given process.
   base::SharedMemoryHandle GetSharedMemoryHandleForProcess(
@@ -78,6 +81,8 @@ class CONTENT_EXPORT GamepadService {
 
   // Called on IO thread when a gamepad is disconnected.
   void OnGamepadDisconnected(int index, const blink::WebGamepad& pad);
+
+  GamepadProvider* provider() { return provider_.get(); }
 
  private:
   friend struct base::DefaultSingletonTraits<GamepadService>;

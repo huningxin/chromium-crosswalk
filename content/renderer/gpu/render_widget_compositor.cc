@@ -234,7 +234,12 @@ void RenderWidgetCompositor::Initialize(float device_scale_factor) {
   // to keep content always crisp when possible.
   settings.layer_transforms_should_scale_layer_contents = true;
 
+#if !defined(OS_ANDROID)
+  if (cmd->HasSwitch(switches::kDisableGpuVsync) ||
+      cmd->HasSwitch("enable-webvr")) {
+#else 
   if (cmd->HasSwitch(switches::kDisableGpuVsync)) {
+#endif
     std::string display_vsync_string =
         cmd->GetSwitchValueASCII(switches::kDisableGpuVsync);
     if (display_vsync_string == "gpu") {

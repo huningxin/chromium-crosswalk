@@ -1,0 +1,31 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+copy("openvr_shared_library") {
+  if (is_win) {
+    sources = [
+      "openvr/bin/win64/openvr_api.dll",
+    ]
+
+    outputs = [
+      "${root_out_dir}/openvr_api.dll",
+    ]
+  }
+}
+
+# GYP: //third_party/openvr/openvr.gyp:openvr
+source_set("openvr") {
+  deps = [
+    ":openvr_shared_library",
+  ]
+  include_dirs = [
+    "openvr/headers",
+  ]
+  if (is_win) {
+    libs = [
+      "openvr/lib/win64/openvr_api.lib",
+    ]
+  }
+}
+

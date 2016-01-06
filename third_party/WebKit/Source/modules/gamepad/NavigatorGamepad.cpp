@@ -46,6 +46,7 @@ static void sampleGamepad(unsigned index, T& gamepad, const WebGamepad& webGamep
     gamepad.setMapping(webGamepad.mapping);
     gamepad.setAxes(webGamepad.axesLength, webGamepad.axes);
     gamepad.setButtons(webGamepad.buttonsLength, webGamepad.buttons);
+    gamepad.setPose(webGamepad.pose);
 }
 
 template<typename GamepadType, typename ListType>

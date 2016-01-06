@@ -31,3 +31,10 @@ IPC_SYNC_MESSAGE_CONTROL0_1(GamepadHostMsg_StartPolling,
                             base::SharedMemoryHandle /* handle */)
 
 IPC_SYNC_MESSAGE_CONTROL0_0(GamepadHostMsg_StopPolling)
+
+IPC_MESSAGE_CONTROL2(GamepadHostMsg_Vibrate,
+                     int /* index */,
+                     int /* duration */)
+
+IPC_MESSAGE_CONTROL1(GamepadHostMsg_CancelVibration,
+                     int /* index */)

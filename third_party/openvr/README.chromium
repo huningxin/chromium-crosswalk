@@ -1,0 +1,13 @@
+Name: OpenVR SDK
+Short Name: openvr
+URL: https://github.com/ValveSoftware/openvr
+Version: 0.9.19
+License: OpenVR SDK Software License
+License File: openvr/LICENSE
+Security Critical: yes
+
+Description:
+Provides an interface to the HTC Vive VR headset and other compatible devices
+
+Local Modifications:
+None
