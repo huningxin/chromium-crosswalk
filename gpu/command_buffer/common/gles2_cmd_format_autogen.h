@@ -15485,4 +15485,238 @@ static_assert(offsetof(UniformMatrix4fvStreamTextureMatrixCHROMIUMImmediate,
               "offset of UniformMatrix4fvStreamTextureMatrixCHROMIUMImmediate "
               "transpose should be 8");
 
+struct CreateVRCompositorCHROMIUM {
+  typedef CreateVRCompositorCHROMIUM ValueType;
+  static const CommandId kCmdId = kCreateVRCompositorCHROMIUM;
+  static const cmd::ArgFlags kArgFlags = cmd::kFixed;
+  static const uint8_t cmd_flags = CMD_FLAG_SET_TRACE_LEVEL(3);
+
+  static uint32_t ComputeSize() {
+    return static_cast<uint32_t>(sizeof(ValueType));  // NOLINT
+  }
+
+  void SetHeader() { header.SetCmd<ValueType>(); }
+
+  void Init(GLenum _compositorType) {
+    SetHeader();
+    compositorType = _compositorType;
+  }
+
+  void* Set(void* cmd, GLenum _compositorType) {
+    static_cast<ValueType*>(cmd)->Init(_compositorType);
+    return NextCmdAddress<ValueType>(cmd);
+  }
+
+  gpu::CommandHeader header;
+  uint32_t compositorType;
+};
+
+static_assert(sizeof(CreateVRCompositorCHROMIUM) == 8,
+              "size of CreateVRCompositorCHROMIUM should be 8");
+static_assert(offsetof(CreateVRCompositorCHROMIUM, header) == 0,
+              "offset of CreateVRCompositorCHROMIUM header should be 0");
+static_assert(
+    offsetof(CreateVRCompositorCHROMIUM, compositorType) == 4,
+    "offset of CreateVRCompositorCHROMIUM compositorType should be 4");
+
+struct SubmitVRCompositorFrameCHROMIUM {
+  typedef SubmitVRCompositorFrameCHROMIUM ValueType;
+  static const CommandId kCmdId = kSubmitVRCompositorFrameCHROMIUM;
+  static const cmd::ArgFlags kArgFlags = cmd::kFixed;
+  static const uint8_t cmd_flags = CMD_FLAG_SET_TRACE_LEVEL(3);
+
+  static uint32_t ComputeSize() {
+    return static_cast<uint32_t>(sizeof(ValueType));  // NOLINT
+  }
+
+  void SetHeader() { header.SetCmd<ValueType>(); }
+
+  void Init(GLuint _compositor,
+            GLuint _frameTexture,
+            GLfloat _x,
+            GLfloat _y,
+            GLfloat _z,
+            GLfloat _w) {
+    SetHeader();
+    compositor = _compositor;
+    frameTexture = _frameTexture;
+    x = _x;
+    y = _y;
+    z = _z;
+    w = _w;
+  }
+
+  void* Set(void* cmd,
+            GLuint _compositor,
+            GLuint _frameTexture,
+            GLfloat _x,
+            GLfloat _y,
+            GLfloat _z,
+            GLfloat _w) {
+    static_cast<ValueType*>(cmd)->Init(_compositor, _frameTexture, _x, _y, _z,
+                                       _w);
+    return NextCmdAddress<ValueType>(cmd);
+  }
+
+  gpu::CommandHeader header;
+  uint32_t compositor;
+  uint32_t frameTexture;
+  float x;
+  float y;
+  float z;
+  float w;
+};
+
+static_assert(sizeof(SubmitVRCompositorFrameCHROMIUM) == 28,
+              "size of SubmitVRCompositorFrameCHROMIUM should be 28");
+static_assert(offsetof(SubmitVRCompositorFrameCHROMIUM, header) == 0,
+              "offset of SubmitVRCompositorFrameCHROMIUM header should be 0");
+static_assert(
+    offsetof(SubmitVRCompositorFrameCHROMIUM, compositor) == 4,
+    "offset of SubmitVRCompositorFrameCHROMIUM compositor should be 4");
+static_assert(
+    offsetof(SubmitVRCompositorFrameCHROMIUM, frameTexture) == 8,
+    "offset of SubmitVRCompositorFrameCHROMIUM frameTexture should be 8");
+static_assert(offsetof(SubmitVRCompositorFrameCHROMIUM, x) == 12,
+              "offset of SubmitVRCompositorFrameCHROMIUM x should be 12");
+static_assert(offsetof(SubmitVRCompositorFrameCHROMIUM, y) == 16,
+              "offset of SubmitVRCompositorFrameCHROMIUM y should be 16");
+static_assert(offsetof(SubmitVRCompositorFrameCHROMIUM, z) == 20,
+              "offset of SubmitVRCompositorFrameCHROMIUM z should be 20");
+static_assert(offsetof(SubmitVRCompositorFrameCHROMIUM, w) == 24,
+              "offset of SubmitVRCompositorFrameCHROMIUM w should be 24");
+
+struct VRCompositorTextureBoundsCHROMIUM {
+  typedef VRCompositorTextureBoundsCHROMIUM ValueType;
+  static const CommandId kCmdId = kVRCompositorTextureBoundsCHROMIUM;
+  static const cmd::ArgFlags kArgFlags = cmd::kFixed;
+  static const uint8_t cmd_flags = CMD_FLAG_SET_TRACE_LEVEL(3);
+
+  static uint32_t ComputeSize() {
+    return static_cast<uint32_t>(sizeof(ValueType));  // NOLINT
+  }
+
+  void SetHeader() { header.SetCmd<ValueType>(); }
+
+  void Init(GLuint _compositor,
+            GLuint _eye,
+            GLfloat _x,
+            GLfloat _y,
+            GLfloat _width,
+            GLfloat _height) {
+    SetHeader();
+    compositor = _compositor;
+    eye = _eye;
+    x = _x;
+    y = _y;
+    width = _width;
+    height = _height;
+  }
+
+  void* Set(void* cmd,
+            GLuint _compositor,
+            GLuint _eye,
+            GLfloat _x,
+            GLfloat _y,
+            GLfloat _width,
+            GLfloat _height) {
+    static_cast<ValueType*>(cmd)->Init(_compositor, _eye, _x, _y, _width,
+                                       _height);
+    return NextCmdAddress<ValueType>(cmd);
+  }
+
+  gpu::CommandHeader header;
+  uint32_t compositor;
+  uint32_t eye;
+  float x;
+  float y;
+  float width;
+  float height;
+};
+
+static_assert(sizeof(VRCompositorTextureBoundsCHROMIUM) == 28,
+              "size of VRCompositorTextureBoundsCHROMIUM should be 28");
+static_assert(offsetof(VRCompositorTextureBoundsCHROMIUM, header) == 0,
+              "offset of VRCompositorTextureBoundsCHROMIUM header should be 0");
+static_assert(
+    offsetof(VRCompositorTextureBoundsCHROMIUM, compositor) == 4,
+    "offset of VRCompositorTextureBoundsCHROMIUM compositor should be 4");
+static_assert(offsetof(VRCompositorTextureBoundsCHROMIUM, eye) == 8,
+              "offset of VRCompositorTextureBoundsCHROMIUM eye should be 8");
+static_assert(offsetof(VRCompositorTextureBoundsCHROMIUM, x) == 12,
+              "offset of VRCompositorTextureBoundsCHROMIUM x should be 12");
+static_assert(offsetof(VRCompositorTextureBoundsCHROMIUM, y) == 16,
+              "offset of VRCompositorTextureBoundsCHROMIUM y should be 16");
+static_assert(offsetof(VRCompositorTextureBoundsCHROMIUM, width) == 20,
+              "offset of VRCompositorTextureBoundsCHROMIUM width should be 20");
+static_assert(
+    offsetof(VRCompositorTextureBoundsCHROMIUM, height) == 24,
+    "offset of VRCompositorTextureBoundsCHROMIUM height should be 24");
+
+struct ResetVRCompositorPoseCHROMIUM {
+  typedef ResetVRCompositorPoseCHROMIUM ValueType;
+  static const CommandId kCmdId = kResetVRCompositorPoseCHROMIUM;
+  static const cmd::ArgFlags kArgFlags = cmd::kFixed;
+  static const uint8_t cmd_flags = CMD_FLAG_SET_TRACE_LEVEL(3);
+
+  static uint32_t ComputeSize() {
+    return static_cast<uint32_t>(sizeof(ValueType));  // NOLINT
+  }
+
+  void SetHeader() { header.SetCmd<ValueType>(); }
+
+  void Init(GLuint _compositor) {
+    SetHeader();
+    compositor = _compositor;
+  }
+
+  void* Set(void* cmd, GLuint _compositor) {
+    static_cast<ValueType*>(cmd)->Init(_compositor);
+    return NextCmdAddress<ValueType>(cmd);
+  }
+
+  gpu::CommandHeader header;
+  uint32_t compositor;
+};
+
+static_assert(sizeof(ResetVRCompositorPoseCHROMIUM) == 8,
+              "size of ResetVRCompositorPoseCHROMIUM should be 8");
+static_assert(offsetof(ResetVRCompositorPoseCHROMIUM, header) == 0,
+              "offset of ResetVRCompositorPoseCHROMIUM header should be 0");
+static_assert(offsetof(ResetVRCompositorPoseCHROMIUM, compositor) == 4,
+              "offset of ResetVRCompositorPoseCHROMIUM compositor should be 4");
+
+struct DeleteVRCompositorCHROMIUM {
+  typedef DeleteVRCompositorCHROMIUM ValueType;
+  static const CommandId kCmdId = kDeleteVRCompositorCHROMIUM;
+  static const cmd::ArgFlags kArgFlags = cmd::kFixed;
+  static const uint8_t cmd_flags = CMD_FLAG_SET_TRACE_LEVEL(3);
+
+  static uint32_t ComputeSize() {
+    return static_cast<uint32_t>(sizeof(ValueType));  // NOLINT
+  }
+
+  void SetHeader() { header.SetCmd<ValueType>(); }
+
+  void Init(GLuint _compositor) {
+    SetHeader();
+    compositor = _compositor;
+  }
+
+  void* Set(void* cmd, GLuint _compositor) {
+    static_cast<ValueType*>(cmd)->Init(_compositor);
+    return NextCmdAddress<ValueType>(cmd);
+  }
+
+  gpu::CommandHeader header;
+  uint32_t compositor;
+};
+
+static_assert(sizeof(DeleteVRCompositorCHROMIUM) == 8,
+              "size of DeleteVRCompositorCHROMIUM should be 8");
+static_assert(offsetof(DeleteVRCompositorCHROMIUM, header) == 0,
+              "offset of DeleteVRCompositorCHROMIUM header should be 0");
+static_assert(offsetof(DeleteVRCompositorCHROMIUM, compositor) == 4,
+              "offset of DeleteVRCompositorCHROMIUM compositor should be 4");
+
 #endif  // GPU_COMMAND_BUFFER_COMMON_GLES2_CMD_FORMAT_AUTOGEN_H_

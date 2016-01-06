@@ -1696,6 +1696,33 @@ GLES2UniformMatrix4fvStreamTextureMatrixCHROMIUM(GLint location,
   gles2::GetGLContext()->UniformMatrix4fvStreamTextureMatrixCHROMIUM(
       location, transpose, default_value);
 }
+GLuint GL_APIENTRY GLES2CreateVRCompositorCHROMIUM(GLenum compositorType) {
+  return gles2::GetGLContext()->CreateVRCompositorCHROMIUM(compositorType);
+}
+void GL_APIENTRY GLES2SubmitVRCompositorFrameCHROMIUM(GLuint compositor,
+                                                      GLuint frameTexture,
+                                                      GLfloat x,
+                                                      GLfloat y,
+                                                      GLfloat z,
+                                                      GLfloat w) {
+  gles2::GetGLContext()->SubmitVRCompositorFrameCHROMIUM(
+      compositor, frameTexture, x, y, z, w);
+}
+void GL_APIENTRY GLES2VRCompositorTextureBoundsCHROMIUM(GLuint compositor,
+                                                        GLuint eye,
+                                                        GLfloat x,
+                                                        GLfloat y,
+                                                        GLfloat width,
+                                                        GLfloat height) {
+  gles2::GetGLContext()->VRCompositorTextureBoundsCHROMIUM(compositor, eye, x,
+                                                           y, width, height);
+}
+void GL_APIENTRY GLES2ResetVRCompositorPoseCHROMIUM(GLuint compositor) {
+  gles2::GetGLContext()->ResetVRCompositorPoseCHROMIUM(compositor);
+}
+void GL_APIENTRY GLES2DeleteVRCompositorCHROMIUM(GLuint compositor) {
+  gles2::GetGLContext()->DeleteVRCompositorCHROMIUM(compositor);
+}
 
 namespace gles2 {
 
@@ -2975,6 +3002,28 @@ extern const NameToFunc g_gles2_function_table[] = {
         "glUniformMatrix4fvStreamTextureMatrixCHROMIUM",
         reinterpret_cast<GLES2FunctionPointer>(
             glUniformMatrix4fvStreamTextureMatrixCHROMIUM),
+    },
+    {
+        "glCreateVRCompositorCHROMIUM",
+        reinterpret_cast<GLES2FunctionPointer>(glCreateVRCompositorCHROMIUM),
+    },
+    {
+        "glSubmitVRCompositorFrameCHROMIUM",
+        reinterpret_cast<GLES2FunctionPointer>(
+            glSubmitVRCompositorFrameCHROMIUM),
+    },
+    {
+        "glVRCompositorTextureBoundsCHROMIUM",
+        reinterpret_cast<GLES2FunctionPointer>(
+            glVRCompositorTextureBoundsCHROMIUM),
+    },
+    {
+        "glResetVRCompositorPoseCHROMIUM",
+        reinterpret_cast<GLES2FunctionPointer>(glResetVRCompositorPoseCHROMIUM),
+    },
+    {
+        "glDeleteVRCompositorCHROMIUM",
+        reinterpret_cast<GLES2FunctionPointer>(glDeleteVRCompositorCHROMIUM),
     },
     {
         NULL, NULL,

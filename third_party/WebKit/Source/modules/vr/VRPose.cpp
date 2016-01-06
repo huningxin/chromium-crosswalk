@@ -16,6 +16,20 @@ DOMFloat32Array* mojoArrayToFloat32Array(const mojo::WTFArray<float>& vec)
     return nullptr;
 }
 
+DOMFloat32Array* vecToFloat32Array(const WebGamepadVector& vec, int elements)
+{
+    if (!vec.isNull) {
+        DOMFloat32Array* out = DOMFloat32Array::create(elements);
+        out->data()[0] = vec.x;
+        out->data()[1] = vec.y;
+        out->data()[2] = vec.z;
+        if (elements >= 4)
+            out->data()[3] = vec.w;
+        return out;
+    }
+    return nullptr;
+}
+
 } // namespace
 
 VRPose::VRPose()
@@ -35,6 +49,17 @@ void VRPose::setPose(const mojom::blink::VRPosePtr& state)
     m_linearVelocity = mojoArrayToFloat32Array(state->linearVelocity);
     m_angularAcceleration = mojoArrayToFloat32Array(state->angularAcceleration);
     m_linearAcceleration = mojoArrayToFloat32Array(state->linearAcceleration);
+}
+
+void VRPose::setPose(const WebGamepadPose &state)
+{
+    m_timeStamp = 0;
+    m_orientation = vecToFloat32Array(state.orientation, 4);
+    m_position = vecToFloat32Array(state.position, 3);
+    m_angularVelocity = nullptr;
+    m_linearVelocity = nullptr;
+    m_angularAcceleration = nullptr;
+    m_linearAcceleration = nullptr;
 }
 
 DEFINE_TRACE(VRPose)

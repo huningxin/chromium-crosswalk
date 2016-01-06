@@ -21,6 +21,16 @@ void GamepadDispatcher::sampleGamepads(WebGamepads& gamepads)
     Platform::current()->sampleGamepads(gamepads);
 }
 
+void GamepadDispatcher::vibrate(unsigned index, unsigned duration)
+{
+    Platform::current()->vibrateGamepad(index, duration);
+}
+
+void GamepadDispatcher::cancelVibration(unsigned index)
+{
+    Platform::current()->cancelGamepadVibration(index);
+}
+
 GamepadDispatcher::GamepadDispatcher()
 {
 }

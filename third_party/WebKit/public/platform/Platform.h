@@ -247,6 +247,8 @@ public:
     // Gamepad -------------------------------------------------------------
 
     virtual void sampleGamepads(WebGamepads& into) { into.length = 0; }
+    virtual void vibrateGamepad(unsigned index, unsigned duration) { }
+    virtual void cancelGamepadVibration(unsigned index) { }
 
     // History -------------------------------------------------------------
 

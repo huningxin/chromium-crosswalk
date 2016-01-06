@@ -44,6 +44,7 @@ include_rules = [
   "+third_party/iaccessible2",
   "+third_party/isimpledom",
   "+third_party/khronos",   # For enum definitions only
+  "+third_party/libovr",
   "+third_party/re2",
 
   # Allow non-browser Chrome OS code to be used.

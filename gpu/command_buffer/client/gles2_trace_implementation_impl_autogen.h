@@ -2463,4 +2463,48 @@ void GLES2TraceImplementation::UniformMatrix4fvStreamTextureMatrixCHROMIUM(
                                                    default_value);
 }
 
+GLuint GLES2TraceImplementation::CreateVRCompositorCHROMIUM(
+    GLenum compositorType) {
+  TRACE_EVENT_BINARY_EFFICIENT0("gpu",
+                                "GLES2Trace::CreateVRCompositorCHROMIUM");
+  return gl_->CreateVRCompositorCHROMIUM(compositorType);
+}
+
+void GLES2TraceImplementation::SubmitVRCompositorFrameCHROMIUM(
+    GLuint compositor,
+    GLuint frameTexture,
+    GLfloat x,
+    GLfloat y,
+    GLfloat z,
+    GLfloat w) {
+  TRACE_EVENT_BINARY_EFFICIENT0("gpu",
+                                "GLES2Trace::SubmitVRCompositorFrameCHROMIUM");
+  gl_->SubmitVRCompositorFrameCHROMIUM(compositor, frameTexture, x, y, z, w);
+}
+
+void GLES2TraceImplementation::VRCompositorTextureBoundsCHROMIUM(
+    GLuint compositor,
+    GLuint eye,
+    GLfloat x,
+    GLfloat y,
+    GLfloat width,
+    GLfloat height) {
+  TRACE_EVENT_BINARY_EFFICIENT0(
+      "gpu", "GLES2Trace::VRCompositorTextureBoundsCHROMIUM");
+  gl_->VRCompositorTextureBoundsCHROMIUM(compositor, eye, x, y, width, height);
+}
+
+void GLES2TraceImplementation::ResetVRCompositorPoseCHROMIUM(
+    GLuint compositor) {
+  TRACE_EVENT_BINARY_EFFICIENT0("gpu",
+                                "GLES2Trace::ResetVRCompositorPoseCHROMIUM");
+  gl_->ResetVRCompositorPoseCHROMIUM(compositor);
+}
+
+void GLES2TraceImplementation::DeleteVRCompositorCHROMIUM(GLuint compositor) {
+  TRACE_EVENT_BINARY_EFFICIENT0("gpu",
+                                "GLES2Trace::DeleteVRCompositorCHROMIUM");
+  gl_->DeleteVRCompositorCHROMIUM(compositor);
+}
+
 #endif  // GPU_COMMAND_BUFFER_CLIENT_GLES2_TRACE_IMPLEMENTATION_IMPL_AUTOGEN_H_

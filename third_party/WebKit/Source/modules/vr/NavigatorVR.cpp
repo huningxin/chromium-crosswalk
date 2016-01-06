@@ -12,6 +12,7 @@
 #include "core/frame/LocalFrame.h"
 #include "core/frame/Navigator.h"
 #include "core/page/Page.h"
+#include "modules/EventModules.h"
 #include "modules/vr/VRController.h"
 #include "modules/vr/VRDisplay.h"
 #include "modules/vr/VRDisplayCollection.h"
@@ -85,6 +86,8 @@ DEFINE_TRACE(NavigatorVR)
 
 NavigatorVR::NavigatorVR(LocalFrame* frame)
     : DOMWindowProperty(frame)
+    , DOMWindowLifecycleObserver(frame ? frame->localDOMWindow() : 0)
+    , m_hasConnectionEventListener(false)
 {
     m_displays = new VRDisplayCollection(this);
 }
@@ -96,6 +99,48 @@ NavigatorVR::~NavigatorVR()
 const char* NavigatorVR::supplementName()
 {
     return "NavigatorVR";
+}
+
+void NavigatorVR::fireVRDisplayPresentChange()
+{
+    if (m_frame) {
+        m_frame->domWindow()->dispatchEvent(Event::create(EventTypeNames::vrdisplaypresentchange));
+    }
+}
+
+static bool isVRConnectionEvent(const AtomicString& eventType)
+{
+    return eventType == EventTypeNames::vrdisplayconnected || eventType == EventTypeNames::vrdisplaydisconnected;
+}
+
+void NavigatorVR::didAddEventListener(LocalDOMWindow*, const AtomicString& eventType)
+{
+    if (isVRConnectionEvent(eventType)) {
+        /*if (page() && page()->isPageVisible())
+            startUpdatingIfAttached();*/
+        m_hasConnectionEventListener = true;
+    }
+}
+
+void NavigatorVR::didRemoveEventListener(LocalDOMWindow* window, const AtomicString& eventType)
+{
+    if (isVRConnectionEvent(eventType)
+        && !window->hasEventListeners(EventTypeNames::vrdisplayconnected)
+        && !window->hasEventListeners(EventTypeNames::vrdisplaydisconnected)) {
+        didRemoveVRConnectionEventListeners();
+    }
+}
+
+void NavigatorVR::didRemoveAllEventListeners(LocalDOMWindow*)
+{
+    didRemoveVRConnectionEventListeners();
+}
+
+void NavigatorVR::didRemoveVRConnectionEventListeners()
+{
+    m_hasConnectionEventListener = false;
+    /*m_dispatchOneEventRunner->stop();
+    m_pendingEvents.clear();*/
 }
 
 } // namespace blink

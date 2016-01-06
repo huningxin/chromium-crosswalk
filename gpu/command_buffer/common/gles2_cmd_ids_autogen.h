@@ -327,7 +327,12 @@
   OP(BindFragDataLocationIndexedEXTBucket)                 /* 568 */ \
   OP(BindFragDataLocationEXTBucket)                        /* 569 */ \
   OP(GetFragDataIndexEXT)                                  /* 570 */ \
-  OP(UniformMatrix4fvStreamTextureMatrixCHROMIUMImmediate) /* 571 */
+  OP(UniformMatrix4fvStreamTextureMatrixCHROMIUMImmediate) /* 571 */ \
+  OP(CreateVRCompositorCHROMIUM)                           /* 572 */ \
+  OP(SubmitVRCompositorFrameCHROMIUM)                      /* 573 */ \
+  OP(VRCompositorTextureBoundsCHROMIUM)                    /* 574 */ \
+  OP(ResetVRCompositorPoseCHROMIUM)                        /* 575 */ \
+  OP(DeleteVRCompositorCHROMIUM)                           /* 576 */
 
 enum CommandId {
   kStartPoint = cmd::kLastCommonId,  // All GLES2 commands start after this.

@@ -82,7 +82,7 @@ GamepadServiceTest::GamepadServiceTest()
     : browser_thread_(TestBrowserThreadBundle::IO_MAINLOOP) {
   memset(&test_data_, 0, sizeof(test_data_));
 
-  // Set it so that we have user gesture.
+  // Must be set to zero initially to pass sanitiation
   test_data_.items[0].buttonsLength = 1;
   test_data_.items[0].buttons[0].value = 1.f;
   test_data_.items[0].buttons[0].pressed = true;
@@ -95,6 +95,7 @@ GamepadServiceTest::~GamepadServiceTest() {
 void GamepadServiceTest::SetUp() {
   fetcher_ = new MockGamepadDataFetcher(test_data_);
   service_ = new GamepadService(std::unique_ptr<GamepadDataFetcher>(fetcher_));
+  service_->provider()->SetSanitizationEnabled(false);
   connection_listener_.reset((new ConnectionListener));
   service_->ConsumerBecameActive(connection_listener_.get());
 }

@@ -22,6 +22,9 @@ public:
 
     void sampleGamepads(WebGamepads&);
 
+    void vibrate(unsigned index, unsigned duration);
+    void cancelVibration(unsigned index);
+
     struct ConnectionChange {
         DISALLOW_NEW();
         WebGamepad pad;

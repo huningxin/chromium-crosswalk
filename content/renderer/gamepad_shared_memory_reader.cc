@@ -104,6 +104,15 @@ void GamepadSharedMemoryReader::SampleGamepads(blink::WebGamepads& gamepads) {
   }
 }
 
+void GamepadSharedMemoryReader::VibrateGamepad(
+    unsigned index, unsigned duration) {
+  RenderThread::Get()->Send(new GamepadHostMsg_Vibrate(index, duration));
+}
+
+void GamepadSharedMemoryReader::CancelGamepadVibration(unsigned index) {
+  RenderThread::Get()->Send(new GamepadHostMsg_CancelVibration(index));
+}
+
 GamepadSharedMemoryReader::~GamepadSharedMemoryReader() {
   StopIfObserving();
 }

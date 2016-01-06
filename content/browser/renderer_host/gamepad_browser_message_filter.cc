@@ -26,6 +26,8 @@ bool GamepadBrowserMessageFilter::OnMessageReceived(
   IPC_BEGIN_MESSAGE_MAP(GamepadBrowserMessageFilter, message)
     IPC_MESSAGE_HANDLER(GamepadHostMsg_StartPolling, OnGamepadStartPolling)
     IPC_MESSAGE_HANDLER(GamepadHostMsg_StopPolling, OnGamepadStopPolling)
+    IPC_MESSAGE_HANDLER(GamepadHostMsg_Vibrate, OnGamepadVibrate)
+    IPC_MESSAGE_HANDLER(GamepadHostMsg_CancelVibration, OnGamepadCancelVibration)
     IPC_MESSAGE_UNHANDLED(handled = false)
   IPC_END_MESSAGE_MAP()
   return handled;
@@ -62,6 +64,14 @@ void GamepadBrowserMessageFilter::OnGamepadStopPolling() {
 
   is_started_ = false;
   GamepadService::GetInstance()->ConsumerBecameInactive(this);
+}
+
+void GamepadBrowserMessageFilter::OnGamepadVibrate(int index, int duration) {
+  GamepadService::GetInstance()->Vibrate(index, duration);
+}
+
+void GamepadBrowserMessageFilter::OnGamepadCancelVibration(int index) {
+  GamepadService::GetInstance()->CancelVibration(index);
 }
 
 }  // namespace content

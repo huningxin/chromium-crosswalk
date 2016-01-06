@@ -24,6 +24,10 @@ class GamepadSharedMemoryReader : public RendererGamepadProvider {
 
   // RendererGamepadProvider implementation.
   void SampleGamepads(blink::WebGamepads& gamepads) override;
+  void VibrateGamepad(unsigned index, unsigned duration) override;
+  void CancelGamepadVibration(unsigned index) override;
+
+
   bool OnControlMessageReceived(const IPC::Message& message) override;
   void Start(blink::WebPlatformEventListener* listener) override;
 

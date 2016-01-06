@@ -562,3 +562,33 @@ VISIT_GL_CALL(UniformMatrix4fvStreamTextureMatrixCHROMIUM,
                GLboolean transpose,
                const GLfloat* default_value),
               (location, transpose, default_value))
+VISIT_GL_CALL(CreateVRCompositorCHROMIUM,
+              GLuint,
+              (GLenum compositorType),
+              (compositorType))
+VISIT_GL_CALL(SubmitVRCompositorFrameCHROMIUM,
+              void,
+              (GLuint compositor,
+               GLuint frameTexture,
+               GLfloat x,
+               GLfloat y,
+               GLfloat z,
+               GLfloat w),
+              (compositor, frameTexture, x, y, z, w))
+VISIT_GL_CALL(VRCompositorTextureBoundsCHROMIUM,
+              void,
+              (GLuint compositor,
+               GLuint eye,
+               GLfloat x,
+               GLfloat y,
+               GLfloat width,
+               GLfloat height),
+              (compositor, eye, x, y, width, height))
+VISIT_GL_CALL(ResetVRCompositorPoseCHROMIUM,
+              void,
+              (GLuint compositor),
+              (compositor))
+VISIT_GL_CALL(DeleteVRCompositorCHROMIUM,
+              void,
+              (GLuint compositor),
+              (compositor))

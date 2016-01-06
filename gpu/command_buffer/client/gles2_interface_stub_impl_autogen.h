@@ -1155,4 +1155,25 @@ void GLES2InterfaceStub::UniformMatrix4fvStreamTextureMatrixCHROMIUM(
     GLint /* location */,
     GLboolean /* transpose */,
     const GLfloat* /* default_value */) {}
+GLuint GLES2InterfaceStub::CreateVRCompositorCHROMIUM(
+    GLenum /* compositorType */) {
+  return 0;
+}
+void GLES2InterfaceStub::SubmitVRCompositorFrameCHROMIUM(
+    GLuint /* compositor */,
+    GLuint /* frameTexture */,
+    GLfloat /* x */,
+    GLfloat /* y */,
+    GLfloat /* z */,
+    GLfloat /* w */) {}
+void GLES2InterfaceStub::VRCompositorTextureBoundsCHROMIUM(
+    GLuint /* compositor */,
+    GLuint /* eye */,
+    GLfloat /* x */,
+    GLfloat /* y */,
+    GLfloat /* width */,
+    GLfloat /* height */) {}
+void GLES2InterfaceStub::ResetVRCompositorPoseCHROMIUM(
+    GLuint /* compositor */) {}
+void GLES2InterfaceStub::DeleteVRCompositorCHROMIUM(GLuint /* compositor */) {}
 #endif  // GPU_COMMAND_BUFFER_CLIENT_GLES2_INTERFACE_STUB_IMPL_AUTOGEN_H_

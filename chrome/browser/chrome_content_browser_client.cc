@@ -171,6 +171,8 @@
 #include "storage/browser/fileapi/external_mount_points.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/resource/resource_bundle.h"
+#include "ui/base/ui_base_switches.h"
+#include "ui/gl/gl_switches.h"
 #include "ui/resources/grit/ui_resources.h"
 #include "url/gurl.h"
 #include "url/origin.h"
@@ -1698,6 +1700,15 @@ void ChromeContentBrowserClient::AppendExtraCommandLineSwitches(
         !command_line->HasSwitch(switches::kDisableBreakpad))
       command_line->AppendSwitch(switches::kDisableBreakpad);
   }
+
+#if !defined(OS_ANDROID)
+  // Temp workarounds for WebVR
+  if (browser_command_line.HasSwitch(switches::kEnableWebVR)) {
+    command_line->AppendSwitchASCII(switches::kUseGL,
+        gfx::kGLImplementationDesktopName);
+    command_line->AppendSwitch(switches::kDisableGpuSandbox);
+  }
+#endif
 
   // The command line switch kEnableBenchmarking needs to be specified along
   // with the kEnableStatsTable switch to ensure that the stats table global

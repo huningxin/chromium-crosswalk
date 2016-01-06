@@ -5262,4 +5262,77 @@ TEST_F(GLES2FormatTest, UniformMatrix4fvStreamTextureMatrixCHROMIUMImmediate) {
       next_cmd, sizeof(cmd) + RoundSizeToMultipleOfEntries(sizeof(data)));
 }
 
+TEST_F(GLES2FormatTest, CreateVRCompositorCHROMIUM) {
+  cmds::CreateVRCompositorCHROMIUM& cmd =
+      *GetBufferAs<cmds::CreateVRCompositorCHROMIUM>();
+  void* next_cmd = cmd.Set(&cmd, static_cast<GLenum>(11));
+  EXPECT_EQ(static_cast<uint32_t>(cmds::CreateVRCompositorCHROMIUM::kCmdId),
+            cmd.header.command);
+  EXPECT_EQ(sizeof(cmd), cmd.header.size * 4u);
+  EXPECT_EQ(static_cast<GLenum>(11), cmd.compositorType);
+  CheckBytesWrittenMatchesExpectedSize(next_cmd, sizeof(cmd));
+}
+
+TEST_F(GLES2FormatTest, SubmitVRCompositorFrameCHROMIUM) {
+  cmds::SubmitVRCompositorFrameCHROMIUM& cmd =
+      *GetBufferAs<cmds::SubmitVRCompositorFrameCHROMIUM>();
+  void* next_cmd =
+      cmd.Set(&cmd, static_cast<GLuint>(11), static_cast<GLuint>(12),
+              static_cast<GLfloat>(13), static_cast<GLfloat>(14),
+              static_cast<GLfloat>(15), static_cast<GLfloat>(16));
+  EXPECT_EQ(
+      static_cast<uint32_t>(cmds::SubmitVRCompositorFrameCHROMIUM::kCmdId),
+      cmd.header.command);
+  EXPECT_EQ(sizeof(cmd), cmd.header.size * 4u);
+  EXPECT_EQ(static_cast<GLuint>(11), cmd.compositor);
+  EXPECT_EQ(static_cast<GLuint>(12), cmd.frameTexture);
+  EXPECT_EQ(static_cast<GLfloat>(13), cmd.x);
+  EXPECT_EQ(static_cast<GLfloat>(14), cmd.y);
+  EXPECT_EQ(static_cast<GLfloat>(15), cmd.z);
+  EXPECT_EQ(static_cast<GLfloat>(16), cmd.w);
+  CheckBytesWrittenMatchesExpectedSize(next_cmd, sizeof(cmd));
+}
+
+TEST_F(GLES2FormatTest, VRCompositorTextureBoundsCHROMIUM) {
+  cmds::VRCompositorTextureBoundsCHROMIUM& cmd =
+      *GetBufferAs<cmds::VRCompositorTextureBoundsCHROMIUM>();
+  void* next_cmd =
+      cmd.Set(&cmd, static_cast<GLuint>(11), static_cast<GLuint>(12),
+              static_cast<GLfloat>(13), static_cast<GLfloat>(14),
+              static_cast<GLfloat>(15), static_cast<GLfloat>(16));
+  EXPECT_EQ(
+      static_cast<uint32_t>(cmds::VRCompositorTextureBoundsCHROMIUM::kCmdId),
+      cmd.header.command);
+  EXPECT_EQ(sizeof(cmd), cmd.header.size * 4u);
+  EXPECT_EQ(static_cast<GLuint>(11), cmd.compositor);
+  EXPECT_EQ(static_cast<GLuint>(12), cmd.eye);
+  EXPECT_EQ(static_cast<GLfloat>(13), cmd.x);
+  EXPECT_EQ(static_cast<GLfloat>(14), cmd.y);
+  EXPECT_EQ(static_cast<GLfloat>(15), cmd.width);
+  EXPECT_EQ(static_cast<GLfloat>(16), cmd.height);
+  CheckBytesWrittenMatchesExpectedSize(next_cmd, sizeof(cmd));
+}
+
+TEST_F(GLES2FormatTest, ResetVRCompositorPoseCHROMIUM) {
+  cmds::ResetVRCompositorPoseCHROMIUM& cmd =
+      *GetBufferAs<cmds::ResetVRCompositorPoseCHROMIUM>();
+  void* next_cmd = cmd.Set(&cmd, static_cast<GLuint>(11));
+  EXPECT_EQ(static_cast<uint32_t>(cmds::ResetVRCompositorPoseCHROMIUM::kCmdId),
+            cmd.header.command);
+  EXPECT_EQ(sizeof(cmd), cmd.header.size * 4u);
+  EXPECT_EQ(static_cast<GLuint>(11), cmd.compositor);
+  CheckBytesWrittenMatchesExpectedSize(next_cmd, sizeof(cmd));
+}
+
+TEST_F(GLES2FormatTest, DeleteVRCompositorCHROMIUM) {
+  cmds::DeleteVRCompositorCHROMIUM& cmd =
+      *GetBufferAs<cmds::DeleteVRCompositorCHROMIUM>();
+  void* next_cmd = cmd.Set(&cmd, static_cast<GLuint>(11));
+  EXPECT_EQ(static_cast<uint32_t>(cmds::DeleteVRCompositorCHROMIUM::kCmdId),
+            cmd.header.command);
+  EXPECT_EQ(sizeof(cmd), cmd.header.size * 4u);
+  EXPECT_EQ(static_cast<GLuint>(11), cmd.compositor);
+  CheckBytesWrittenMatchesExpectedSize(next_cmd, sizeof(cmd));
+}
+
 #endif  // GPU_COMMAND_BUFFER_COMMON_GLES2_CMD_FORMAT_TEST_AUTOGEN_H_

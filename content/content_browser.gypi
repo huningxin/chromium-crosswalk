@@ -827,7 +827,7 @@
       'browser/gamepad/gamepad_standard_mappings_win.cc',
       'browser/gamepad/raw_input_data_fetcher_win.cc',
       'browser/gamepad/raw_input_data_fetcher_win.h',
-      'browser/gamepad/xbox_data_fetcher_mac.cc',
+      'browser/gamepad/xbox_data_fetcher_mac.mm',
       'browser/gamepad/xbox_data_fetcher_mac.h',
       'browser/geofencing/geofencing_dispatcher_host.cc',
       'browser/geofencing/geofencing_dispatcher_host.h',
@@ -1889,7 +1889,17 @@
     '<@(private_browser_sources)',
   ],
   'conditions': [
-    ['OS != "win"', {
+    ['OS == "win"', {
+      'dependencies': [
+        '../third_party/libovr/libovr.gyp:libovr',
+      ],
+      'sources': [
+        'browser/vr/oculus/oculus_vr_device.cc',
+        'browser/vr/oculus/oculus_vr_device.h',
+        'browser/vr/oculus/oculus_vr_device_provider.cc',
+        'browser/vr/oculus/oculus_vr_device_provider.h',
+      ]
+    }, { # os != "win"
       'sources': [
         'browser/file_descriptor_info_impl.cc',
         'browser/file_descriptor_info_impl.h',
@@ -2216,6 +2226,50 @@
         'browser/gpu/gpu_surface_tracker.cc',
         'browser/gpu/gpu_surface_tracker.h',
       ],
+    }],
+    ['enable_webvr==1 and OS=="win"', {
+      'dependencies': [
+        '../third_party/libovr/libovr.gyp:libovr',
+      ],
+      'sources': [
+        'browser/vr/oculus/oculus_vr_device.cc',
+        'browser/vr/oculus/oculus_vr_device.h',
+        'browser/vr/oculus/oculus_vr_device_provider.cc',
+        'browser/vr/oculus/oculus_vr_device_provider.h',
+        'browser/vr/oculus/oculus_vr_gamepad_data_fetcher.cc',
+        'browser/vr/oculus/oculus_vr_gamepad_data_fetcher.h',
+      ]
+    }],
+    ['enable_webvr==1 and OS=="win"', {
+      'dependencies': [
+        '../third_party/openvr/openvr.gyp:openvr',
+      ],
+      'sources': [
+        'browser/vr/openvr/open_vr_device.cc',
+        'browser/vr/openvr/open_vr_device.h',
+        'browser/vr/openvr/open_vr_device_provider.cc',
+        'browser/vr/openvr/open_vr_device_provider.h',
+        'browser/vr/openvr/open_vr_gamepad_data_fetcher.cc',
+        'browser/vr/openvr/open_vr_gamepad_data_fetcher.h',
+      ],
+      'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalDependencies': [
+            'openvr_api.lib',
+          ],
+          'AdditionalLibraryDirectories': [
+            '../third_party/openvr/openvr/lib/win32',
+          ],
+        },
+      },
+    }],
+    ['enable_webvr==1', {
+      'sources': [
+        'browser/vr/simulated/simulated_vr_device.cc',
+        'browser/vr/simulated/simulated_vr_device.h',
+        'browser/vr/simulated/simulated_vr_device_provider.cc',
+        'browser/vr/simulated/simulated_vr_device_provider.h',
+      ]
     }],
   ],
 }

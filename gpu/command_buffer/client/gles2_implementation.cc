@@ -6817,6 +6817,14 @@ void GLES2Implementation::InvalidateCachedExtensions() {
   cached_extensions_.clear();
 }
 
+GLuint GLES2Implementation::CreateVRCompositorCHROMIUM(GLenum compositorType) {
+  GPU_CLIENT_SINGLE_THREAD_CHECK();
+  GPU_CLIENT_LOG("[" << GetLogPrefix() << "] glCreateVRCompositorCHROMIUM()");
+  helper_->CreateVRCompositorCHROMIUM(compositorType);
+  CheckGLError();
+  return 1;
+}
+
 // Include the auto-generated part of this file. We split this because it means
 // we can easily edit the non-auto generated parts right here in this file
 // instead of having to edit some template or the code generator.

@@ -27,7 +27,7 @@ void VRStageParameters::update(const mojom::blink::VRStageParametersPtr& stage)
 
 DEFINE_TRACE(VRStageParameters)
 {
-    visitor->trace(m_standingTransform);
+  visitor->trace(m_standingTransform);
 }
 
 } // namespace blink

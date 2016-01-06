@@ -4,6 +4,7 @@
 
 [
 ] interface GamepadButton {
+    readonly attribute boolean touched;
     readonly attribute boolean pressed;
     readonly attribute double value;
 };

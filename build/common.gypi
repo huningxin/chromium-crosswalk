@@ -1022,9 +1022,9 @@
           'pkg-config': 'pkg-config'
         }],
 
-        # Enable WebVR support by default on Android
+        # Enable WebVR support by on Android and Windows
         # Still requires command line flag to access API
-        ['OS=="android"', {
+        ['OS=="android" or OS=="win"', {
           'enable_webvr%': 1,
         }, {
           'enable_webvr%': 0,

@@ -165,8 +165,8 @@ enable_chromevox_next = false
 # Use brlapi from brltty for braille display support.
 use_brlapi = is_chromeos
 
-# Enable WebVR support by default on Android
+# Enable WebVR support by default on Android and Windows
 # Still requires command line flag to access API
-enable_webvr = is_android
+enable_webvr = is_android || is_win
 
 enable_configuration_policy = !is_ios

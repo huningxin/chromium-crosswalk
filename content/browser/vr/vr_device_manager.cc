@@ -10,9 +10,16 @@
 #include "base/memory/singleton.h"
 #include "build/build_config.h"
 
+#if defined(OS_WIN)
+#include "content/browser/vr/oculus/oculus_vr_device_provider.h"
+#include "content/browser/vr/openvr/open_vr_device_provider.h"
+#endif
+
 #if defined(OS_ANDROID)
 #include "content/browser/vr/android/cardboard/cardboard_vr_device_provider.h"
 #endif
+
+#include "content/browser/vr/simulated/simulated_vr_device_provider.h"
 
 namespace content {
 
@@ -24,12 +31,29 @@ VRDeviceManager::VRDeviceManager()
     : vr_initialized_(false), keep_alive_(false) {
   bindings_.set_connection_error_handler(
       base::Bind(&VRDeviceManager::OnConnectionError, base::Unretained(this)));
+
 // Register VRDeviceProviders for the current platform
 #if defined(OS_ANDROID)
   std::unique_ptr<VRDeviceProvider> cardboard_provider(
       new CardboardVRDeviceProvider());
   RegisterProvider(std::move(cardboard_provider));
 #endif
+
+#if defined(OS_WIN)
+  std::unique_ptr<VRDeviceProvider> oculus_provider(
+      new OculusVRDeviceProvider());
+  RegisterProvider(std::move(oculus_provider));
+
+  std::unique_ptr<VRDeviceProvider> openvr_provider(
+      new OpenVRDeviceProvider());
+  RegisterProvider(std::move(openvr_provider));
+#endif
+
+/*#if defined(WEBVR_USE_SIMULATED)
+  std::unique_ptr<VRDeviceProvider> simulated_vr_provider(
+    new SimulatedVRDeviceProvider());
+  RegisterProvider(std::move(simulated_vr_provider));
+#endif*/
 }
 
 VRDeviceManager::VRDeviceManager(std::unique_ptr<VRDeviceProvider> provider)

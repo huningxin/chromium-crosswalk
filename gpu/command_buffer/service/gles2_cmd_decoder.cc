@@ -81,6 +81,10 @@
 #include <OpenGL/CGLIOSurface.h>
 #endif
 
+#include "gpu/command_buffer/service/vr/vr_compositor.h"
+#include "gpu/command_buffer/service/vr/oculus/oculus_vr_compositor.h"
+#include "gpu/command_buffer/service/vr/openvr/open_vr_compositor.h"
+
 namespace gpu {
 namespace gles2 {
 
@@ -722,6 +726,7 @@ class GLES2DecoderImpl : public GLES2Decoder, public ErrorStateClient {
   friend class ScopedFrameBufferReadPixelHelper;
   friend class ScopedResolvedFrameBufferBinder;
   friend class BackFramebuffer;
+  friend class VRSwapCallback;
 
   enum FramebufferOperation {
     kFramebufferDiscard,
@@ -1062,6 +1067,18 @@ class GLES2DecoderImpl : public GLES2Decoder, public ErrorStateClient {
 
   void DoMatrixLoadfCHROMIUM(GLenum matrix_mode, const GLfloat* matrix);
   void DoMatrixLoadIdentityCHROMIUM(GLenum matrix_mode);
+
+  // VR Compositor
+  VRCompositor* vr_compositor_ = nullptr;
+  bool vr_needs_flush_ = false;
+  GLuint DoCreateVRCompositorCHROMIUM(GLenum compositorType);
+  void DoSubmitVRCompositorFrameCHROMIUM(GLuint compositor, GLuint texture,
+      GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+  void DoVRCompositorTextureBoundsCHROMIUM(GLuint compositor, GLuint eye,
+      GLfloat x, GLfloat y, GLfloat width, GLfloat height);
+  void DoResetVRCompositorPoseCHROMIUM(GLuint compositor);
+  void DoDeleteVRCompositorCHROMIUM(GLuint compositor);
+  void FlushVRFrame();
 
   // Creates a Program for the given program.
   Program* CreateProgram(GLuint client_id, GLuint service_id) {
@@ -2201,8 +2218,60 @@ class GLES2DecoderImpl : public GLES2Decoder, public ErrorStateClient {
 
   SamplerState default_sampler_state_;
 
+  GLint swap_interval_ = 1;
+
   DISALLOW_COPY_AND_ASSIGN(GLES2DecoderImpl);
 };
+
+//----------
+// VR stuff
+//----------
+
+class VRSwapCallback {
+public:
+    VRSwapCallback(GLES2DecoderImpl* decoder) :
+        decoder_(decoder)
+    {};
+    ~VRSwapCallback() {};
+
+    GLES2DecoderImpl* decoder() { return decoder_; }
+
+    void onSwap() {
+      decoder_->MakeCurrent();
+      decoder_->FlushVRFrame();
+    }
+
+private:
+  GLES2DecoderImpl* decoder_;
+};
+
+static std::vector<VRSwapCallback*> vr_swap_callbacks;
+void AddVRSwapListener(GLES2DecoderImpl* decoder) {
+  for (size_t i = 0; i < vr_swap_callbacks.size(); ++i) {
+    if (vr_swap_callbacks[i]->decoder() == decoder)
+      return;
+  }
+
+  vr_swap_callbacks.push_back(new VRSwapCallback(decoder));
+}
+
+void OnVRSwap(GLES2DecoderImpl* decoder) {
+  if (!vr_swap_callbacks.size())
+    return;
+
+  VRSwapCallback* callback;
+  while (vr_swap_callbacks.size()) {
+    callback = vr_swap_callbacks.back();
+    callback->onSwap();
+    vr_swap_callbacks.pop_back();
+    delete callback;
+  }
+  decoder->MakeCurrent();
+}
+
+//-----------
+// /VR stuff
+//-----------
 
 const GLES2DecoderImpl::CommandInfo GLES2DecoderImpl::command_info[] = {
 #define GLES2_CMD_OP(name)                                   \
@@ -4171,6 +4240,11 @@ void GLES2DecoderImpl::Destroy(bool have_context) {
     return;
 
   DCHECK(!have_context || context_->IsCurrent(nullptr));
+
+  if (vr_compositor_) {
+    delete vr_compositor_;
+    vr_compositor_ = nullptr;
+  }
 
   // Unbind everything.
   state_.vertex_attrib_manager = nullptr;
@@ -12998,6 +13072,12 @@ error::Error GLES2DecoderImpl::HandleShaderBinary(uint32_t immediate_data_size,
 void GLES2DecoderImpl::DoSwapBuffers() {
   bool is_offscreen = !!offscreen_target_frame_buffer_.get();
 
+  bool reset_swap = false;
+  if (vr_swap_callbacks.size() && swap_interval_ != 0) {
+    reset_swap = true;
+    context_->SetSwapInterval(0);
+  }
+
   int this_frame_number = frame_number_++;
   // TRACE_EVENT for gpu tests:
   TRACE_EVENT_INSTANT2("test_gpu", "SwapBuffersLatency",
@@ -13113,6 +13193,13 @@ void GLES2DecoderImpl::DoSwapBuffers() {
     FinishSwapBuffers(surface_->SwapBuffers());
   }
 
+  OnVRSwap(this);
+  //FlushVRFrame();
+
+  if (reset_swap) {
+    context_->SetSwapInterval(swap_interval_);
+  }
+
   // This may be a slow command.  Exit command processing to allow for
   // context preemption and GPU watchdog checks.
   ExitCommandProcessingEarly();
@@ -13149,7 +13236,10 @@ void GLES2DecoderImpl::DoCommitOverlayPlanes() {
 }
 
 void GLES2DecoderImpl::DoSwapInterval(int interval) {
-  context_->SetSwapInterval(interval);
+  if (swap_interval_ != interval) {
+    swap_interval_ = interval;
+    context_->SetSwapInterval(interval);
+  }
 }
 
 error::Error GLES2DecoderImpl::HandleEnableFeatureCHROMIUM(
@@ -15207,6 +15297,89 @@ void GLES2DecoderImpl::DoMatrixLoadIdentityCHROMIUM(GLenum matrix_mode) {
   // The matrix_mode is either GL_PATH_MODELVIEW_NV or GL_PATH_PROJECTION_NV
   // since the values of the _NV and _CHROMIUM tokens match.
   glMatrixLoadIdentityEXT(matrix_mode);
+}
+
+GLuint GLES2DecoderImpl::DoCreateVRCompositorCHROMIUM(GLenum compositorType) {
+  // ANGLE not supported yet. :(
+  if (feature_info_->gl_version_info().is_angle)
+    return 0;
+
+  if (!vr_compositor_) {
+    if (compositorType == 2) { // Oculus
+      vr_compositor_ = new OculusVRCompositor();
+      RestoreBufferBindings();
+    } else if (compositorType == 3) { // OpenVR
+      vr_compositor_ = new OpenVRCompositor();
+    }
+    vr_needs_flush_ = false;
+  }
+
+  return 1;
+}
+
+void GLES2DecoderImpl::DoSubmitVRCompositorFrameCHROMIUM(
+    GLuint compositor, GLuint client_texture_id,
+    GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+  TRACE_EVENT0("gpu", "GLES2DecoderImpl::DoSubmitVRCompositorFrameCHROMIUM");
+  // ANGLE not supported yet. :(
+  if (feature_info_->gl_version_info().is_angle)
+    return;
+
+  TextureRef* texture_ref = GetTexture(client_texture_id);
+  if (vr_compositor_ && texture_ref) {
+    if (vr_compositor_->needsStateRestore()) {
+      ClearAllAttributes();
+    }
+
+    vr_compositor_->SubmitFrame(texture_ref->service_id(), x, y, z, w);
+
+    if (vr_compositor_->needsStateRestore()) {
+      RestoreAllAttributes();
+      RestoreTextureUnitBindings(0);
+      RestoreActiveTexture();
+      RestoreProgramBindings();
+      RestoreBufferBindings();
+      RestoreFramebufferBindings();
+      RestoreGlobalState();
+    }
+
+    // TODO: This needs to be a lot more thread safe
+    AddVRSwapListener(this);
+    vr_needs_flush_ = true;
+  }
+}
+
+void GLES2DecoderImpl::FlushVRFrame() {
+  if (!vr_compositor_ || !vr_needs_flush_)
+    return;
+
+  vr_compositor_->OnSwapFrame();
+
+  vr_needs_flush_ = false;
+}
+
+void GLES2DecoderImpl::DoVRCompositorTextureBoundsCHROMIUM(GLuint compositor,
+    GLuint eye, GLfloat x, GLfloat y, GLfloat width, GLfloat height) {
+   if (!vr_compositor_)
+    return;
+
+  vr_compositor_->TextureBounds(eye, x, y, width, height);
+}
+
+void GLES2DecoderImpl::DoResetVRCompositorPoseCHROMIUM(GLuint compositor) {
+  if (!vr_compositor_)
+    return;
+
+  vr_compositor_->ResetPose();
+}
+
+void GLES2DecoderImpl::DoDeleteVRCompositorCHROMIUM(GLuint compositor) {
+  vr_needs_flush_ = false;
+
+  if (vr_compositor_) {
+    delete vr_compositor_;
+    vr_compositor_ = nullptr;
+  }
 }
 
 error::Error GLES2DecoderImpl::HandleUniformBlockBinding(
