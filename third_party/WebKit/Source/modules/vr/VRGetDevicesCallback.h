@@ -10,14 +10,14 @@
 
 namespace blink {
 
-class VRHardwareUnitCollection;
+class VRDisplayCollection;
 class ScriptPromiseResolver;
 class WebVRClient;
 
 class VRGetDevicesCallback final : public WebVRGetDevicesCallback {
     USING_FAST_MALLOC(VRGetDevicesCallback);
 public:
-    VRGetDevicesCallback(ScriptPromiseResolver*, VRHardwareUnitCollection*);
+    VRGetDevicesCallback(ScriptPromiseResolver*, VRDisplayCollection*);
     ~VRGetDevicesCallback() override;
 
     void onSuccess(const WebVector<WebVRDevice>&) override;
@@ -25,7 +25,7 @@ public:
 
 private:
     Persistent<ScriptPromiseResolver> m_resolver;
-    Persistent<VRHardwareUnitCollection> m_hardwareUnits;
+    Persistent<VRDisplayCollection> m_displays;
 };
 
 } // namespace blink
