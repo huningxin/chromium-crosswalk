@@ -14,13 +14,13 @@ class VRDisplayCollection;
 class ScriptPromiseResolver;
 class WebVRClient;
 
-class VRGetDevicesCallback final : public WebVRGetDevicesCallback {
+class VRGetDevicesCallback final : public WebVRGetDisplaysCallback {
     USING_FAST_MALLOC(VRGetDevicesCallback);
 public:
     VRGetDevicesCallback(ScriptPromiseResolver*, VRDisplayCollection*);
     ~VRGetDevicesCallback() override;
 
-    void onSuccess(const WebVector<WebVRDevice>&) override;
+    void onSuccess(const WebVector<WebVRDisplay>&) override;
     void onError() override;
 
 private:

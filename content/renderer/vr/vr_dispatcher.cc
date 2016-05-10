@@ -25,47 +25,47 @@ VRServicePtr& VRDispatcher::GetVRServicePtr() {
   return vr_service_;
 }
 
-void VRDispatcher::getDevices(blink::WebVRGetDevicesCallback* callback) {
+void VRDispatcher::getDisplays(blink::WebVRGetDisplaysCallback* callback) {
   int request_id = pending_requests_.Add(callback);
-  GetVRServicePtr()->GetDevices(base::Bind(&VRDispatcher::OnGetDevices,
-                                           base::Unretained(this), request_id));
+  GetVRServicePtr()->GetDisplays(base::Bind(&VRDispatcher::OnGetDisplays,
+                                            base::Unretained(this), request_id));
 }
 
-void VRDispatcher::getSensorState(unsigned int index,
-                                  blink::WebHMDSensorState& state) {
-  GetVRServicePtr()->GetSensorState(
+void VRDispatcher::getPose(unsigned int index,
+                           blink::WebVRPose& pose) {
+  GetVRServicePtr()->GetPose(
       index,
-      base::Bind(&VRDispatcher::OnGetSensorState, base::Unretained(&state)));
+      base::Bind(&VRDispatcher::OnGetPose, base::Unretained(&pose)));
 
   // This call needs to return results synchronously in order to be useful and
   // provide the lowest latency results possible.
   GetVRServicePtr().WaitForIncomingResponse();
 }
 
-void VRDispatcher::resetSensor(unsigned int index) {
-  GetVRServicePtr()->ResetSensor(index);
+void VRDispatcher::resetPose(unsigned int index) {
+  GetVRServicePtr()->ResetPose(index);
 }
 
-void VRDispatcher::OnGetDevices(int request_id,
-                                const mojo::Array<VRDeviceInfoPtr>& devices) {
-  blink::WebVector<blink::WebVRDevice> web_devices(devices.size());
+void VRDispatcher::OnGetDisplays(int request_id,
+                                 const mojo::Array<VRDisplayPtr>& displays) {
+  blink::WebVector<blink::WebVRDisplay> web_displays(displays.size());
 
-  blink::WebVRGetDevicesCallback* callback =
+  blink::WebVRGetDisplaysCallback* callback =
       pending_requests_.Lookup(request_id);
   if (!callback)
     return;
 
-  for (size_t i = 0; i < devices.size(); ++i) {
-    web_devices[i] = devices[i].To<blink::WebVRDevice>();
+  for (size_t i = 0; i < displays.size(); ++i) {
+    web_displays[i] = displays[i].To<blink::WebVRDisplay>();
   }
 
-  callback->onSuccess(web_devices);
+  callback->onSuccess(web_displays);
   pending_requests_.Remove(request_id);
 }
 
-void VRDispatcher::OnGetSensorState(blink::WebHMDSensorState* state,
-                                    const VRSensorStatePtr& mojo_state) {
-  *state = mojo_state.To<blink::WebHMDSensorState>();
+void VRDispatcher::OnGetPose(blink::WebVRPose* pose,
+                             const VRPosePtr& mojo_pose) {
+  *pose = mojo_pose.To<blink::WebVRPose>();
 }
 
 }  // namespace content

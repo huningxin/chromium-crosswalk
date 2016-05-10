@@ -7,17 +7,6 @@
 
 namespace blink {
 
-namespace {
-
-void setVecToFloat32Array(DOMFloat32Array* out, const WebVRVector3& vec)
-{
-    out->data()[0] = vec.x;
-    out->data()[1] = vec.y;
-    out->data()[2] = vec.z;
-}
-
-} // namespace
-
 VREyeParameters::VREyeParameters()
 {
     m_offset = DOMFloat32Array::create(3);
@@ -26,12 +15,19 @@ VREyeParameters::VREyeParameters()
     m_renderHeight = 0;
 }
 
-void VREyeParameters::update(const WebVREyeParameters &eye_parameters)
+void VREyeParameters::update(const WebVREyeParameters &eyeParameters)
 {
-    setVecToFloat32Array(m_offset.get(), eye_parameters.eyeTranslation);
-    m_fieldOfView->setFromWebVRFieldOfView(eye_parameters.recommendedFieldOfView);
-    m_renderWidth = eye_parameters.renderRect.width;
-    m_renderHeight = eye_parameters.renderRect.height;
+    m_offset->data()[0] = eyeParameters.offset[0];
+    m_offset->data()[1] = eyeParameters.offset[1];
+    m_offset->data()[2] = eyeParameters.offset[2];
+
+    m_fieldOfView->setUpDegrees(eyeParameters.fieldOfView.upDegrees);
+    m_fieldOfView->setDownDegrees(eyeParameters.fieldOfView.downDegrees);
+    m_fieldOfView->setLeftDegrees(eyeParameters.fieldOfView.leftDegrees);
+    m_fieldOfView->setRightDegrees(eyeParameters.fieldOfView.rightDegrees);
+
+    m_renderWidth = eyeParameters.renderWidth;
+    m_renderHeight = eyeParameters.renderHeight;
 }
 
 } // namespace blink

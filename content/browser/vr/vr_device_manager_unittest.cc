@@ -48,13 +48,13 @@ TEST_F(VRDeviceManagerTest, InitializationTest) {
   // initialized yet or the providesr have been released.
   // The VRService should initialize each of it's providers upon it's own
   // initialization.
-  mojo::Array<VRDeviceInfoPtr> webvr_devices;
+  mojo::Array<VRDisplayPtr> webvr_devices;
   webvr_devices = device_manager_->GetVRDevices();
   EXPECT_TRUE(provider_->IsInitialized());
 }
 
 TEST_F(VRDeviceManagerTest, GetDevicesBasicTest) {
-  mojo::Array<VRDeviceInfoPtr> webvr_devices;
+  mojo::Array<VRDisplayPtr> webvr_devices;
   webvr_devices = device_manager_->GetVRDevices();
   // Calling GetVRDevices should initialize the providers.
   EXPECT_TRUE(provider_->IsInitialized());

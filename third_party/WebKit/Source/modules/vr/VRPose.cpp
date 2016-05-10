@@ -8,26 +8,10 @@ namespace blink {
 
 namespace {
 
-DOMFloat32Array* vecToFloat32Array(const WebVRVector4& vec, bool valid)
+DOMFloat32Array* arrayToFloat32Array(const float* array, int length, bool valid)
 {
     if (valid) {
-        DOMFloat32Array* out = DOMFloat32Array::create(4).get();
-        out->data()[0] = vec.x;
-        out->data()[1] = vec.y;
-        out->data()[2] = vec.z;
-        out->data()[3] = vec.w;
-        return out;
-    }
-    return nullptr;
-}
-
-DOMFloat32Array* vecToFloat32Array(const WebVRVector3& vec, bool valid)
-{
-    if (valid) {
-        DOMFloat32Array* out = DOMFloat32Array::create(3).get();
-        out->data()[0] = vec.x;
-        out->data()[1] = vec.y;
-        out->data()[2] = vec.z;
+        DOMFloat32Array* out = DOMFloat32Array::create(array, length).get();
         return out;
     }
     return nullptr;
@@ -40,15 +24,15 @@ VRPose::VRPose()
 {
 }
 
-void VRPose::setPose(const WebHMDSensorState &state)
+void VRPose::setPose(const WebVRPose &pose)
 {
-    m_timeStamp = state.timestamp;
-    m_orientation = vecToFloat32Array(state.orientation, state.flags & WebVRSensorStateOrientation);
-    m_position = vecToFloat32Array(state.position, state.flags & WebVRSensorStatePosition);
-    m_angularVelocity = vecToFloat32Array(state.angularVelocity, state.flags & WebVRSensorStateAngularVelocity);
-    m_linearVelocity = vecToFloat32Array(state.linearVelocity, state.flags & WebVRSensorStateLinearVelocity);
-    m_angularAcceleration = vecToFloat32Array(state.angularAcceleration, state.flags & WebVRSensorStateAngularAcceleration);
-    m_linearAcceleration = vecToFloat32Array(state.linearAcceleration, state.flags & WebVRSensorStateLinearAcceleration);
+    m_timeStamp = pose.timestamp;
+    m_orientation = arrayToFloat32Array(&(pose.orientation[0]), 4, pose.flags & WebVRPoseOrientation);
+    m_position = arrayToFloat32Array(&(pose.position[0]), 3, pose.flags & WebVRPosePosition);
+    m_angularVelocity = arrayToFloat32Array(&(pose.angularVelocity[0]), 3, pose.flags & WebVRPoseAngularVelocity);
+    m_linearVelocity = arrayToFloat32Array(&(pose.linearVelocity[0]), 3, pose.flags & WebVRPoseLinearVelocity);
+    m_angularAcceleration = arrayToFloat32Array(&(pose.angularAcceleration[0]), 3, pose.flags & WebVRPoseAngularAcceleration);
+    m_linearAcceleration = arrayToFloat32Array(&(pose.linearAcceleration[0]), 3, pose.flags & WebVRPoseLinearAcceleration);
 }
 
 } // namespace blink

@@ -18,4 +18,11 @@ VRStageParameters::VRStageParameters()
     m_standingTransform->data()[15] = 1.0f;
 }
 
+void VRStageParameters::update(const WebVRStageParameters& stage)
+{
+    m_standingTransform = DOMFloat32Array::create(&(stage.standingTransform[0]), 16);
+    m_sizeX = stage.sizeX;
+    m_sizeZ = stage.sizeZ;
+}
+
 } // namespace blink

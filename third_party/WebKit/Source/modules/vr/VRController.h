@@ -22,11 +22,11 @@ class MODULES_EXPORT VRController final
 public:
     virtual ~VRController();
 
-    void getDevices(WebVRGetDevicesCallback*);
+    void getDisplays(WebVRGetDisplaysCallback*);
 
-    void getSensorState(unsigned index, WebHMDSensorState& into);
+    void getPose(unsigned index, WebVRPose& pose);
 
-    void resetSensor(unsigned index);
+    void resetPose(unsigned index);
 
     static void provideTo(LocalFrame&, WebVRClient*);
     static VRController* from(LocalFrame&);

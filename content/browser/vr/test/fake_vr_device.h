@@ -16,16 +16,16 @@ class FakeVRDevice : public VRDevice {
   explicit FakeVRDevice(VRDeviceProvider* provider);
   ~FakeVRDevice() override;
 
-  void SetVRDevice(const VRDeviceInfoPtr& device);
-  void SetSensorState(const VRSensorStatePtr& state);
+  void SetVRDevice(const VRDisplayPtr& device);
+  void SetPose(const VRPosePtr& state);
 
-  VRDeviceInfoPtr GetVRDevice() override;
-  VRSensorStatePtr GetSensorState() override;
-  void ResetSensor() override{};
+  VRDisplayPtr GetVRDevice() override;
+  VRPosePtr GetPose() override;
+  void ResetPose() override;
 
  private:
-  VRDeviceInfoPtr device_;
-  VRSensorStatePtr state_;
+  VRDisplayPtr device_;
+  VRPosePtr state_;
 
   DISALLOW_COPY_AND_ASSIGN(FakeVRDevice);
 };

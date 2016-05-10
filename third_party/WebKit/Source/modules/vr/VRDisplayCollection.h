@@ -17,7 +17,7 @@ class VRDisplayCollection final : public GarbageCollected<VRDisplayCollection> {
 public:
     explicit VRDisplayCollection(NavigatorVR*);
 
-    VRDisplayVector updateDisplays(const WebVector<WebVRDevice>&);
+    VRDisplayVector updateDisplays(const WebVector<WebVRDisplay>&);
     VRDisplay* getDisplayForIndex(unsigned index);
 
     DECLARE_VIRTUAL_TRACE();

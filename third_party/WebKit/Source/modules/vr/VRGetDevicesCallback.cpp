@@ -19,9 +19,9 @@ VRGetDevicesCallback::~VRGetDevicesCallback()
 {
 }
 
-void VRGetDevicesCallback::onSuccess(const WebVector<WebVRDevice>& devices)
+void VRGetDevicesCallback::onSuccess(const WebVector<WebVRDisplay>& displays)
 {
-    m_resolver->resolve(m_displays->updateDisplays(devices));
+    m_resolver->resolve(m_displays->updateDisplays(displays));
 }
 
 void VRGetDevicesCallback::onError()

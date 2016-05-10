@@ -13,22 +13,22 @@ VRDisplayCollection::VRDisplayCollection(NavigatorVR* navigatorVR)
 {
 }
 
-VRDisplayVector VRDisplayCollection::updateDisplays(const WebVector<WebVRDevice>& devices)
+VRDisplayVector VRDisplayCollection::updateDisplays(const WebVector<WebVRDisplay>& displays)
 {
-    VRDisplayVector vrDevices;
+    VRDisplayVector vrDisplays;
 
-    for (const auto& device : devices) {
-        VRDisplay* display = getDisplayForIndex(device.index);
-        if (!display) {
-            display = new VRDisplay(m_navigatorVR);
-            m_displays.append(display);
+    for (const auto& display : displays) {
+        VRDisplay* vrDisplay = getDisplayForIndex(display.index);
+        if (!vrDisplay) {
+            vrDisplay = new VRDisplay(m_navigatorVR);
+            m_displays.append(vrDisplay);
         }
 
-        display->updateFromWebVRDevice(device);
-        vrDevices.append(display);
+        vrDisplay->update(display);
+        vrDisplays.append(vrDisplay);
     }
 
-    return vrDevices;
+    return vrDisplays;
 }
 
 VRDisplay* VRDisplayCollection::getDisplayForIndex(unsigned index)

@@ -76,7 +76,7 @@ protected:
 
     VRDisplay(NavigatorVR*);
 
-    void updateFromWebVRDevice(const WebVRDevice&);
+    void update(const WebVRDisplay&);
 
     VRController* controller();
 

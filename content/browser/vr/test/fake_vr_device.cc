@@ -7,26 +7,26 @@
 namespace content {
 
 FakeVRDevice::FakeVRDevice(VRDeviceProvider* provider) : VRDevice(provider) {
-  device_ = VRDeviceInfo::New();
-  state_ = VRSensorState::New();
+  device_ = VRDisplay::New();
+  state_ = VRPose::New();
 }
 
 FakeVRDevice::~FakeVRDevice() {
 }
 
-void FakeVRDevice::SetVRDevice(const VRDeviceInfoPtr& device) {
+void FakeVRDevice::SetVRDevice(const VRDisplayPtr& device) {
   device_ = device.Clone();
 }
 
-void FakeVRDevice::SetSensorState(const VRSensorStatePtr& state) {
+void FakeVRDevice::SetSensorState(const VRPosePtr& state) {
   state_ = state.Clone();
 }
 
-VRDeviceInfoPtr FakeVRDevice::GetVRDevice() {
+blink::mojom::VRDisplayPtr FakeVRDevice::GetVRDevice() {
   return device_.Clone();
 }
 
-VRSensorStatePtr FakeVRDevice::GetSensorState() {
+blink::mojom::VRPosePtr FakeVRDevice::GetSensorState() {
   return state_.Clone();
 }
 

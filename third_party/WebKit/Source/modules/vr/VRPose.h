@@ -29,7 +29,7 @@ public:
     DOMFloat32Array* angularAcceleration() const { return m_angularAcceleration.get(); }
     DOMFloat32Array* linearAcceleration() const { return m_linearAcceleration.get(); }
 
-    void setPose(const WebHMDSensorState&);
+    void setPose(const WebVRPose&);
 
     DEFINE_INLINE_TRACE() { }
 

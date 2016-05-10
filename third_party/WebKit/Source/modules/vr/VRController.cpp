@@ -37,7 +37,7 @@ const char* VRController::supplementName()
     return "VRController";
 }
 
-void VRController::getDevices(WebVRGetDevicesCallback* callback)
+void VRController::getDisplays(WebVRGetDisplaysCallback* callback)
 {
     // When detached, the client is no longer valid.
     if (!m_client) {
@@ -47,23 +47,23 @@ void VRController::getDevices(WebVRGetDevicesCallback* callback)
     }
 
     // Client is expected to take ownership of the callback
-    m_client->getDevices(callback);
+    m_client->getDisplays(callback);
 }
 
-void VRController::getSensorState(unsigned index, WebHMDSensorState& into)
+void VRController::getPose(unsigned index, WebVRPose& pose)
 {
     // When detached, the client is no longer valid.
     if (!m_client)
         return;
-    m_client->getSensorState(index, into);
+    m_client->getPose(index, pose);
 }
 
-void VRController::resetSensor(unsigned index)
+void VRController::resetPose(unsigned index)
 {
     // When detached, the client is no longer valid.
     if (!m_client)
         return;
-    m_client->resetSensor(index);
+    m_client->resetPose(index);
 }
 
 void VRController::willDetachFrameHost()

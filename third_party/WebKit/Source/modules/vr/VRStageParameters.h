@@ -23,6 +23,8 @@ public:
     float sizeX() const { return m_sizeX; }
     float sizeZ() const { return m_sizeZ; }
 
+    void update(const WebVRStageParameters&);
+
     DEFINE_INLINE_TRACE() { }
 
 private:

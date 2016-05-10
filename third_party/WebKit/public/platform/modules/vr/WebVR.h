@@ -14,18 +14,6 @@
 
 namespace blink {
 
-struct WebVRVector3 {
-    float x, y, z;
-};
-
-struct WebVRVector4 {
-    float x, y, z, w;
-};
-
-struct WebVRRect {
-    int x, y, width, height;
-};
-
 // A field of view, given by 4 degrees describing the view from a center point.
 struct WebVRFieldOfView {
     float upDegrees;
@@ -34,69 +22,66 @@ struct WebVRFieldOfView {
     float rightDegrees;
 };
 
-// Bit flags to indicate which fields of an WebHMDSensorState are valid.
-enum WebVRSensorStateFlags {
-    WebVRSensorStateOrientation = 1 << 1,
-    WebVRSensorStatePosition = 1 << 2,
-    WebVRSensorStateAngularVelocity = 1 << 3,
-    WebVRSensorStateLinearVelocity = 1 << 4,
-    WebVRSensorStateAngularAcceleration = 1 << 5,
-    WebVRSensorStateLinearAcceleration = 1 << 6,
-    WebVRSensorStateComplete = (1 << 7) - 1 // All previous states combined.
+// Bit flags to indicate which fields of an WebHMDPose are valid.
+enum WebVRPoseFlags {
+    WebVRPoseOrientation = 1 << 1,
+    WebVRPosePosition = 1 << 2,
+    WebVRPoseAngularVelocity = 1 << 3,
+    WebVRPoseLinearVelocity = 1 << 4,
+    WebVRPoseAngularAcceleration = 1 << 5,
+    WebVRPoseLinearAcceleration = 1 << 6,
+    WebVRPoseComplete = (1 << 7) - 1 // All previous states combined.
 };
 
-// A bitfield of WebVRSensorStateFlags.
-typedef int WebVRSensorStateMask;
+// A bitfield of WebVRPoseFlags.
+typedef int WebVRPoseMask;
 
-// A sensor's position, orientation, velocity, and acceleration state at the
+// A display's position, orientation, velocity, and acceleration state at the
 // given timestamp.
-struct WebHMDSensorState {
+struct WebVRPose {
     double timestamp;
-    unsigned frameIndex;
-    WebVRSensorStateMask flags;
-    WebVRVector4 orientation;
-    WebVRVector3 position;
-    WebVRVector3 angularVelocity;
-    WebVRVector3 linearVelocity;
-    WebVRVector3 angularAcceleration;
-    WebVRVector3 linearAcceleration;
+    WebVRPoseMask flags;
+    float orientation[4];
+    float position[3];
+    float angularVelocity[3];
+    float linearVelocity[3];
+    float angularAcceleration[3];
+    float linearAcceleration[3];
 };
 
-// Information about the optical properties for an eye in an HMD.
+struct WebVRDisplayCapabilities {
+    bool hasOrientation;
+    bool hasPosition;
+    bool hasExternalDisplay;
+    bool canPresent;
+};
+
+// Information about the optical properties for an eye in a Display.
 struct WebVREyeParameters {
-    WebVRFieldOfView minimumFieldOfView;
-    WebVRFieldOfView maximumFieldOfView;
-    WebVRFieldOfView recommendedFieldOfView;
-    WebVRVector3 eyeTranslation;
-    WebVRRect renderRect;
+    WebVRFieldOfView fieldOfView;
+    float offset[3];
+    unsigned renderWidth;
+    unsigned renderHeight;
 };
 
-// Information pertaining to Head Mounted Displays.
-struct WebVRHMDInfo {
-    WebVREyeParameters leftEye;
-    WebVREyeParameters rightEye;
+struct WebVRStageParameters {
+    float standingTransform[16];
+    float sizeX;
+    float sizeZ;
 };
-
-// Bit flags to indicate what type of data a WebVRDevice describes.
-enum WebVRDeviceTypeFlags {
-    WebVRDeviceTypePosition = 1 << 1,
-    WebVRDeviceTypeHMD = 1 << 2
-};
-
-// A bitfield of WebVRDeviceTypeFlags.
-typedef int WebVRDeviceTypeMask;
 
 // Describes a single VR hardware unit. May describe multiple capabilities,
 // such as position sensors or head mounted display metrics.
-struct WebVRDevice {
+struct WebVRDisplay {
     // Index for this hardware unit.
     unsigned index;
-    // Friendly device name.
-    WebString deviceName;
-    // Identifies the capabilities of this hardware unit.
-    WebVRDeviceTypeMask flags;
-    // Will only contain valid data if (flags & HasHMDDevice).
-    WebVRHMDInfo hmdInfo;
+    // Friendly display name.
+    WebString displayName;
+    WebVRDisplayCapabilities capabilities;
+    bool hasStageParameters;
+    WebVRStageParameters stageParameters;
+    WebVREyeParameters leftEye;
+    WebVREyeParameters rightEye;
 };
 
 }

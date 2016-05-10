@@ -31,7 +31,7 @@ class VRDeviceManager : public VRService {
   // Returns the VRDeviceManager singleton.
   static VRDeviceManager* GetInstance();
 
-  mojo::Array<VRDeviceInfoPtr> GetVRDevices();
+  mojo::Array<VRDisplayPtr> GetVRDevices();
   VRDevice* GetDevice(unsigned int index);
 
  private:
@@ -48,10 +48,10 @@ class VRDeviceManager : public VRService {
   void RegisterProvider(scoped_ptr<VRDeviceProvider> provider);
 
   // VRService implementation
-  void GetDevices(const GetDevicesCallback& callback) override;
-  void GetSensorState(uint32_t index,
-                      const GetSensorStateCallback& callback) override;
-  void ResetSensor(uint32_t index) override;
+  void GetDisplays(const GetDisplaysCallback& callback) override;
+  void GetPose(uint32_t index,
+               const GetPoseCallback& callback) override;
+  void ResetPose(uint32_t index) override;
 
   // Mojo connection error handler.
   void OnConnectionError();

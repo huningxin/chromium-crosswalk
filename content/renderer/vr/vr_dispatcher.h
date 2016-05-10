@@ -24,26 +24,26 @@ class VRDispatcher : NON_EXPORTED_BASE(public blink::WebVRClient) {
   ~VRDispatcher() override;
 
   // blink::WebVRClient implementation.
-  void getDevices(blink::WebVRGetDevicesCallback* callback) override;
+  void getDisplays(blink::WebVRGetDisplaysCallback* callback) override;
 
-  void getSensorState(unsigned int index,
-                      blink::WebHMDSensorState& state) override;
+  void getPose(unsigned int index,
+               blink::WebVRPose& pose) override;
 
-  void resetSensor(unsigned int index) override;
+  void resetPose(unsigned int index) override;
 
  private:
   // Helper method that returns an initialized PermissionServicePtr.
   VRServicePtr& GetVRServicePtr();
 
   // Callback handlers
-  void OnGetDevices(int request_id,
-                    const mojo::Array<VRDeviceInfoPtr>& devices);
-  static void OnGetSensorState(blink::WebHMDSensorState* state,
-                               const VRSensorStatePtr& mojo_state);
+  void OnGetDisplays(int request_id,
+                    const mojo::Array<VRDisplayPtr>& displays);
+  static void OnGetPose(blink::WebVRPose* pose,
+                        const VRPosePtr& mojo_pose);
 
   // Tracks requests sent to browser to match replies with callbacks.
   // Owns callback objects.
-  IDMap<blink::WebVRGetDevicesCallback, IDMapOwnPointer> pending_requests_;
+  IDMap<blink::WebVRGetDisplaysCallback, IDMapOwnPointer> pending_requests_;
 
   ServiceRegistry* service_registry_;
   VRServicePtr vr_service_;

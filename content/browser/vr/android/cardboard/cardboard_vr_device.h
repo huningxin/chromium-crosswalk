@@ -20,15 +20,13 @@ class CardboardVRDevice : public VRDevice {
   explicit CardboardVRDevice(VRDeviceProvider* provider);
   ~CardboardVRDevice() override;
 
-  VRDeviceInfoPtr GetVRDevice() override;
-  VRSensorStatePtr GetSensorState() override;
-  void ResetSensor() override;
+  VRDisplayPtr GetVRDevice() override;
+  VRPosePtr GetPose() override;
+  void ResetPose() override;
 
  private:
   base::android::ScopedJavaGlobalRef<jobject> j_cardboard_device_;
   base::android::ScopedJavaGlobalRef<jfloatArray> j_head_matrix_;
-
-  unsigned int frame_index_;
 
   DISALLOW_COPY_AND_ASSIGN(CardboardVRDevice);
 };

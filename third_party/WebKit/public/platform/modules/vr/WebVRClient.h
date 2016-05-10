@@ -12,18 +12,18 @@
 namespace blink {
 
 // Success and failure callbacks for getDevices.
-using WebVRGetDevicesCallback = WebCallbacks<const WebVector<WebVRDevice>&, void>;
+using WebVRGetDisplaysCallback = WebCallbacks<const WebVector<WebVRDisplay>&, void>;
 
 // Client handling VR device communication for a given WebFrame.
 class WebVRClient {
 public:
     virtual ~WebVRClient() { }
 
-    virtual void getDevices(WebVRGetDevicesCallback*) = 0;
+    virtual void getDisplays(WebVRGetDisplaysCallback*) = 0;
 
-    virtual void getSensorState(unsigned index, blink::WebHMDSensorState& into) = 0;
+    virtual void getPose(unsigned index, blink::WebVRPose& pose) = 0;
 
-    virtual void resetSensor(unsigned index) = 0;
+    virtual void resetPose(unsigned index) = 0;
 };
 
 } // namespace blink
