@@ -62,7 +62,7 @@ blink::mojom::VRDisplayPtr CardboardVRDevice::GetVRDevice() {
   device->capabilities->hasOrientation = true;
   device->capabilities->hasPosition = false;
   device->capabilities->hasExternalDisplay = false;
-  device->capabilities->canPresent = false;
+  device->capabilities->canPresent = true;
 
   device->leftEye = blink::mojom::VREyeParameters::New();
   device->rightEye = blink::mojom::VREyeParameters::New();
