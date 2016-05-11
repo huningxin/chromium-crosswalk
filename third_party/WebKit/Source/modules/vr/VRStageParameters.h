@@ -18,15 +18,15 @@ class VRStageParameters final : public GarbageCollectedFinalized<VRStageParamete
 public:
     VRStageParameters();
 
-    DOMFloat32Array* sittingToStandingTransform() const { return m_standingTransform; }
+    DOMFloat32Array* sittingToStandingTransform() const { return m_standingTransform.get(); }
 
     float sizeX() const { return m_sizeX; }
     float sizeZ() const { return m_sizeZ; }
 
-    DECLARE_VIRTUAL_TRACE()
+    DEFINE_INLINE_TRACE() { }
 
 private:
-    Member<DOMFloat32Array> m_standingTransform;
+    RefPtr<DOMFloat32Array> m_standingTransform;
     float m_sizeX;
     float m_sizeZ;
 };

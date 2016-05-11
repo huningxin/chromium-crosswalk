@@ -21,7 +21,7 @@ class Navigator;
 class VRController;
 class VRDisplayCollection;
 
-class MODULES_EXPORT NavigatorVR final : public GarbageCollectedFinalized<NavigatorVR>, public Supplement<Navigator>, public DOMWindowProperty {
+class MODULES_EXPORT NavigatorVR final : public GarbageCollectedFinalized<NavigatorVR>, public HeapSupplement<Navigator>, public DOMWindowProperty {
     USING_GARBAGE_COLLECTED_MIXIN(NavigatorVR);
     WTF_MAKE_NONCOPYABLE(NavigatorVR);
 public:

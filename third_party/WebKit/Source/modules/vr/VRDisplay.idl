@@ -9,7 +9,8 @@ enum VREye {
 
 // http://mozvr.github.io/webvr-spec/webvr.html#vrdisplay
 [
-    RuntimeEnabled=WebVR
+    RuntimeEnabled=WebVR,
+    GarbageCollected
 ] interface VRDisplay {
     // An identifier for this device unique across VRDisplays.
     readonly attribute unsigned long displayId;

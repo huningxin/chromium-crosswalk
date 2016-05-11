@@ -21,17 +21,17 @@ class VREyeParameters final : public GarbageCollectedFinalized<VREyeParameters>,
 public:
     VREyeParameters();
 
-    DOMFloat32Array* offset() const { return m_offset; }
+    DOMFloat32Array* offset() const { return m_offset.get(); }
     VRFieldOfView* fieldOfView() const { return m_fieldOfView; }
     unsigned long renderWidth() const { return m_renderWidth; }
     unsigned long renderHeight() const { return m_renderHeight; }
 
     void update(const WebVREyeParameters&);
 
-    DECLARE_VIRTUAL_TRACE()
+    DEFINE_INLINE_TRACE() { }
 
 private:
-    Member<DOMFloat32Array> m_offset;
+    RefPtr<DOMFloat32Array> m_offset;
     Member<VRFieldOfView> m_fieldOfView;
     unsigned long m_renderWidth;
     unsigned long m_renderHeight;

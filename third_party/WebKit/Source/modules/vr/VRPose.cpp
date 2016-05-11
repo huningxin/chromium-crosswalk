@@ -11,7 +11,7 @@ namespace {
 DOMFloat32Array* vecToFloat32Array(const WebVRVector4& vec, bool valid)
 {
     if (valid) {
-        DOMFloat32Array* out = DOMFloat32Array::create(4);
+        DOMFloat32Array* out = DOMFloat32Array::create(4).get();
         out->data()[0] = vec.x;
         out->data()[1] = vec.y;
         out->data()[2] = vec.z;
@@ -24,7 +24,7 @@ DOMFloat32Array* vecToFloat32Array(const WebVRVector4& vec, bool valid)
 DOMFloat32Array* vecToFloat32Array(const WebVRVector3& vec, bool valid)
 {
     if (valid) {
-        DOMFloat32Array* out = DOMFloat32Array::create(3);
+        DOMFloat32Array* out = DOMFloat32Array::create(3).get();
         out->data()[0] = vec.x;
         out->data()[1] = vec.y;
         out->data()[2] = vec.z;
@@ -49,16 +49,6 @@ void VRPose::setPose(const WebHMDSensorState &state)
     m_linearVelocity = vecToFloat32Array(state.linearVelocity, state.flags & WebVRSensorStateLinearVelocity);
     m_angularAcceleration = vecToFloat32Array(state.angularAcceleration, state.flags & WebVRSensorStateAngularAcceleration);
     m_linearAcceleration = vecToFloat32Array(state.linearAcceleration, state.flags & WebVRSensorStateLinearAcceleration);
-}
-
-DEFINE_TRACE(VRPose)
-{
-    visitor->trace(m_orientation);
-    visitor->trace(m_position);
-    visitor->trace(m_angularVelocity);
-    visitor->trace(m_linearVelocity);
-    visitor->trace(m_angularAcceleration);
-    visitor->trace(m_linearAcceleration);
 }
 
 } // namespace blink

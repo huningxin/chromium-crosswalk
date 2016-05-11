@@ -18,9 +18,4 @@ VRStageParameters::VRStageParameters()
     m_standingTransform->data()[15] = 1.0f;
 }
 
-DEFINE_TRACE(VRStageParameters)
-{
-    visitor->trace(m_standingTransform);
-}
-
 } // namespace blink

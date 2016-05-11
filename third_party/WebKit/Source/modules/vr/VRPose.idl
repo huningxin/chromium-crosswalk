@@ -5,6 +5,7 @@
 // http://mozvr.github.io/webvr-spec/webvr.html#vrpose
 [
     RuntimeEnabled=WebVR,
+    GarbageCollected
 ] interface VRPose {
     readonly attribute double timeStamp;
     readonly attribute Float32Array? position;

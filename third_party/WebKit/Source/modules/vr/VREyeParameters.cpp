@@ -34,10 +34,4 @@ void VREyeParameters::update(const WebVREyeParameters &eye_parameters)
     m_renderHeight = eye_parameters.renderRect.height;
 }
 
-DEFINE_TRACE(VREyeParameters)
-{
-    visitor->trace(m_offset);
-    visitor->trace(m_fieldOfView);
-}
-
 } // namespace blink

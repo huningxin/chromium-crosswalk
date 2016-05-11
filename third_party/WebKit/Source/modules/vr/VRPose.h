@@ -22,27 +22,27 @@ public:
     }
 
     double timeStamp() const { return m_timeStamp; }
-    DOMFloat32Array* orientation() const { return m_orientation; }
-    DOMFloat32Array* position() const { return m_position; }
-    DOMFloat32Array* angularVelocity() const { return m_angularVelocity; }
-    DOMFloat32Array* linearVelocity() const { return m_linearVelocity; }
-    DOMFloat32Array* angularAcceleration() const { return m_angularAcceleration; }
-    DOMFloat32Array* linearAcceleration() const { return m_linearAcceleration; }
+    DOMFloat32Array* orientation() const { return m_orientation.get(); }
+    DOMFloat32Array* position() const { return m_position.get(); }
+    DOMFloat32Array* angularVelocity() const { return m_angularVelocity.get(); }
+    DOMFloat32Array* linearVelocity() const { return m_linearVelocity.get(); }
+    DOMFloat32Array* angularAcceleration() const { return m_angularAcceleration.get(); }
+    DOMFloat32Array* linearAcceleration() const { return m_linearAcceleration.get(); }
 
     void setPose(const WebHMDSensorState&);
 
-    DECLARE_VIRTUAL_TRACE();
+    DEFINE_INLINE_TRACE() { }
 
 private:
     VRPose();
 
     double m_timeStamp;
-    Member<DOMFloat32Array> m_orientation;
-    Member<DOMFloat32Array> m_position;
-    Member<DOMFloat32Array> m_angularVelocity;
-    Member<DOMFloat32Array> m_linearVelocity;
-    Member<DOMFloat32Array> m_angularAcceleration;
-    Member<DOMFloat32Array> m_linearAcceleration;
+    RefPtr<DOMFloat32Array> m_orientation;
+    RefPtr<DOMFloat32Array> m_position;
+    RefPtr<DOMFloat32Array> m_angularVelocity;
+    RefPtr<DOMFloat32Array> m_linearVelocity;
+    RefPtr<DOMFloat32Array> m_angularAcceleration;
+    RefPtr<DOMFloat32Array> m_linearAcceleration;
 };
 
 } // namespace blink

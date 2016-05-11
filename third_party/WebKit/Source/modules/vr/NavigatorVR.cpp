@@ -17,7 +17,6 @@
 #include "modules/vr/VRDisplayCollection.h"
 #include "modules/vr/VRGetDevicesCallback.h"
 #include "modules/vr/VRPose.h"
-#include "wtf/PtrUtil.h"
 
 namespace blink {
 
@@ -31,7 +30,7 @@ NavigatorVR* NavigatorVR::from(Document& document)
 
 NavigatorVR& NavigatorVR::from(Navigator& navigator)
 {
-    NavigatorVR* supplement = static_cast<NavigatorVR*>(Supplement<Navigator>::from(navigator, supplementName()));
+    NavigatorVR* supplement = static_cast<NavigatorVR*>(HeapSupplement<Navigator>::from(navigator, supplementName()));
     if (!supplement) {
         supplement = new NavigatorVR(navigator.frame());
         provideTo(navigator, supplementName(), supplement);
@@ -57,7 +56,7 @@ ScriptPromise NavigatorVR::getVRDisplays(ScriptState* scriptState)
         return promise;
     }
 
-    controller()->getDevices(WTF::wrapUnique(new VRGetDevicesCallback(resolver, m_displays.get())));
+    controller()->getDevices(new VRGetDevicesCallback(resolver, m_displays.get()));
 
     return promise;
 }
