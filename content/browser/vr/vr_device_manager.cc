@@ -41,13 +41,13 @@ VRDeviceManager::VRDeviceManager()
 #endif
 
 #if defined(OS_WIN)
-  std::unique_ptr<VRDeviceProvider> oculus_provider(
+  scoped_ptr<VRDeviceProvider> oculus_provider(
       new OculusVRDeviceProvider());
   RegisterProvider(std::move(oculus_provider));
 
-  std::unique_ptr<VRDeviceProvider> openvr_provider(
-      new OpenVRDeviceProvider());
-  RegisterProvider(std::move(openvr_provider));
+  //scoped_ptr<VRDeviceProvider> openvr_provider(
+  //    new OpenVRDeviceProvider());
+  //RegisterProvider(std::move(openvr_provider));
 #endif
 
 /*#if defined(WEBVR_USE_SIMULATED)

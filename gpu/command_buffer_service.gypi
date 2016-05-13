@@ -145,8 +145,8 @@
     }],
     ['enable_webvr==1 and OS=="win"', {
       'sources': [
-        'command_buffer/service/vr/openvr/open_vr_compositor.cc',
-        'command_buffer/service/vr/openvr/open_vr_compositor.h',
+        #'command_buffer/service/vr/openvr/open_vr_compositor.cc',
+        #'command_buffer/service/vr/openvr/open_vr_compositor.h',
       ],
       'msvs_settings': {
         'VCLinkerTool': {

@@ -30,8 +30,8 @@ OculusVRDevice::~OculusVRDevice() {
   }
 }
 
-blink::mojom::VRFieldOfViewPtr ovrFovPortToWebVR(const ovrFovPort& fov) {
-  blink::mojom::VRFieldOfViewPtr out = blink::mojom::VRFieldOfView::New();
+VRFieldOfViewPtr ovrFovPortToWebVR(const ovrFovPort& fov) {
+  VRFieldOfViewPtr out = VRFieldOfView::New();
   out->upDegrees = atanf(fov.UpTan) * radToDeg;
   out->downDegrees = atanf(fov.DownTan) * radToDeg;
   out->leftDegrees = atanf(fov.LeftTan) * radToDeg;
@@ -56,26 +56,26 @@ mojo::Array<float> ovrVector3fToWebVR(const ovrVector3f& vec) {
   return out;
 }
 
-blink::mojom::VRDisplayPtr OculusVRDevice::GetVRDevice() {
-  blink::mojom::VRDisplayPtr device = blink::mojom::VRDisplay::New();
+VRDisplayPtr OculusVRDevice::GetVRDevice() {
+  VRDisplayPtr device = VRDisplay::New();
 
   ovrHmdDesc session_desc = ovr_GetHmdDesc(session_);
 
   device->displayName = base::StringPrintf("%s, %s",
       session_desc.ProductName, session_desc.Manufacturer);
 
-  device->compositorType = blink::mojom::VRDisplay::CompositorType::OCULUS;
+  device->compositorType = VRDisplay::CompositorType::OCULUS;
 
-  device->capabilities = blink::mojom::VRDisplayCapabilities::New();
+  device->capabilities = VRDisplayCapabilities::New();
   device->capabilities->hasOrientation = true;
   device->capabilities->hasPosition = true;
   device->capabilities->hasExternalDisplay = true;
   device->capabilities->canPresent = true;
 
-  device->leftEye = blink::mojom::VREyeParameters::New();
-  device->rightEye = blink::mojom::VREyeParameters::New();
-  blink::mojom::VREyeParametersPtr& leftEye = device->leftEye;
-  blink::mojom::VREyeParametersPtr& rightEye = device->rightEye;
+  device->leftEye = VREyeParameters::New();
+  device->rightEye = VREyeParameters::New();
+  VREyeParametersPtr& leftEye = device->leftEye;
+  VREyeParametersPtr& rightEye = device->rightEye;
 
   leftEye->fieldOfView = ovrFovPortToWebVR(
       session_desc.DefaultEyeFov[ovrEye_Left]);
@@ -101,7 +101,7 @@ blink::mojom::VRDisplayPtr OculusVRDevice::GetVRDevice() {
   rightEye->renderWidth = targetRight.w;
   rightEye->renderHeight = targetRight.h;
 
-  device->stageParameters = blink::mojom::VRStageParameters::New();
+  device->stageParameters = VRStageParameters::New();
   device->stageParameters->standingTransform = mojo::Array<float>::New(16);
   mojo::Array<float>& transform =
       device->stageParameters->standingTransform;
@@ -128,8 +128,8 @@ blink::mojom::VRDisplayPtr OculusVRDevice::GetVRDevice() {
   return device;
 }
 
-blink::mojom::VRPosePtr OculusVRDevice::GetPose() {
-  blink::mojom::VRPosePtr pose = blink::mojom::VRPose::New();
+VRPosePtr OculusVRDevice::GetPose() {
+  VRPosePtr pose = VRPose::New();
 
   ovrTrackingState ovr_state = ovr_GetTrackingState(session_,
       ovr_GetTimeInSeconds(), true);

@@ -14,8 +14,8 @@ class SimulatedVRDevice : public VRDevice {
   SimulatedVRDevice(VRDeviceProvider* provider);
   ~SimulatedVRDevice() override;
 
-  blink::mojom::VRDisplayPtr GetVRDevice() override;
-  blink::mojom::VRPosePtr GetPose() override;
+  VRDisplayPtr GetVRDevice() override;
+  VRPosePtr GetPose() override;
   void ResetPose() override;
 
  private:

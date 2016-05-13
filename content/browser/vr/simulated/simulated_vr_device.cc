@@ -145,29 +145,29 @@ SimulatedVRDevice::SimulatedVRDevice(VRDeviceProvider* provider)
 SimulatedVRDevice::~SimulatedVRDevice() {
 }
 
-mojom::VRDisplayPtr SimulatedVRDevice::GetVRDevice() {
-  mojom::VRDisplayPtr device = mojom::VRDisplay::New();
+VRDisplayPtr SimulatedVRDevice::GetVRDevice() {
+  VRDisplayPtr device = VRDisplay::New();
 
   device->displayName = "Simulated VR Device";
-  device->compositorType = mojom::VRDisplay::CompositorType::NONE;
+  device->compositorType = VRDisplay::CompositorType::NONE;
 
-  device->capabilities = mojom::VRDisplayCapabilities::New();
+  device->capabilities = VRDisplayCapabilities::New();
   device->capabilities->hasOrientation = false;
   device->capabilities->hasPosition = false;
   device->capabilities->hasExternalDisplay = false;
 
-  device->leftEye = mojom::VREyeParameters::New();
-  device->rightEye = mojom::VREyeParameters::New();
-  mojom::VREyeParametersPtr& leftEye = device->leftEye;
-  mojom::VREyeParametersPtr& rightEye = device->rightEye;
+  device->leftEye = VREyeParameters::New();
+  device->rightEye = VREyeParameters::New();
+  VREyeParametersPtr& leftEye = device->leftEye;
+  VREyeParametersPtr& rightEye = device->rightEye;
 
-  leftEye->fieldOfView = mojom::VRFieldOfView::New();
+  leftEye->fieldOfView = VRFieldOfView::New();
   leftEye->fieldOfView->upDegrees = 45.0f;
   leftEye->fieldOfView->downDegrees = 45.0f;
   leftEye->fieldOfView->leftDegrees = 45.0f;
   leftEye->fieldOfView->rightDegrees = 35.0f;
 
-  rightEye->fieldOfView = mojom::VRFieldOfView::New();
+  rightEye->fieldOfView = VRFieldOfView::New();
   rightEye->fieldOfView->upDegrees = 45.0f;
   rightEye->fieldOfView->downDegrees = 45.0f;
   rightEye->fieldOfView->leftDegrees = 35.0f;
@@ -189,7 +189,7 @@ mojom::VRDisplayPtr SimulatedVRDevice::GetVRDevice() {
   rightEye->renderWidth = 640;
   rightEye->renderHeight = 720;
 
-  device->stageParameters = mojom::VRStageParameters::New();
+  device->stageParameters = VRStageParameters::New();
   device->stageParameters->sizeX = 1.5;
   device->stageParameters->sizeZ = 1.5;
   device->stageParameters->standingTransform = mojo::Array<float>::New(16);
@@ -215,8 +215,8 @@ mojom::VRDisplayPtr SimulatedVRDevice::GetVRDevice() {
   return device;
 }
 
-mojom::VRPosePtr SimulatedVRDevice::GetPose() {
-  mojom::VRPosePtr state = mojom::VRPose::New();
+VRPosePtr SimulatedVRDevice::GetPose() {
+  VRPosePtr state = VRPose::New();
 
   state->timestamp = base::Time::Now().ToJsTime();
 

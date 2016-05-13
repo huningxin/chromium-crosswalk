@@ -834,25 +834,6 @@ void RendererBlinkPlatformImpl::sampleGamepads(WebGamepads& gamepads) {
   static_cast<RendererGamepadProvider*>(observer)->SampleGamepads(gamepads);
 }
 
-void RendererBlinkPlatformImpl::vibrateGamepad(
-    unsigned index, unsigned duration) {
-  PlatformEventObserverBase* observer =
-      platform_event_observers_.Lookup(blink::WebPlatformEventTypeGamepad);
-  if (!observer)
-    return;
-  static_cast<RendererGamepadProvider*>(observer)->VibrateGamepad(
-      index, duration);
-}
-
-void RendererBlinkPlatformImpl::cancelGamepadVibration(unsigned index) {
-  PlatformEventObserverBase* observer =
-      platform_event_observers_.Lookup(blink::WebPlatformEventTypeGamepad);
-  if (!observer)
-    return;
-  static_cast<RendererGamepadProvider*>(observer)->CancelGamepadVibration(
-      index);
-}
-
 //------------------------------------------------------------------------------
 
 WebMediaRecorderHandler*

@@ -14738,9 +14738,9 @@ GLuint GLES2DecoderImpl::DoCreateVRCompositorCHROMIUM(GLenum compositorType) {
     if (compositorType == 2) { // Oculus
       vr_compositor_ = new OculusVRCompositor();
       RestoreBufferBindings();
-    } else if (compositorType == 3) { // OpenVR
+    }/* else if (compositorType == 3) { // OpenVR
       vr_compositor_ = new OpenVRCompositor();
-    }
+    }*/
     vr_needs_flush_ = false;
   }
 

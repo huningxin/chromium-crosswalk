@@ -15,8 +15,8 @@ class OculusVRDevice : public VRDevice {
   OculusVRDevice(VRDeviceProvider* provider, ovrSession session);
   ~OculusVRDevice() override;
 
-  blink::mojom::VRDisplayPtr GetVRDevice() override;
-  blink::mojom::VRPosePtr GetPose() override;
+  VRDisplayPtr GetVRDevice() override;
+  VRPosePtr GetPose() override;
   void ResetPose() override;
 
  private:

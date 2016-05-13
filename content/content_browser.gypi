@@ -2221,8 +2221,8 @@
         'browser/vr/oculus/oculus_vr_device.h',
         'browser/vr/oculus/oculus_vr_device_provider.cc',
         'browser/vr/oculus/oculus_vr_device_provider.h',
-        'browser/vr/oculus/oculus_vr_gamepad_data_fetcher.cc',
-        'browser/vr/oculus/oculus_vr_gamepad_data_fetcher.h',
+        #'browser/vr/oculus/oculus_vr_gamepad_data_fetcher.cc',
+        #'browser/vr/oculus/oculus_vr_gamepad_data_fetcher.h',
       ]
     }],
     ['enable_webvr==1 and OS=="win"', {
@@ -2230,12 +2230,12 @@
         '../third_party/openvr/openvr.gyp:openvr',
       ],
       'sources': [
-        'browser/vr/openvr/open_vr_device.cc',
-        'browser/vr/openvr/open_vr_device.h',
-        'browser/vr/openvr/open_vr_device_provider.cc',
-        'browser/vr/openvr/open_vr_device_provider.h',
-        'browser/vr/openvr/open_vr_gamepad_data_fetcher.cc',
-        'browser/vr/openvr/open_vr_gamepad_data_fetcher.h',
+        #'browser/vr/openvr/open_vr_device.cc',
+        #'browser/vr/openvr/open_vr_device.h',
+        #'browser/vr/openvr/open_vr_device_provider.cc',
+        #'browser/vr/openvr/open_vr_device_provider.h',
+        #'browser/vr/openvr/open_vr_gamepad_data_fetcher.cc',
+        #'browser/vr/openvr/open_vr_gamepad_data_fetcher.h',
       ],
       'msvs_settings': {
         'VCLinkerTool': {

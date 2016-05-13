@@ -27,12 +27,9 @@ class OculusVRDeviceProvider : public VRDeviceProvider {
  private:
   void Shutdown();
 
-  void RegisterGamepad(ovrHmdStruct* session);
-
   bool initialized_;
 
   VRDevice* device_; // Oculus API only supports one device
-  GamepadConsumer* gamepad_consumer_;
 };
 
 }  // namespace content

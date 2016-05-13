@@ -8,25 +8,12 @@
 #include "content/browser/gamepad/gamepad_consumer.h"
 #include "content/browser/gamepad/gamepad_service.h"
 #include "content/browser/vr/oculus/oculus_vr_device.h"
-#include "content/browser/vr/oculus/oculus_vr_gamepad_data_fetcher.h"
 #include "content/public/browser/browser_thread.h"
 
 #include <algorithm>
 #include <memory>
 
 namespace content {
-
-// Keeps the GamepadProvider alive while the OpenVRDeviceProvider is in use.
-class OculusVRGamepadConsumer : public GamepadConsumer {
-public:
-  ~OculusVRGamepadConsumer() override {};
-  void OnGamepadConnected(
-      unsigned index,
-      const blink::WebGamepad& gamepad) override {};
-  void OnGamepadDisconnected(
-      unsigned index,
-      const blink::WebGamepad& gamepad) override {};
-};
 
 OculusVRDeviceProvider::OculusVRDeviceProvider()
     : VRDeviceProvider()
@@ -54,30 +41,10 @@ void OculusVRDeviceProvider::GetDevices(std::vector<VRDevice*>* devices) {
     }
 
     device_ = new OculusVRDevice(this, session);
-
-    BrowserThread::PostTask(
-      BrowserThread::IO, FROM_HERE,
-      base::Bind(&OculusVRDeviceProvider::RegisterGamepad,
-          base::Unretained(this), session));
   }
 
   if (device_)
     devices->push_back(device_);
-}
-
-void OculusVRDeviceProvider::RegisterGamepad(ovrHmdStruct* session) {
-  GamepadService* gamepad_service = GamepadService::GetInstance();
-  gamepad_consumer_ = new OculusVRGamepadConsumer();
-  gamepad_service->ConsumerBecameActive(gamepad_consumer_);
-
-  GamepadProvider* provider = gamepad_service->provider();
-  if (provider) {
-    provider->AddGamepadDataFetcher(std::unique_ptr<GamepadDataFetcher>(
-        new OculusVRGamepadDataFetcher(session)));
-    // TODO: Remove somewhere.
-  } else {
-    LOG(ERROR) << "No GamepadProvider available.";
-  }
 }
 
 void OculusVRDeviceProvider::Initialize() {

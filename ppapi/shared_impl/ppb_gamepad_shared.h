@@ -21,27 +21,7 @@ namespace ppapi {
 
 struct WebKitGamepadButton {
   bool pressed;
-  bool touched;
   double value;
-};
-
-struct WebKitGamepadVector {
-    bool isNull;
-    float x, y, z, w;
-};
-
-class WebKitGamepadPose {
-public:
-    WebKitGamepadPose()
-        : isNull(true)
-    {
-    }
-
-    bool isNull;
-
-    // TODO: 6DOF
-    WebKitGamepadVector orientation;
-    WebKitGamepadVector position;
 };
 
 // This must match the definition of blink::Gamepad. The GamepadHost unit test
@@ -76,8 +56,6 @@ struct WebKitGamepad {
 
   // Mapping type (for example "standard")
   base::char16 mapping[kMappingLengthCap];
-
-  WebKitGamepadPose pose;
 };
 
 // This must match the definition of blink::Gamepads. The GamepadHost unit
