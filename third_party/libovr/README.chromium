@@ -1,0 +1,13 @@
+Name: Oculus Rift SDK
+Short Name: libovr
+URL: http://developer.oculusvr.com
+Version: 1.3.0
+License: Oculus VR Rift SDK Software License
+License File: LICENSE.txt
+Security Critical: yes
+
+Description:
+Provides an interface to the Oculus Rift VR headset
+
+Local Modifications:
+None

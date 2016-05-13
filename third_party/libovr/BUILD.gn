@@ -1,0 +1,13 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# GYP: //third_party/libovr/libovr.gyp:libovr
+static_library("libovr") {
+  include_dirs = [
+    "LibOVR/Include",
+  ]
+  sources = [
+    "LibOVR/Src/OVR_CAPIShim.c",
+  ]
+}
