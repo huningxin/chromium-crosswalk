@@ -863,4 +863,19 @@ void UniformMatrix4fvStreamTextureMatrixCHROMIUM(
     GLint location,
     GLboolean transpose,
     const GLfloat* default_value) override;
+GLuint CreateVRCompositorCHROMIUM(GLenum compositorType) override;
+void SubmitVRCompositorFrameCHROMIUM(GLuint compositor,
+                                     GLuint frameTexture,
+                                     GLfloat x,
+                                     GLfloat y,
+                                     GLfloat z,
+                                     GLfloat w) override;
+void VRCompositorTextureBoundsCHROMIUM(GLuint compositor,
+                                       GLuint eye,
+                                       GLfloat x,
+                                       GLfloat y,
+                                       GLfloat width,
+                                       GLfloat height) override;
+void ResetVRCompositorPoseCHROMIUM(GLuint compositor) override;
+void DeleteVRCompositorCHROMIUM(GLuint compositor) override;
 #endif  // GPU_COMMAND_BUFFER_CLIENT_GLES2_TRACE_IMPLEMENTATION_AUTOGEN_H_

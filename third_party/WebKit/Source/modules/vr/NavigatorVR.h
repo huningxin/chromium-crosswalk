@@ -6,6 +6,7 @@
 #define NavigatorVR_h
 
 #include "bindings/core/v8/ScriptPromise.h"
+#include "core/frame/DOMWindowLifecycleObserver.h"
 #include "core/frame/DOMWindowProperty.h"
 #include "modules/ModulesExport.h"
 #include "modules/vr/VRDisplay.h"
@@ -21,7 +22,7 @@ class Navigator;
 class VRController;
 class VRDisplayCollection;
 
-class MODULES_EXPORT NavigatorVR final : public GarbageCollectedFinalized<NavigatorVR>, public HeapSupplement<Navigator>, public DOMWindowProperty {
+class MODULES_EXPORT NavigatorVR final : public GarbageCollectedFinalized<NavigatorVR>, public HeapSupplement<Navigator>, public DOMWindowProperty, public DOMWindowLifecycleObserver {
     USING_GARBAGE_COLLECTED_MIXIN(NavigatorVR);
     WTF_MAKE_NONCOPYABLE(NavigatorVR);
 public:
@@ -45,7 +46,16 @@ private:
 
     static const char* supplementName();
 
+    void fireVRDisplayPresentChange();
+    void didRemoveVRConnectionEventListeners();
+
+    // DOMWindowLifecycleObserver
+    void didAddEventListener(LocalDOMWindow*, const AtomicString&) override;
+    void didRemoveEventListener(LocalDOMWindow*, const AtomicString&) override;
+    void didRemoveAllEventListeners(LocalDOMWindow*) override;
+
     Member<VRDisplayCollection> m_displays;
+    bool m_hasConnectionEventListener;
 };
 
 } // namespace blink

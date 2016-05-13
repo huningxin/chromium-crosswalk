@@ -422,6 +422,8 @@ public:
     void setFilterQuality(SkFilterQuality) override;
     bool isWebGL2OrHigher() { return version() >= 2; }
 
+    DrawingBuffer* drawingBuffer() const;
+
 protected:
     friend class EXTDisjointTimerQuery;
     friend class WebGLDrawBuffers;
@@ -489,7 +491,6 @@ protected:
     // Structure for rendering to a DrawingBuffer, instead of directly
     // to the back-buffer of m_context.
     RefPtr<DrawingBuffer> m_drawingBuffer;
-    DrawingBuffer* drawingBuffer() const;
 
     RefPtr<WebGLContextGroup> m_contextGroup;
 

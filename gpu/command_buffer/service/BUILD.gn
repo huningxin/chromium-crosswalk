@@ -167,6 +167,18 @@ source_set("service_sources") {
     configs -= [ "//build/config/compiler:default_optimization" ]
     configs += [ "//build/config/compiler:optimize_max" ]
   }
+
+  if (is_win) {
+    deps += [ "//third_party/libovr:libovr", "//third_party/openvr:openvr" ]
+
+    sources += [
+      "vr/vr_compositor.h",
+      "vr/oculus/oculus_vr_compositor.cc",
+      "vr/oculus/oculus_vr_compositor.h",
+      "vr/openvr/open_vr_compositor.cc",
+      "vr/openvr/open_vr_compositor.h",
+    ]
+  }
 }
 
 proto_library("disk_cache_proto") {

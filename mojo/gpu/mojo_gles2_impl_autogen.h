@@ -892,6 +892,21 @@ class MojoGLES2Impl : public gpu::gles2::GLES2Interface {
       GLint location,
       GLboolean transpose,
       const GLfloat* default_value) override;
+  GLuint CreateVRCompositorCHROMIUM(GLenum compositorType) override;
+  void SubmitVRCompositorFrameCHROMIUM(GLuint compositor,
+                                       GLuint frameTexture,
+                                       GLfloat x,
+                                       GLfloat y,
+                                       GLfloat z,
+                                       GLfloat w) override;
+  void VRCompositorTextureBoundsCHROMIUM(GLuint compositor,
+                                         GLuint eye,
+                                         GLfloat x,
+                                         GLfloat y,
+                                         GLfloat width,
+                                         GLfloat height) override;
+  void ResetVRCompositorPoseCHROMIUM(GLuint compositor) override;
+  void DeleteVRCompositorCHROMIUM(GLuint compositor) override;
 
  private:
   MojoGLES2Context context_;

@@ -291,6 +291,12 @@ void* NativeViewGLSurfaceWGL::GetHandle() {
   return device_context_;
 }
 
+bool NativeViewGLSurfaceWGL::Resize(const gfx::Size& size,
+                                    float scale_factor,
+                                    bool has_alpha) {
+  return true;
+}
+
 PbufferGLSurfaceWGL::PbufferGLSurfaceWGL(const gfx::Size& size)
     : size_(size),
       device_context_(NULL),

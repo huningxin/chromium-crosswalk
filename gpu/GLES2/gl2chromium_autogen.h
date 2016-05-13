@@ -381,5 +381,13 @@
 #define glGetFragDataIndexEXT GLES2_GET_FUN(GetFragDataIndexEXT)
 #define glUniformMatrix4fvStreamTextureMatrixCHROMIUM \
   GLES2_GET_FUN(UniformMatrix4fvStreamTextureMatrixCHROMIUM)
+#define glCreateVRCompositorCHROMIUM GLES2_GET_FUN(CreateVRCompositorCHROMIUM)
+#define glSubmitVRCompositorFrameCHROMIUM \
+  GLES2_GET_FUN(SubmitVRCompositorFrameCHROMIUM)
+#define glVRCompositorTextureBoundsCHROMIUM \
+  GLES2_GET_FUN(VRCompositorTextureBoundsCHROMIUM)
+#define glResetVRCompositorPoseCHROMIUM \
+  GLES2_GET_FUN(ResetVRCompositorPoseCHROMIUM)
+#define glDeleteVRCompositorCHROMIUM GLES2_GET_FUN(DeleteVRCompositorCHROMIUM)
 
 #endif  // GPU_GLES2_GL2CHROMIUM_AUTOGEN_H_

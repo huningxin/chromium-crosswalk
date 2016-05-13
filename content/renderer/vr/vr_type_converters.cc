@@ -82,6 +82,7 @@ blink::WebVRDisplay TypeConverter<blink::WebVRDisplay, VRDisplayPtr>::Convert(
   output.index = input->index;
   output.displayName = blink::WebString::fromUTF8(input->displayName.data(),
                                                   input->displayName.size());
+  output.compositorType = input->compositorType;
   output.capabilities =
       input->capabilities.To<blink::WebVRDisplayCapabilities>();
   output.hasStageParameters = !input->stageParameters.is_null();

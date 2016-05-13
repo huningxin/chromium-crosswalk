@@ -143,5 +143,30 @@
         ],
       },
     }],
+    ['enable_webvr==1 and OS=="win"', {
+      'sources': [
+        'command_buffer/service/vr/openvr/open_vr_compositor.cc',
+        'command_buffer/service/vr/openvr/open_vr_compositor.h',
+      ],
+      'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalDependencies': [
+            'openvr_api.lib',
+          ],
+          'AdditionalLibraryDirectories': [
+            '../third_party/openvr/openvr/lib/win64',
+          ],
+        },
+      },
+    }],
+    ['enable_webvr==1 and OS=="win"', {
+      'dependencies': [
+        '../third_party/libovr/libovr.gyp:libovr',
+      ],
+      'sources': [
+        'command_buffer/service/vr/oculus/oculus_vr_compositor.cc',
+        'command_buffer/service/vr/oculus/oculus_vr_compositor.h',
+      ]
+    }],
   ],
 }

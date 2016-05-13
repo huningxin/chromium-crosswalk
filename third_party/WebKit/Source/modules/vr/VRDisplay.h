@@ -63,6 +63,7 @@ public:
     void cancelAnimationFrame(int id);
 
     ScriptPromise requestPresent(ScriptState*, const HeapVector<VRLayer>& layers);
+    ScriptPromise requestPresent(ScriptState*, const VRLayer& layer);
     ScriptPromise exitPresent(ScriptState*);
 
     HeapVector<VRLayer> getLayers();
@@ -78,6 +79,8 @@ protected:
 
     void update(const WebVRDisplay&);
 
+    gpu::gles2::GLES2Interface* getCompositingContext();
+
     VRController* controller();
 
 private:
@@ -88,6 +91,7 @@ private:
     Member<NavigatorVR> m_navigatorVR;
     unsigned m_displayId;
     String m_displayName;
+    WebVRCompositorType m_compositorType;
     bool m_isConnected;
     bool m_isPresenting;
     bool m_canUpdateFramePose;
@@ -97,6 +101,9 @@ private:
     Member<VREyeParameters> m_eyeParametersLeft;
     Member<VREyeParameters> m_eyeParametersRight;
     Member<VRPose> m_framePose;
+    VRLayer m_layer;
+    OwnPtr<WebGraphicsContext3DProvider> m_contextProvider;
+    Member<WebGLRenderingContextBase> m_context;
 };
 
 using VRDisplayVector = HeapVector<Member<VRDisplay>>;

@@ -148,6 +148,8 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
 
   blink::WebBlobRegistry* blobRegistry() override;
   void sampleGamepads(blink::WebGamepads&) override;
+  void vibrateGamepad(unsigned index, unsigned duration) override;
+  void cancelGamepadVibration(unsigned index) override;
   blink::WebRTCPeerConnectionHandler* createRTCPeerConnectionHandler(
       blink::WebRTCPeerConnectionHandlerClient* client) override;
   blink::WebRTCCertificateGenerator* createRTCCertificateGenerator() override;

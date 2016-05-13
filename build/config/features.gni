@@ -175,8 +175,8 @@ use_brlapi = is_chromeos
 # system).
 use_gconf = is_linux && !is_chromeos && !is_chromecast && !is_headless
 
-# Enable WebVR support by default on Android
+# Enable WebVR support by default on Android and Windows
 # Still requires command line flag to access API
-enable_webvr = is_android
+enable_webvr = is_android || is_win
 
 use_gio = is_linux && !is_chromeos && !is_chromecast && !is_headless

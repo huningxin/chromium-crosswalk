@@ -43,6 +43,10 @@ class NativeViewGLSurfaceWGL : public GLSurfaceWGL {
   gfx::Size GetSize() override;
   void* GetHandle() override;
 
+  bool Resize(const gfx::Size& size,
+              float scale_factor,
+              bool has_alpha) override;
+
  private:
   ~NativeViewGLSurfaceWGL() override;
 

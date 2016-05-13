@@ -362,3 +362,10 @@ GL_APICALL GLint        GL_APIENTRY glGetFragDataIndexEXT (GLidProgram program, 
 
 // Extension CHROMIUM_stream_texture_matrix
 GL_APICALL void         GL_APIENTRY glUniformMatrix4fvStreamTextureMatrixCHROMIUM (GLintUniformLocation location, GLbooleanFalseOnly transpose, const GLfloat* default_value);
+
+// Extension CHROMIUM_vr_compositor.
+GL_APICALL GLuint       GL_APIENTRY glCreateVRCompositorCHROMIUM (GLenum compositorType);
+GL_APICALL void         GL_APIENTRY glSubmitVRCompositorFrameCHROMIUM (GLuint compositor, GLuint frameTexture, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+GL_APICALL void         GL_APIENTRY glVRCompositorTextureBoundsCHROMIUM (GLuint compositor, GLuint eye, GLfloat x, GLfloat y, GLfloat width, GLfloat height);
+GL_APICALL void         GL_APIENTRY glResetVRCompositorPoseCHROMIUM (GLuint compositor );
+GL_APICALL void         GL_APIENTRY glDeleteVRCompositorCHROMIUM (GLuint compositor);

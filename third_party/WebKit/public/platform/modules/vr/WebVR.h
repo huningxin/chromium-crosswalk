@@ -70,6 +70,13 @@ struct WebVRStageParameters {
     float sizeZ;
 };
 
+enum WebVRCompositorType {
+    VR_COMPOSITOR_NONE,
+    VR_COMPOSITOR_CARDBOARD,
+    VR_COMPOSITOR_OCULUS,
+    VR_COMPOSITOR_OPENVR
+};
+
 // Describes a single VR hardware unit. May describe multiple capabilities,
 // such as position sensors or head mounted display metrics.
 struct WebVRDisplay {
@@ -77,6 +84,7 @@ struct WebVRDisplay {
     unsigned index;
     // Friendly display name.
     WebString displayName;
+    WebVRCompositorType compositorType;
     WebVRDisplayCapabilities capabilities;
     bool hasStageParameters;
     WebVRStageParameters stageParameters;

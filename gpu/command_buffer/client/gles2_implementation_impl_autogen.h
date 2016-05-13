@@ -3593,4 +3593,51 @@ void GLES2Implementation::UniformMatrix4fvStreamTextureMatrixCHROMIUM(
   CheckGLError();
 }
 
+void GLES2Implementation::SubmitVRCompositorFrameCHROMIUM(GLuint compositor,
+                                                          GLuint frameTexture,
+                                                          GLfloat x,
+                                                          GLfloat y,
+                                                          GLfloat z,
+                                                          GLfloat w) {
+  GPU_CLIENT_SINGLE_THREAD_CHECK();
+  GPU_CLIENT_LOG("[" << GetLogPrefix() << "] glSubmitVRCompositorFrameCHROMIUM("
+                     << compositor << ", " << frameTexture << ", " << x << ", "
+                     << y << ", " << z << ", " << w << ")");
+  helper_->SubmitVRCompositorFrameCHROMIUM(compositor, frameTexture, x, y, z,
+                                           w);
+  CheckGLError();
+}
+
+void GLES2Implementation::VRCompositorTextureBoundsCHROMIUM(GLuint compositor,
+                                                            GLuint eye,
+                                                            GLfloat x,
+                                                            GLfloat y,
+                                                            GLfloat width,
+                                                            GLfloat height) {
+  GPU_CLIENT_SINGLE_THREAD_CHECK();
+  GPU_CLIENT_LOG("[" << GetLogPrefix()
+                     << "] glVRCompositorTextureBoundsCHROMIUM(" << compositor
+                     << ", " << eye << ", " << x << ", " << y << ", " << width
+                     << ", " << height << ")");
+  helper_->VRCompositorTextureBoundsCHROMIUM(compositor, eye, x, y, width,
+                                             height);
+  CheckGLError();
+}
+
+void GLES2Implementation::ResetVRCompositorPoseCHROMIUM(GLuint compositor) {
+  GPU_CLIENT_SINGLE_THREAD_CHECK();
+  GPU_CLIENT_LOG("[" << GetLogPrefix() << "] glResetVRCompositorPoseCHROMIUM("
+                     << compositor << ")");
+  helper_->ResetVRCompositorPoseCHROMIUM(compositor);
+  CheckGLError();
+}
+
+void GLES2Implementation::DeleteVRCompositorCHROMIUM(GLuint compositor) {
+  GPU_CLIENT_SINGLE_THREAD_CHECK();
+  GPU_CLIENT_LOG("[" << GetLogPrefix() << "] glDeleteVRCompositorCHROMIUM("
+                     << compositor << ")");
+  helper_->DeleteVRCompositorCHROMIUM(compositor);
+  CheckGLError();
+}
+
 #endif  // GPU_COMMAND_BUFFER_CLIENT_GLES2_IMPLEMENTATION_IMPL_AUTOGEN_H_

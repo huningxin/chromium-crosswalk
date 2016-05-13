@@ -243,6 +243,9 @@ versionchange
 visibilitychange
 voiceschanged
 volumechange
+vrdisplayconnected
+vrdisplaydisconnected
+vrdisplaypresentchange
 waiting
 waitingforkey
 webglcontextcreationerror

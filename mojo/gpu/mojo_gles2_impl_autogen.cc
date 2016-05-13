@@ -1929,5 +1929,35 @@ void MojoGLES2Impl::UniformMatrix4fvStreamTextureMatrixCHROMIUM(
   glUniformMatrix4fvStreamTextureMatrixCHROMIUM(location, transpose,
                                                 default_value);
 }
+GLuint MojoGLES2Impl::CreateVRCompositorCHROMIUM(GLenum compositorType) {
+  MojoGLES2MakeCurrent(context_);
+  return glCreateVRCompositorCHROMIUM(compositorType);
+}
+void MojoGLES2Impl::SubmitVRCompositorFrameCHROMIUM(GLuint compositor,
+                                                    GLuint frameTexture,
+                                                    GLfloat x,
+                                                    GLfloat y,
+                                                    GLfloat z,
+                                                    GLfloat w) {
+  MojoGLES2MakeCurrent(context_);
+  glSubmitVRCompositorFrameCHROMIUM(compositor, frameTexture, x, y, z, w);
+}
+void MojoGLES2Impl::VRCompositorTextureBoundsCHROMIUM(GLuint compositor,
+                                                      GLuint eye,
+                                                      GLfloat x,
+                                                      GLfloat y,
+                                                      GLfloat width,
+                                                      GLfloat height) {
+  MojoGLES2MakeCurrent(context_);
+  glVRCompositorTextureBoundsCHROMIUM(compositor, eye, x, y, width, height);
+}
+void MojoGLES2Impl::ResetVRCompositorPoseCHROMIUM(GLuint compositor) {
+  MojoGLES2MakeCurrent(context_);
+  glResetVRCompositorPoseCHROMIUM(compositor);
+}
+void MojoGLES2Impl::DeleteVRCompositorCHROMIUM(GLuint compositor) {
+  MojoGLES2MakeCurrent(context_);
+  glDeleteVRCompositorCHROMIUM(compositor);
+}
 
 }  // namespace mojo
