@@ -201,10 +201,10 @@ void ClearWindowPropertyStore(HWND hwnd) {
 }
 
 bool IsAeroGlassEnabled() {
-#if defined(ENABLE_WEBVR)
+//#if defined(ENABLE_WEBVR)
   // FIXME: Temp fix for WebVR, prevent black from with --use-gl=desktop
-  return false;
-#else
+//  return false;
+//#else
 
   // For testing in Win8 (where it is not possible to disable composition) the
   // user can specify this command line switch to mimic the behavior.  In this
@@ -221,7 +221,7 @@ bool IsAeroGlassEnabled() {
   // If composition is not enabled, we behave like on XP.
   BOOL enabled = FALSE;
   return SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled;
-#endif
+//#endif
 }
 
 }  // namespace win
