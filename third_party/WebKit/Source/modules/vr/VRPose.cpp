@@ -8,11 +8,10 @@ namespace blink {
 
 namespace {
 
-DOMFloat32Array* arrayToFloat32Array(const float* array, int length, bool valid)
+PassRefPtr<DOMFloat32Array> arrayToFloat32Array(const float* array, int length, bool valid)
 {
     if (valid) {
-        DOMFloat32Array* out = DOMFloat32Array::create(array, length).get();
-        return out;
+        return DOMFloat32Array::create(array, length);
     }
     return nullptr;
 }
