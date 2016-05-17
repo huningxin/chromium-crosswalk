@@ -28,7 +28,7 @@ public:
 
     void update(const WebVREyeParameters&);
 
-    DEFINE_INLINE_TRACE() { }
+    DECLARE_VIRTUAL_TRACE();
 
 private:
     RefPtr<DOMFloat32Array> m_offset;
