@@ -1051,6 +1051,10 @@ const char kMemoryPressureThresholdsMb[] = "memory-pressure-thresholds-mb";
 const char kTraceExportEventsToETW[] = "trace-export-events-to-etw";
 #endif
 
+#if defined(OS_LINUX) && !defined(OS_CHROMEOS)
+const char kNodeJS[] = "nodejs";
+#endif
+
 // Don't dump stuff here, follow the same order as the header.
 
 }  // namespace switches
