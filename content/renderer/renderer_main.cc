@@ -34,7 +34,7 @@
 #include "content/renderer/renderer_main_platform_delegate.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "ui/base/ui_base_switches.h"
-#include "xwalk/nodejs/nodejs_content.h"
+#include "third_party/node/src/node_webkit.h"
 
 #if defined(OS_ANDROID)
 #include "base/android/library_loader/library_loader_hooks.h"
@@ -99,8 +99,8 @@ int RendererMain(const MainFunctionParams& parameters) {
   //bool nodejs = parsed_command_line.HasSwitch(switches::kNodeJS);
   bool nodejs = true;
 
-  if (nodejs)
-    xwalk::nodejs::LoadNodeSymbols();
+  //if (nodejs)
+  //  LoadNodeSymbols();
 
 #if defined(OS_MACOSX)
   base::mac::ScopedNSAutoreleasePool* pool = parameters.autorelease_pool;

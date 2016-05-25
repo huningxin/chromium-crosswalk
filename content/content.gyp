@@ -321,7 +321,6 @@
             '../third_party/webrtc/modules/modules.gyp:webrtc_h264',
             'common_features',
             'content_resources',
-            '../xwalk/nodejs/xwalk_nodejs.gyp:xwalk_nodejs',
           ],
           'conditions': [
             ['chromium_enable_vtune_jit_for_v8==1', {

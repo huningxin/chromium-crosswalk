@@ -46,7 +46,10 @@ void UnloadNativeLibrary(NativeLibrary library) {
 // static
 void* GetFunctionPointerFromNativeLibrary(NativeLibrary library,
                                           const char* name) {
-  return dlsym(library, name);
+  void* func = dlsym(library, name);
+  if (!func)
+    DLOG(ERROR) << "dlerror: " << dlerror();
+  return func;
 }
 
 // static

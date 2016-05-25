@@ -9,6 +9,13 @@
 #include "content/public/common/content_switches.h"
 #include "v8/include/v8.h"
 #include "third_party/node/src/node.h"
+#include "base/native_library.h"
+#include "base/path_service.h"
+#include "base/strings/string_number_conversions.h"
+#include "base/strings/string_util.h"
+#include "base/strings/utf_string_conversions.h"
+#include "base/files/file_path.h"
+
 #undef CHECK
 #undef CHECK_EQ
 #undef CHECK_GE
@@ -20,6 +27,7 @@
 #undef DISALLOW_COPY_AND_ASSIGN
 #include "third_party/node/src/node_webkit.h"
 
+VoidHookFn g_promise_reject_callback_fn = nullptr;
 VoidHookFn g_msg_pump_ctor_fn = nullptr;
 VoidHookFn g_msg_pump_dtor_fn = nullptr;
 VoidHookFn g_msg_pump_sched_work_fn = nullptr, g_msg_pump_nest_leave_fn = nullptr, g_msg_pump_need_work_fn = nullptr;
@@ -27,6 +35,39 @@ VoidHookFn g_msg_pump_did_work_fn = nullptr, g_msg_pump_pre_loop_fn = nullptr, g
 VoidIntHookFn g_msg_pump_delay_work_fn = nullptr;
 VoidHookFn g_msg_pump_clean_ctx_fn = nullptr;
 GetPointerFn g_uv_default_loop_fn = nullptr;
+
+void LoadNodeSymbols() {
+  struct SymbolDefinition {
+    const char* name;
+    VoidHookFn* fn;
+  };
+  const SymbolDefinition kSymbols[] = {
+    { "g_msg_pump_ctor", &g_msg_pump_ctor_fn },
+    { "g_msg_pump_dtor", &g_msg_pump_dtor_fn },
+    { "g_msg_pump_sched_work", &g_msg_pump_sched_work_fn },
+    { "g_msg_pump_nest_leave", &g_msg_pump_nest_leave_fn },
+    { "g_msg_pump_nest_enter", &g_msg_pump_nest_enter_fn },
+    { "g_msg_pump_need_work", &g_msg_pump_need_work_fn },
+    { "g_msg_pump_did_work", &g_msg_pump_did_work_fn },
+    { "g_msg_pump_pre_loop", &g_msg_pump_pre_loop_fn },
+    { "g_msg_pump_clean_ctx", &g_msg_pump_clean_ctx_fn },
+    { "g_promise_reject_callback", &g_promise_reject_callback_fn}
+  };
+  base::NativeLibraryLoadError error;
+  base::FilePath node_dll_path = base::FilePath::FromUTF16Unsafe(base::GetNativeLibraryName(base::UTF8ToUTF16("node")));
+  base::NativeLibrary node_dll = base::LoadNativeLibrary(node_dll_path, &error);
+  if(!node_dll)
+    LOG_IF(FATAL, true) << "Failed to load node library (error: " << error.ToString() << ")";
+  else {
+    for (size_t i = 0; i < sizeof(kSymbols) / sizeof(kSymbols[0]); ++i) {
+      *(kSymbols[i].fn) = (VoidHookFn)base::GetFunctionPointerFromNativeLibrary(node_dll, kSymbols[i].name);
+      DCHECK((*kSymbols[i].fn)) << "Unable to find symbol for "
+                              << kSymbols[i].name;
+    }
+    g_msg_pump_delay_work_fn = (VoidIntHookFn)base::GetFunctionPointerFromNativeLibrary(node_dll, "g_msg_pump_delay_work");
+    g_uv_default_loop_fn = (GetPointerFn)base::GetFunctionPointerFromNativeLibrary(node_dll, "g_uv_default_loop");
+  }
+}
 
 namespace base {
 
@@ -36,6 +77,8 @@ MessagePumpUV::MessagePumpUV()
   // wakeup_event_ = new uv_async_t;
   // uv_async_init(uv_default_loop(), wakeup_event_, wakeup_callback);
   // node::g_nw_uv_run = uv_run;
+  if (g_msg_pump_ctor_fn == nullptr)
+    LoadNodeSymbols();
   g_msg_pump_ctor_fn(&wakeup_event_);
 }
 
