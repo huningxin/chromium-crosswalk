@@ -40,6 +40,11 @@ WebArrayBuffer WebArrayBuffer::create(unsigned numElements, unsigned elementByte
     return WebArrayBuffer(DOMArrayBuffer::create(numElements, elementByteSize));
 }
 
+WebArrayBuffer WebArrayBuffer::createExternal(void* source, unsigned byteLength)
+{
+    return WebArrayBuffer(DOMArrayBuffer::createExternal(source, byteLength));
+}
+
 void WebArrayBuffer::reset()
 {
     m_private.reset();
