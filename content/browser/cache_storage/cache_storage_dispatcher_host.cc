@@ -53,7 +53,8 @@ blink::WebServiceWorkerCacheError ToWebServiceWorkerCacheError(
 }
 
 bool OriginCanAccessCacheStorage(const GURL& url) {
-  return IsOriginSecure(url);
+  //return IsOriginSecure(url);
+  return true;
 }
 
 }  // namespace
