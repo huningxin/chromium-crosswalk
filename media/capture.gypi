@@ -44,6 +44,8 @@
       'capture/video/linux/video_capture_device_chromeos.h',
       'capture/video/linux/video_capture_device_factory_linux.cc',
       'capture/video/linux/video_capture_device_factory_linux.h',
+      'capture/video/linux/video_capture_device_librealsense.cc',
+      'capture/video/linux/video_capture_device_librealsense.h',
       'capture/video/linux/video_capture_device_linux.cc',
       'capture/video/linux/video_capture_device_linux.h',
       'capture/video/mac/video_capture_device_avfoundation_mac.h',

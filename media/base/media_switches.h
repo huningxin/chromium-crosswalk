@@ -20,6 +20,8 @@ MEDIA_EXPORT extern const char kVideoThreads[];
 MEDIA_EXPORT extern const char kEnableMediaSuspend[];
 MEDIA_EXPORT extern const char kDisableMediaSuspend[];
 
+MEDIA_EXPORT extern const char kUseRsVideoCapture[];
+
 #if defined(OS_ANDROID)
 MEDIA_EXPORT extern const char kDisableMediaThreadForMediaPlayback[];
 MEDIA_EXPORT extern const char kDisableUnifiedMediaPipeline[];
@@ -38,7 +40,6 @@ MEDIA_EXPORT extern const char kEnableExclusiveAudio[];
 MEDIA_EXPORT extern const char kForceMediaFoundationVideoCapture[];
 MEDIA_EXPORT extern const char kForceWaveAudio[];
 MEDIA_EXPORT extern const char kTrySupportedChannelLayouts[];
-MEDIA_EXPORT extern const char kUseRsVideoCapture[];
 MEDIA_EXPORT extern const char kWaveOutBuffers[];
 #endif
 

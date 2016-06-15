@@ -13,6 +13,7 @@
     'linux_link_pulseaudio%': 0,
     # Option for Windows to use RSSDK for video capture.
     'use_rssdk%': 0,
+    'use_librealsense%': 1,
     'conditions': [
       # Enable ALSA and Pulse for runtime selection.
       ['(OS=="linux" or OS=="freebsd" or OS=="solaris") and (embedded==0 or chromecast==1)', {
@@ -778,6 +779,13 @@
         }],
         ['OS=="linux"', {
           'conditions': [
+            ['use_librealsense==1', {
+              'link_settings': {
+                'libraries': [
+                  '-L/usr/local/lib -lrealsense',
+                ],
+              },
+            }],
             ['use_x11==1', {
               'dependencies': [
                 '../build/linux/system.gyp:x11',

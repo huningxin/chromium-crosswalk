@@ -9,10 +9,12 @@
 #include <stdint.h>
 #include <sys/ioctl.h>
 
+#include "base/command_line.h"
 #include "base/files/file_enumerator.h"
 #include "base/files/scoped_file.h"
 #include "base/posix/eintr_wrapper.h"
 #include "build/build_config.h"
+#include "media/base/media_switches.h"
 
 #if defined(OS_OPENBSD)
 #include <sys/videoio.h>
@@ -24,6 +26,7 @@
 #include "media/capture/video/linux/video_capture_device_chromeos.h"
 #endif
 #include "media/capture/video/linux/video_capture_device_linux.h"
+#include "media/capture/video/linux/video_capture_device_librealsense.h"
 
 namespace media {
 
@@ -122,7 +125,10 @@ static void GetSupportedFormatsForV4L2BufferType(
 
 VideoCaptureDeviceFactoryLinux::VideoCaptureDeviceFactoryLinux(
     scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner)
-    : ui_task_runner_(ui_task_runner) {
+    : ui_task_runner_(ui_task_runner),
+      use_librealsense_(false) {
+  const base::CommandLine* cmd_line = base::CommandLine::ForCurrentProcess();
+  use_librealsense_ = cmd_line->HasSwitch(switches::kUseRsVideoCapture);
 }
 
 VideoCaptureDeviceFactoryLinux::~VideoCaptureDeviceFactoryLinux() {
@@ -131,6 +137,11 @@ VideoCaptureDeviceFactoryLinux::~VideoCaptureDeviceFactoryLinux() {
 std::unique_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryLinux::Create(
     const VideoCaptureDevice::Name& device_name) {
   DCHECK(thread_checker_.CalledOnValidThread());
+  if (use_librealsense_) {
+    VideoCaptureDeviceLibrealsense* self =
+      new VideoCaptureDeviceLibrealsense(device_name);
+    return scoped_ptr<VideoCaptureDevice>(self);
+  }
 #if defined(OS_CHROMEOS)
   VideoCaptureDeviceChromeOS* self =
       new VideoCaptureDeviceChromeOS(ui_task_runner_, device_name);
@@ -156,6 +167,12 @@ void VideoCaptureDeviceFactoryLinux::GetDeviceNames(
     VideoCaptureDevice::Names* const device_names) {
   DCHECK(thread_checker_.CalledOnValidThread());
   DCHECK(device_names->empty());
+
+  if (use_librealsense_) {
+    VideoCaptureDeviceLibrealsense::GetDeviceNames(device_names);
+    return;
+  }
+
   const base::FilePath path("/dev/");
   base::FileEnumerator enumerator(path, false, base::FileEnumerator::FILES,
                                   "video*");
@@ -190,6 +207,12 @@ void VideoCaptureDeviceFactoryLinux::GetDeviceSupportedFormats(
   DCHECK(thread_checker_.CalledOnValidThread());
   if (device.id().empty())
     return;
+
+  if (use_librealsense_) {
+    VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats(device, supported_formats);
+    return;
+  }
+
   base::ScopedFD fd(HANDLE_EINTR(open(device.id().c_str(), O_RDONLY)));
   if (!fd.is_valid())  // Failed to open this device.
     return;
