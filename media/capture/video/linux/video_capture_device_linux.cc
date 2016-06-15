@@ -21,6 +21,7 @@
 
 namespace media {
 
+#if 0
 // USB VID and PID are both 4 bytes long.
 static const size_t kVidPidSize = 4;
 
@@ -43,6 +44,7 @@ static bool ReadIdFile(const std::string& path, std::string* id) {
   id->append(id_buf, kVidPidSize);
   return true;
 }
+#endif
 
 // Translates Video4Linux pixel formats to Chromium pixel formats.
 // static
@@ -59,6 +61,9 @@ std::list<uint32_t> VideoCaptureDeviceLinux::GetListOfUsableFourCCs(
 }
 
 const std::string VideoCaptureDevice::Name::GetModel() const {
+  std::string id;
+  return id;
+#if 0
   // |unique_id| is of the form "/dev/video2".  |file_name| is "video2".
   const std::string dev_dir = "/dev/";
   DCHECK_EQ(0, unique_id_.compare(0, dev_dir.length(), dev_dir));
@@ -78,6 +83,7 @@ const std::string VideoCaptureDevice::Name::GetModel() const {
     return "";
 
   return usb_id;
+#endif
 }
 
 VideoCaptureDeviceLinux::VideoCaptureDeviceLinux(const Name& device_name)
