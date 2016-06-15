@@ -55,6 +55,7 @@ class MEDIA_EXPORT VideoCaptureDevice {
     // Linux/CrOS targets Capture Api type: it can only be set on construction.
     enum CaptureApiType {
       V4L2_SINGLE_PLANE,
+      LIBREALSENSE,
       API_TYPE_UNKNOWN
     };
 #elif defined(OS_WIN)

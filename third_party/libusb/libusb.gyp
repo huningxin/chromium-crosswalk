@@ -48,7 +48,7 @@
             'src/libusb/os/threads_posix.h',
           ],
           'defines': [
-            'DEFAULT_VISIBILITY=',
+            'DEFAULT_VISIBILITY=__attribute__ ((visibility ("default")))',
             'HAVE_GETTIMEOFDAY=1',
             'HAVE_POLL_H=1',
             'HAVE_SYS_TIME_H=1',

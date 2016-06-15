@@ -17,6 +17,9 @@ const char kVideoThreads[] = "video-threads";
 const char kEnableMediaSuspend[] = "enable-media-suspend";
 const char kDisableMediaSuspend[] = "disable-media-suspend";
 
+// Use RSSDK for video capture.
+const char kUseRsVideoCapture[] = "use-rs-video-capture";
+
 #if defined(OS_ANDROID)
 // Sets the MediaSource player that uses UI thread for frame processing.
 const char kDisableMediaThreadForMediaPlayback[] =
@@ -87,9 +90,6 @@ const char kForceWaveAudio[] = "force-wave-audio";
 // flag since some drivers lie about supported layouts and hang when used.  See
 // http://crbug.com/259165 for more details.
 const char kTrySupportedChannelLayouts[] = "try-supported-channel-layouts";
-
-// Use RSSDK for video capture.
-const char kUseRsVideoCapture[] = "use-rs-video-capture";
 
 // Number of buffers to use for WaveOut.
 const char kWaveOutBuffers[] = "waveout-buffers";
