@@ -45,80 +45,78 @@ class RsCaptureDelegate final
     : public base::RefCountedThreadSafe<RsCaptureDelegate> {
  public:
   RsCaptureDelegate(
-      const VideoCaptureDevice::Name& device_name,
       const scoped_refptr<base::SingleThreadTaskRunner>& task_runner) :
       task_runner_(task_runner),
-      device_name_(device_name),
       is_capturing_(false) {
-    rs_context_.reset(new rs::context);
-    std::string delimiter("-");
-    name_ = device_name.name().substr(0, device_name.name().find(delimiter));
-    std::string stream = device_name.name().substr(device_name.name().find(delimiter) + 1);
-    if (stream == "COLOR")
-      rs_stream_ = rs::stream::color;
-    else if (stream == "DEPTH")
-      rs_stream_ = rs::stream::depth;
-    else
-      NOTREACHED();
-
-    DVLOG(1) << "RsCaptureDelegate::RsCaptureDelegate: " << name_ << " " << rs_stream_;
-  }
-
-  // Forward-to versions of VideoCaptureDevice virtual methods.
-  void AllocateAndStart(int width,
-                        int height,
-                        float frame_rate,
-                        scoped_ptr<VideoCaptureDevice::Client> client) {
-    DCHECK(task_runner_->BelongsToCurrentThread());
-    DCHECK(client);
-    client_ = std::move(client);
-
+    rs_context_ = new rs::context;
     int device_count = rs_context_->get_device_count();   
     if (!device_count) {
-      SetErrorState(FROM_HERE, "No device detected. Is it plugged in?");
+      LOG(ERROR) << "No device detected. Is it plugged in?";
       return;
     }
 
-    for (int i = 0; i < device_count; ++i){
-      // Show the device name and information
-      rs::device * dev = rs_context_->get_device(i);
-      DVLOG(1) << "Device " << i << " - " << dev->get_name() << ":\n";
+    // Assume the first device.
+    rs_device_ = rs_context_->get_device(0);
+  }
 
-      if (name_ != std::string(dev->get_name()))
-        continue;
+  void StartStream(rs::stream stream,
+                   scoped_ptr<VideoCaptureDevice::Client> client) {
+    DCHECK(task_runner_->BelongsToCurrentThread());
+    if (clients_[static_cast<int>(stream)].get()) {
+      LOG(ERROR) << "Stream " << stream << " is already started";
+      return;
+    }
+    DCHECK(client);
 
-      rs_device_ = dev;
-
-      rs_device_->enable_stream(rs_stream_, rs::preset::best_quality);
-
-      DVLOG(1) << "Enabled Stream: " << rs_device_->get_stream_width(rs_stream_) << " " 
-          << rs_device_->get_stream_height(rs_stream_) << " " << rs_device_->get_stream_format(rs_stream_);
-
-      capture_format_.frame_size.SetSize(rs_device_->get_stream_width(rs_stream_),
-                                         rs_device_->get_stream_height(rs_stream_));
-      capture_format_.frame_rate = rs_device_->get_stream_framerate(rs_stream_);
-      capture_format_.pixel_format = PIXEL_FORMAT_RGB24;
-
-      if (rs_device_->get_stream_format(rs_stream_) == rs::format::z16) {
-        rgb_.reset(new uint8_t[rs_device_->get_stream_width(rs_stream_) * rs_device_->get_stream_height(rs_stream_) * 3]);
-      }
-
-      rs_device_->start();
-
-      break;
+    if (rs_device_->is_streaming()) {
+      LOG(ERROR) << "Stop device";
+      rs_device_->stop();
     }
 
-    is_capturing_ = true;
-    task_runner_->PostTask(
-        FROM_HERE, base::Bind(&RsCaptureDelegate::DoCapture, this));
+    clients_[static_cast<int>(stream)] = std::move(client);
+
+    rs_device_->enable_stream(stream, rs::preset::best_quality);
+
+    LOG(ERROR) << "Enabled Stream: " << rs_device_->get_stream_width(stream) << " " 
+        << rs_device_->get_stream_height(stream) << " " << rs_device_->get_stream_format(stream);
+
+    capture_formats_[static_cast<int>(stream)].frame_size.SetSize(rs_device_->get_stream_width(stream),
+                                       rs_device_->get_stream_height(stream));
+    capture_formats_[static_cast<int>(stream)].frame_rate = rs_device_->get_stream_framerate(stream);
+    capture_formats_[static_cast<int>(stream)].pixel_format = PIXEL_FORMAT_RGB24;
+
+    if (rs_device_->get_stream_format(stream) == rs::format::z16) {
+      rgb_.reset(new uint8_t[rs_device_->get_stream_width(stream) * rs_device_->get_stream_height(stream) * 3]);
+    }
+
+    rs_device_->start();
+
+    if (is_capturing_ == false) {
+      is_capturing_ = true;
+      task_runner_->PostTask(
+          FROM_HERE, base::Bind(&RsCaptureDelegate::DoCapture, this));
+    }
   }
-  void StopAndDeAllocate() {
+  void StopStream(rs::stream stream) {
     DCHECK(task_runner_->BelongsToCurrentThread());
-    rs_device_->stop();
 
-    is_capturing_ = false;
+    LOG(ERROR) << "Stop Stream: " << stream;
 
-    client_.reset();
+    if (rs_device_->is_streaming()) {
+      LOG(ERROR) << "Stop device";
+      rs_device_->stop();
+    }
+
+    clients_[static_cast<int>(stream)].reset();
+    rs_device_->disable_stream(stream);
+
+    if (clients_[static_cast<int>(rs::stream::color)].get() ||
+        clients_[static_cast<int>(rs::stream::depth)].get()) {
+      rs_device_->start();
+      LOG(ERROR) << "Restart device";
+    } else {
+      is_capturing_ = false;
+    }
   }
 
  private:
@@ -128,68 +126,113 @@ class RsCaptureDelegate final
   void DoCapture() {
     DCHECK(task_runner_->BelongsToCurrentThread());
     if (!is_capturing_) {
+      LOG(ERROR) << "Stop capture";
       return;
     }
 
     rs_device_->wait_for_frames();
 
-    if (rs_device_->get_stream_format(rs_stream_) == rs::format::rgb8) {
-      client_->OnIncomingCapturedData(
-          reinterpret_cast<const uint8_t *>(rs_device_->get_frame_data(rs_stream_)),
-          capture_format_.ImageAllocationSize(),
-          capture_format_, 0, base::TimeTicks::Now());
-    } else if (rs_device_->get_stream_format(rs_stream_) == rs::format::z16) {
-      make_depth_histogram(rgb_.get(),
-                           reinterpret_cast<const uint16_t *>(rs_device_->get_frame_data(rs_stream_)),
-                           rs_device_->get_stream_width(rs_stream_), rs_device_->get_stream_height(rs_stream_));
-      client_->OnIncomingCapturedData(
-          rgb_.get(),
-          capture_format_.ImageAllocationSize(),
-          capture_format_, 0, base::TimeTicks::Now());
+    if (clients_[static_cast<int>(rs::stream::color)].get()) {
+      if (rs_device_->get_stream_format(rs::stream::color) == rs::format::rgb8) {
+        clients_[static_cast<int>(rs::stream::color)]->OnIncomingCapturedData(
+            reinterpret_cast<const uint8_t *>(rs_device_->get_frame_data(rs::stream::color)),
+            capture_formats_[static_cast<int>(rs::stream::color)].ImageAllocationSize(),
+            capture_formats_[static_cast<int>(rs::stream::color)], 0, base::TimeTicks::Now());
+      }
+    }
+
+    if (clients_[static_cast<int>(rs::stream::depth)].get()) {
+      if (rs_device_->get_stream_format(rs::stream::depth) == rs::format::z16) {
+        make_depth_histogram(rgb_.get(),
+                             reinterpret_cast<const uint16_t *>(rs_device_->get_frame_data(rs::stream::depth)),
+                             rs_device_->get_stream_width(rs::stream::depth), rs_device_->get_stream_height(rs::stream::depth));
+        clients_[static_cast<int>(rs::stream::depth)]->OnIncomingCapturedData(
+            rgb_.get(),
+            capture_formats_[static_cast<int>(rs::stream::depth)].ImageAllocationSize(),
+            capture_formats_[static_cast<int>(rs::stream::depth)], 0, base::TimeTicks::Now());
+      }
     }
 
     task_runner_->PostTask(
         FROM_HERE, base::Bind(&RsCaptureDelegate::DoCapture, this));
   }
 
-  void SetErrorState(const tracked_objects::Location& from_here,
-                     const std::string& reason) {
-    DCHECK(task_runner_->BelongsToCurrentThread());
-    is_capturing_ = false;
-    client_->OnError(from_here, reason);
-  }
-
   const scoped_refptr<base::SingleThreadTaskRunner> task_runner_;
   const VideoCaptureDevice::Name device_name_;
 
-  scoped_ptr<VideoCaptureDevice::Client> client_;
+  // depth = 0, color = 1
+  scoped_ptr<VideoCaptureDevice::Client> clients_[2];
+  VideoCaptureFormat capture_formats_[2];
 
   bool is_capturing_;
 
-  std::string name_;
-  scoped_ptr<rs::context> rs_context_;
+  rs::context* rs_context_;
   rs::device* rs_device_;
-  rs::stream rs_stream_;
 
-  VideoCaptureFormat capture_format_;
   scoped_ptr<uint8_t[]> rgb_;
 
   DISALLOW_COPY_AND_ASSIGN(RsCaptureDelegate);
 };
 
+class RsCaptureService {
+ public:
+  static RsCaptureService* GetInstance() {
+    if (g_rs_capture_service_ == nullptr) {
+      g_rs_capture_service_ = new RsCaptureService;
+    }
+    return g_rs_capture_service_;
+  }
+  RsCaptureService() : 
+      rs_thread_("LibrealsenseCaptureThread") {
+    rs_thread_.Start();
+    capture_impl_ = new RsCaptureDelegate(rs_thread_.task_runner());
+  }
+  ~RsCaptureService() {
+    // Check if the thread is running.
+    // This means that the device has not been StopAndDeAllocate()d properly.
+    DCHECK(!rs_thread_.IsRunning());
+    rs_thread_.Stop();
+  }
+
+  void StartStream(rs::stream stream, scoped_ptr<VideoCaptureDevice::Client> client) {
+    DCHECK(client);
+    rs_thread_.message_loop()->PostTask(
+        FROM_HERE,
+        base::Bind(&RsCaptureDelegate::StartStream, capture_impl_,
+                   stream,
+                   base::Passed(&client)));
+  }
+
+  void StopStream(rs::stream stream) {
+    rs_thread_.message_loop()->PostTask(
+        FROM_HERE,
+        base::Bind(&RsCaptureDelegate::StopStream, capture_impl_,
+                   stream));
+  }
+ 
+ private:
+  static RsCaptureService* g_rs_capture_service_;
+
+  scoped_refptr<RsCaptureDelegate> capture_impl_;
+
+  base::Thread rs_thread_;
+};
+
+RsCaptureService* RsCaptureService::g_rs_capture_service_ = nullptr;
+
 void VideoCaptureDeviceLibrealsense::GetDeviceNames(Names* device_names) {
   DCHECK(device_names->empty());
-  DVLOG(1) << "VideoCaptureDeviceLibrealsense::GetDeviceNames";
+  LOG(ERROR) << "VideoCaptureDeviceLibrealsense::GetDeviceNames";
 
   rs::context ctx;
 
   int device_count = ctx.get_device_count();   
-  if (!device_count) DVLOG(1) << "No device detected. Is it plugged in?";
+  if (!device_count) LOG(ERROR) << "No device detected. Is it plugged in?";
 
   for (int i = 0; i < device_count; ++i){
     // Show the device name and information
     rs::device * dev = ctx.get_device(i);
-    DVLOG(1) << "Device " << i << " - " << dev->get_name()
+    LOG(ERROR) << "Device " << i << " - " << dev->get_name()
         << " Serial number: " << dev->get_serial() << " Firmware version: "
         << dev->get_firmware_version();
 
@@ -205,7 +248,7 @@ void VideoCaptureDeviceLibrealsense::GetDeviceNames(Names* device_names) {
           continue;
 
         // Show each available mode for this stream
-        DVLOG(1) << " Stream " << strm << " - " << mode_count << "\n";
+        LOG(ERROR) << " Stream " << strm << " - " << mode_count << "\n";
 
         std::string name = std::string(dev->get_name()) + std::string("-") + std::string(rs_stream_to_string((rs_stream)strm));
         std::string id = std::string(dev->get_serial()) + std::string("-") + std::string(rs_stream_to_string((rs_stream)strm));
@@ -234,22 +277,22 @@ void VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats(
     return;
   }
 
-  DVLOG(1) << "VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats: " << name << " " << stream;
+  LOG(ERROR) << "VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats: " << name << " " << stream;
 
   int device_count = ctx.get_device_count();   
-  if (!device_count) DVLOG(1) << "No device detected. Is it plugged in?";
+  if (!device_count) LOG(ERROR) << "No device detected. Is it plugged in?";
 
   for (int i = 0; i < device_count; ++i){
     // Show the device name and information
     rs::device * dev = ctx.get_device(i);
-    DVLOG(1) << "Device " << i << " - " << dev->get_name() << ":\n";
+    LOG(ERROR) << "Device " << i << " - " << dev->get_name() << ":\n";
 
     if (name != std::string(dev->get_name()))
       continue;
 
     int mode_count = dev->get_stream_mode_count(requested_stream);
     if (mode_count == 0) {
-      DVLOG(1) << "No modes found";
+      LOG(ERROR) << "No modes found";
     }
 
     for(int k = 0; k < mode_count; ++k){
@@ -267,55 +310,38 @@ void VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats(
       supported_format.frame_size.SetSize(width, height);
       supported_format.frame_rate = framerate;
 
-      DVLOG(1) << "  " << width << "\tx " << height << "\t@ " << framerate << "Hz\t" << format;
+      LOG(ERROR) << "  " << width << "\tx " << height << "\t@ " << framerate << "Hz\t" << format;
     }
   }
 }
 
 VideoCaptureDeviceLibrealsense::VideoCaptureDeviceLibrealsense(const Name& device_name)
-    : rs_thread_("LibrealsenseCaptureThread"),
-      device_name_(device_name){
+    : device_name_(device_name){
+  std::string delimiter("-");
+  std::string name = device_name_.name().substr(0, device_name_.name().find(delimiter));
+  std::string stream = device_name_.name().substr(device_name_.name().find(delimiter) + 1);
+
+  if (stream == "COLOR") {
+    stream_type_ = static_cast<int>(rs::stream::color);
+  } else if (stream == "DEPTH") {
+    stream_type_ = static_cast<int>(rs::stream::depth);
+  } else {
+    NOTREACHED();
+    return;
+  }
 }
 
 VideoCaptureDeviceLibrealsense::~VideoCaptureDeviceLibrealsense() {
-  // Check if the thread is running.
-  // This means that the device has not been StopAndDeAllocate()d properly.
-  DCHECK(!rs_thread_.IsRunning());
-  rs_thread_.Stop();
 }
 
 void VideoCaptureDeviceLibrealsense::AllocateAndStart(
     const VideoCaptureParams& params,
     scoped_ptr<VideoCaptureDevice::Client> client) {
-  if (rs_thread_.IsRunning())
-    return;  // Wrong state.
-
-  DCHECK(client);
-
-  rs_thread_.Start();
-
-  capture_impl_ = new RsCaptureDelegate(
-      device_name_, rs_thread_.task_runner());
-  if (!capture_impl_) {
-    client->OnError(FROM_HERE, "Failed to create VideoCaptureDelegate");
-    return;
-  }
-  rs_thread_.message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&RsCaptureDelegate::AllocateAndStart, capture_impl_,
-                 params.requested_format.frame_size.width(),
-                 params.requested_format.frame_size.height(),
-                 params.requested_format.frame_rate, base::Passed(&client)));
+  RsCaptureService::GetInstance()->StartStream(static_cast<rs::stream>(stream_type_), std::move(client));
 }
 
 void VideoCaptureDeviceLibrealsense::StopAndDeAllocate() {
-  if (!rs_thread_.IsRunning())
-    return;  // Wrong state.
-  rs_thread_.message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&RsCaptureDelegate::StopAndDeAllocate, capture_impl_));
-  rs_thread_.Stop();
-  
+  RsCaptureService::GetInstance()->StopStream(static_cast<rs::stream>(stream_type_));
 }
 
 }  // namespace media

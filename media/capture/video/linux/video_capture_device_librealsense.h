@@ -19,8 +19,6 @@
 
 namespace media {
 
-class RsCaptureDelegate;
-
 // librealsense implementation of VideoCaptureDevice.
 class VideoCaptureDeviceLibrealsense : public VideoCaptureDevice {
  public:
@@ -38,11 +36,9 @@ class VideoCaptureDeviceLibrealsense : public VideoCaptureDevice {
   void StopAndDeAllocate() override;
 
  private:
-  base::Thread rs_thread_;  // Thread used for reading data from the device.
-
   const Name device_name_;
 
-  scoped_refptr<RsCaptureDelegate> capture_impl_;
+  int stream_type_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDeviceLibrealsense);
 };
