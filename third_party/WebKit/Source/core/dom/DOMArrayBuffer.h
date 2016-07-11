@@ -30,10 +30,6 @@ public:
     {
         return create(WTF::ArrayBuffer::create(contents));
     }
-    static PassRefPtr<DOMArrayBuffer> createExternal(void* source, unsigned byteLength)
-    {
-        return adoptRef(new DOMArrayBuffer(source, byteLength));
-    }
 
     // Only for use by XMLHttpRequest::responseArrayBuffer and
     // Internals::serializeObject.
@@ -56,10 +52,6 @@ public:
 private:
     explicit DOMArrayBuffer(PassRefPtr<WTF::ArrayBuffer> buffer)
         : DOMArrayBufferBase(buffer)
-    {
-    }
-    DOMArrayBuffer(void* source, unsigned byteLength)
-        : DOMArrayBufferBase(source, byteLength)
     {
     }
 };

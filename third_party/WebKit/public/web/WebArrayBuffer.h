@@ -55,7 +55,6 @@ public:
     }
 
     BLINK_EXPORT static WebArrayBuffer create(unsigned numElements, unsigned elementByteSize);
-    BLINK_EXPORT static WebArrayBuffer createExternal(void* source, unsigned byteLength);
 
     BLINK_EXPORT void reset();
     BLINK_EXPORT void assign(const WebArrayBuffer&);

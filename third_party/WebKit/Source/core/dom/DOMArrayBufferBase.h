@@ -19,24 +19,9 @@ public:
     const WTF::ArrayBuffer* buffer() const { return m_buffer.get(); }
     WTF::ArrayBuffer* buffer() { return m_buffer.get(); }
 
-    const void* data() const {
-      if (m_isExternal)
-          return m_source;
-      else
-          return buffer()->data();
-    }
-    void* data() {
-        if (m_isExternal)
-            return m_source;
-        else
-            return buffer()->data();
-    }
-    unsigned byteLength() const {
-        if (m_isExternal)
-            return m_byteLength;
-        else
-            return buffer()->byteLength();
-    }
+    const void* data() const { return buffer()->data(); }
+    void* data() { return buffer()->data(); }
+    unsigned byteLength() const { return buffer()->byteLength(); }
     bool transfer(WTF::ArrayBufferContents& result) { return buffer()->transfer(result); }
     bool shareContentsWith(WTF::ArrayBufferContents& result) { return buffer()->shareContentsWith(result); }
     bool isNeutered() const { return buffer()->isNeutered(); }
@@ -50,27 +35,12 @@ public:
 
 protected:
     explicit DOMArrayBufferBase(PassRefPtr<WTF::ArrayBuffer> buffer)
-        : m_buffer(buffer),
-          m_isExternal(false),
-          m_source(nullptr),
-          m_byteLength(0)
+        : m_buffer(buffer)
     {
         ASSERT(m_buffer);
     }
 
-    DOMArrayBufferBase(void* source, unsigned byteLength)
-        : m_buffer(WTF::ArrayBuffer::create(source, byteLength)),
-          m_isExternal(true),
-          m_source(source),
-          m_byteLength(byteLength)
-    {
-    }
-
     RefPtr<WTF::ArrayBuffer> m_buffer;
-    bool m_isExternal;
-    void* m_source;
-    unsigned m_byteLength;
- 
 };
 
 } // namespace blink
