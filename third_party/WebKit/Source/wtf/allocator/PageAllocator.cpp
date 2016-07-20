@@ -224,8 +224,8 @@ void decommitSystemPages(void* addr, size_t len)
 {
     ASSERT(!(len & kSystemPageOffsetMask));
 #if OS(POSIX)
-    int ret = madvise(addr, len, MADV_FREE);
-    RELEASE_ASSERT(!ret);
+    madvise(addr, len, MADV_FREE);
+    //RELEASE_ASSERT(!ret);
 #else
     setSystemPagesInaccessible(addr, len);
 #endif

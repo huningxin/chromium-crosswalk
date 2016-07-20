@@ -345,9 +345,9 @@ base::TimeDelta TimeDeltaFromXEventTime(Time timestamp) {
   uint32_t delta = static_cast<uint32_t>(now_ms - timestamp);
   // If using a mock clock, all bets are off -- in some tests, actual X11 events
   // come through with real timestamps.
-  DCHECK(delta < 60 * 1000 || g_tick_clock.Get() != nullptr)
-      << "Unexpected X11 event time, now: " << now_ticks
-      << " event at: " << timestamp;
+  //DCHECK(delta < 60 * 1000 || g_tick_clock.Get() != nullptr)
+  //    << "Unexpected X11 event time, now: " << now_ticks
+  //    << " event at: " << timestamp;
   return base::TimeDelta::FromMilliseconds(now_ms - delta);
 }
 

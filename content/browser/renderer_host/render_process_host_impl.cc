@@ -394,6 +394,8 @@ class RendererSandboxedProcessLauncherDelegate
 #elif defined(OS_POSIX)
 #if !defined(OS_MACOSX) && !defined(OS_ANDROID)
   ZygoteHandle* GetZygote() override {
+    return nullptr;
+/*
     const base::CommandLine& browser_command_line =
         *base::CommandLine::ForCurrentProcess();
     base::CommandLine::StringType renderer_prefix =
@@ -401,6 +403,7 @@ class RendererSandboxedProcessLauncherDelegate
     if (!renderer_prefix.empty())
       return nullptr;
     return GetGenericZygote();
+*/
   }
 #endif  // !defined(OS_MACOSX) && !defined(OS_ANDROID)
   base::ScopedFD TakeIpcFd() override { return std::move(ipc_fd_); }
@@ -685,8 +688,11 @@ bool RenderProcessHostImpl::Init() {
       browser_command_line.GetSwitchValueNative(switches::kRendererCmdPrefix);
 
 #if defined(OS_LINUX)
+  /*
   int flags = renderer_prefix.empty() ? ChildProcessHost::CHILD_ALLOW_SELF
                                       : ChildProcessHost::CHILD_NORMAL;
+  */
+  int flags = ChildProcessHost::CHILD_NORMAL;
 #else
   int flags = ChildProcessHost::CHILD_NORMAL;
 #endif
