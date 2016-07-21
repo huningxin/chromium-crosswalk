@@ -140,7 +140,7 @@ std::unique_ptr<VideoCaptureDevice> VideoCaptureDeviceFactoryLinux::Create(
   if (use_librealsense_) {
     VideoCaptureDeviceLibrealsense* self =
       new VideoCaptureDeviceLibrealsense(device_name);
-    return scoped_ptr<VideoCaptureDevice>(self);
+    return std::unique_ptr<VideoCaptureDevice>(self);
   }
 #if defined(OS_CHROMEOS)
   VideoCaptureDeviceChromeOS* self =
