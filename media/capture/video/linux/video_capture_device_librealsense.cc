@@ -16,214 +16,6 @@
 
 namespace media {
 
-inline void make_depth_histogram(uint8_t* rgb_image, const uint16_t depth_image[], int width, int height)
-{
-    static uint32_t histogram[0x10000];
-    memset(histogram, 0, sizeof(histogram));
-
-    for(int i = 0; i < width*height; ++i) ++histogram[depth_image[i]];
-    for(int i = 2; i < 0x10000; ++i) histogram[i] += histogram[i-1]; // Build a cumulative histogram for the indices in [1,0xFFFF]
-    for(int i = 0; i < width*height; ++i)
-    {
-        if(uint16_t d = depth_image[i])
-        {
-            int f = histogram[d] * 255 / histogram[0xFFFF]; // 0-255 based on histogram location
-            rgb_image[i*3 + 0] = 255 - f;
-            rgb_image[i*3 + 1] = 0;
-            rgb_image[i*3 + 2] = f;
-        }
-        else
-        {
-            rgb_image[i*3 + 0] = 20;
-            rgb_image[i*3 + 1] = 5;
-            rgb_image[i*3 + 2] = 0;
-        }
-    }
-}
-
-class RsCaptureDelegate final
-    : public base::RefCountedThreadSafe<RsCaptureDelegate> {
- public:
-  RsCaptureDelegate(
-      const scoped_refptr<base::SingleThreadTaskRunner>& task_runner) :
-      task_runner_(task_runner),
-      is_capturing_(false) {
-    rs_context_ = rs_create_context(RS_API_VERSION, nullptr);
-    int device_count = rs_get_device_count(rs_context_, nullptr);
-    if (!device_count) {
-      LOG(ERROR) << "No device detected. Is it plugged in?";
-      return;
-    }
-
-    // Assume the first device.
-    rs_device_ = rs_get_device(rs_context_, 0, nullptr);
-  }
-
-  void StartStream(rs_stream stream,
-                   std::unique_ptr<VideoCaptureDevice::Client> client) {
-    DCHECK(task_runner_->BelongsToCurrentThread());
-    if (clients_[static_cast<int>(stream)].get()) {
-      LOG(ERROR) << "Stream " << stream << " is already started";
-      return;
-    }
-    DCHECK(client);
-
-    if (rs_is_device_streaming(rs_device_, nullptr) != 0) {
-      LOG(ERROR) << "Stop device";
-      rs_stop_device(rs_device_, RS_SOURCE_ALL, nullptr);
-    }
-
-    clients_[static_cast<int>(stream)] = std::move(client);
-
-    rs_enable_stream_preset(rs_device_, stream, RS_PRESET_BEST_QUALITY, nullptr);
-
-    int width = rs_get_stream_width(rs_device_, stream, nullptr);
-    int height = rs_get_stream_height(rs_device_, stream, nullptr);
-    rs_format format = rs_get_stream_format(rs_device_, stream, nullptr);
-
-    LOG(ERROR) << "Enabled Stream: " << width << " " << height << " " << format;
-
-    capture_formats_[static_cast<int>(stream)].frame_size.SetSize(width, height);
-    capture_formats_[static_cast<int>(stream)].frame_rate = rs_get_stream_framerate(rs_device_, stream, nullptr);
-    capture_formats_[static_cast<int>(stream)].pixel_format = PIXEL_FORMAT_RGB24;
-
-    if (format == RS_FORMAT_Z16) {
-      rgb_.reset(new uint8_t[width * height * 3]);
-    }
-
-    rs_start_device(rs_device_, RS_SOURCE_ALL, nullptr);
-
-    if (is_capturing_ == false) {
-      is_capturing_ = true;
-      task_runner_->PostTask(
-          FROM_HERE, base::Bind(&RsCaptureDelegate::DoCapture, this));
-    }
-  }
-  void StopStream(rs_stream stream) {
-    DCHECK(task_runner_->BelongsToCurrentThread());
-
-    LOG(ERROR) << "Stop Stream: " << stream;
-
-    if (rs_is_device_streaming(rs_device_, nullptr) != 0) {
-      LOG(ERROR) << "Stop device";
-      rs_stop_device(rs_device_, RS_SOURCE_ALL, nullptr);
-    }
-
-    clients_[static_cast<int>(stream)].reset();
-    rs_disable_stream(rs_device_, stream, nullptr);
-
-    if (clients_[static_cast<int>(RS_STREAM_COLOR)].get() ||
-        clients_[static_cast<int>(RS_STREAM_DEPTH)].get()) {
-      rs_start_device(rs_device_, RS_SOURCE_ALL, nullptr);
-      LOG(ERROR) << "Restart device";
-    } else {
-      is_capturing_ = false;
-    }
-  }
-
- private:
-  friend class base::RefCountedThreadSafe<RsCaptureDelegate>;
-  ~RsCaptureDelegate() {
-    rs_delete_context(rs_context_, nullptr);
-  }
-
-  void DoCapture() {
-    DCHECK(task_runner_->BelongsToCurrentThread());
-    if (!is_capturing_) {
-      LOG(ERROR) << "Stop capture";
-      return;
-    }
-
-    rs_wait_for_frames(rs_device_, nullptr);
-
-    if (clients_[static_cast<int>(RS_STREAM_COLOR)].get()) {
-      if (rs_get_stream_format(rs_device_, RS_STREAM_COLOR, nullptr) == RS_FORMAT_RGB8) {
-        clients_[static_cast<int>(RS_STREAM_COLOR)]->OnIncomingCapturedData(
-            reinterpret_cast<const uint8_t *>(rs_get_frame_data(rs_device_, RS_STREAM_COLOR, nullptr)),
-            capture_formats_[static_cast<int>(RS_STREAM_COLOR)].ImageAllocationSize(),
-            capture_formats_[static_cast<int>(RS_STREAM_COLOR)], 0, base::TimeTicks::Now());
-      }
-    }
-
-    if (clients_[static_cast<int>(RS_STREAM_DEPTH)].get()) {
-      if (rs_get_stream_format(rs_device_, RS_STREAM_DEPTH, nullptr) == RS_FORMAT_Z16) {
-        make_depth_histogram(rgb_.get(),
-                             reinterpret_cast<const uint16_t *>(rs_get_frame_data(rs_device_, RS_STREAM_DEPTH, nullptr)),
-                             rs_get_stream_width(rs_device_, RS_STREAM_DEPTH, nullptr), rs_get_stream_height(rs_device_, RS_STREAM_DEPTH, nullptr));
-        clients_[static_cast<int>(RS_STREAM_DEPTH)]->OnIncomingCapturedData(
-            rgb_.get(),
-            capture_formats_[static_cast<int>(RS_STREAM_DEPTH)].ImageAllocationSize(),
-            capture_formats_[static_cast<int>(RS_STREAM_DEPTH)], 0, base::TimeTicks::Now());
-      }
-    }
-
-    task_runner_->PostTask(
-        FROM_HERE, base::Bind(&RsCaptureDelegate::DoCapture, this));
-  }
-
-  const scoped_refptr<base::SingleThreadTaskRunner> task_runner_;
-  const VideoCaptureDevice::Name device_name_;
-
-  // depth = 0, color = 1
-  std::unique_ptr<VideoCaptureDevice::Client> clients_[2];
-  VideoCaptureFormat capture_formats_[2];
-
-  bool is_capturing_;
-
-  rs_context* rs_context_;
-  rs_device* rs_device_;
-
-  std::unique_ptr<uint8_t[]> rgb_;
-
-  DISALLOW_COPY_AND_ASSIGN(RsCaptureDelegate);
-};
-
-class RsCaptureService {
- public:
-  static RsCaptureService* GetInstance() {
-    if (g_rs_capture_service_ == nullptr) {
-      g_rs_capture_service_ = new RsCaptureService;
-    }
-    return g_rs_capture_service_;
-  }
-  RsCaptureService() : 
-      rs_thread_("LibrealsenseCaptureThread") {
-    rs_thread_.Start();
-    capture_impl_ = new RsCaptureDelegate(rs_thread_.task_runner());
-  }
-  ~RsCaptureService() {
-    // Check if the thread is running.
-    // This means that the device has not been StopAndDeAllocate()d properly.
-    DCHECK(!rs_thread_.IsRunning());
-    rs_thread_.Stop();
-  }
-
-  void StartStream(rs_stream stream, std::unique_ptr<VideoCaptureDevice::Client> client) {
-    DCHECK(client);
-    rs_thread_.message_loop()->PostTask(
-        FROM_HERE,
-        base::Bind(&RsCaptureDelegate::StartStream, capture_impl_,
-                   stream,
-                   base::Passed(&client)));
-  }
-
-  void StopStream(rs_stream stream) {
-    rs_thread_.message_loop()->PostTask(
-        FROM_HERE,
-        base::Bind(&RsCaptureDelegate::StopStream, capture_impl_,
-                   stream));
-  }
- 
- private:
-  static RsCaptureService* g_rs_capture_service_;
-
-  scoped_refptr<RsCaptureDelegate> capture_impl_;
-
-  base::Thread rs_thread_;
-};
-
-RsCaptureService* RsCaptureService::g_rs_capture_service_ = nullptr;
-
 void VideoCaptureDeviceLibrealsense::GetDeviceNames(Names* device_names) {
   DCHECK(device_names->empty());
   LOG(ERROR) << "VideoCaptureDeviceLibrealsense::GetDeviceNames";
@@ -329,26 +121,97 @@ VideoCaptureDeviceLibrealsense::VideoCaptureDeviceLibrealsense(const Name& devic
   std::string stream = device_name_.name().substr(device_name_.name().find(delimiter) + 1);
 
   if (stream == "COLOR") {
-    stream_type_ = static_cast<int>(RS_STREAM_COLOR);
+    stream_ = RS_STREAM_COLOR;
   } else if (stream == "DEPTH") {
-    stream_type_ = static_cast<int>(RS_STREAM_DEPTH);
+    stream_ = RS_STREAM_DEPTH;
   } else {
     NOTREACHED();
     return;
   }
+
+  rs_capture_service_ = RsCaptureService::GetInstance();
 }
 
 VideoCaptureDeviceLibrealsense::~VideoCaptureDeviceLibrealsense() {
 }
 
+void FrameCallback(rs_device* dev, rs_frame_ref* frame, void* user) {
+  VideoCaptureDeviceLibrealsense* vcd = reinterpret_cast<VideoCaptureDeviceLibrealsense*>(user);
+
+  vcd->OnFrame(frame);
+}
+
 void VideoCaptureDeviceLibrealsense::AllocateAndStart(
     const VideoCaptureParams& params,
     std::unique_ptr<VideoCaptureDevice::Client> client) {
-  RsCaptureService::GetInstance()->StartStream(static_cast<rs_stream>(stream_type_), std::move(client));
+
+  client_ = std::move(client);
+
+  rs_capture_service_->StartStream(stream_, this);
+  rs_device* device = rs_capture_service_->GetDevice();
+
+  int width = rs_get_stream_width(device, stream_, nullptr);
+  int height = rs_get_stream_height(device, stream_, nullptr);
+  rs_format format = rs_get_stream_format(device, stream_, nullptr);
+
+  LOG(ERROR) << "Enabled Stream: " << width << " " << height << " " << format;
+
+  capture_format_.frame_size.SetSize(width, height);
+  capture_format_.frame_rate = rs_get_stream_framerate(device, stream_, nullptr);
+  capture_format_.pixel_format = PIXEL_FORMAT_RGB24;
+
+  if (format == RS_FORMAT_Z16) {
+    rgb_.reset(new uint8_t[width * height * 3]);
+  }
 }
 
 void VideoCaptureDeviceLibrealsense::StopAndDeAllocate() {
-  RsCaptureService::GetInstance()->StopStream(static_cast<rs_stream>(stream_type_));
+  rs_capture_service_->StopStream(stream_, this);
+}
+
+inline void make_depth_histogram(uint8_t* rgb_image, const uint16_t depth_image[], int width, int height)
+{
+    static uint32_t histogram[0x10000];
+    memset(histogram, 0, sizeof(histogram));
+
+    for(int i = 0; i < width*height; ++i) ++histogram[depth_image[i]];
+    for(int i = 2; i < 0x10000; ++i) histogram[i] += histogram[i-1]; // Build a cumulative histogram for the indices in [1,0xFFFF]
+    for(int i = 0; i < width*height; ++i)
+    {
+        if(uint16_t d = depth_image[i])
+        {
+            int f = histogram[d] * 255 / histogram[0xFFFF]; // 0-255 based on histogram location
+            rgb_image[i*3 + 0] = 255 - f;
+            rgb_image[i*3 + 1] = 0;
+            rgb_image[i*3 + 2] = f;
+        }
+        else
+        {
+            rgb_image[i*3 + 0] = 20;
+            rgb_image[i*3 + 1] = 5;
+            rgb_image[i*3 + 2] = 0;
+        }
+    }
+}
+
+void VideoCaptureDeviceLibrealsense::OnFrame(rs_frame_ref* frame) {
+  const uint8_t* data = nullptr;
+  rs_format format = rs_get_detached_frame_format(frame, nullptr);
+  if (format == RS_FORMAT_Z16) {
+    make_depth_histogram(rgb_.get(),
+                         reinterpret_cast<const uint16_t *>(rs_get_detached_frame_data(frame, nullptr)),
+                         rs_get_detached_frame_width(frame, nullptr), rs_get_detached_frame_height(frame, nullptr));
+    data = rgb_.get();
+  } else if (format == RS_FORMAT_RGB8) {
+    data = reinterpret_cast<const uint8_t *>(rs_get_detached_frame_data(frame, nullptr));
+  }
+
+  if (data) {
+    client_->OnIncomingCapturedData(
+        data,
+        capture_format_.ImageAllocationSize(),
+        capture_format_, 0, base::TimeTicks::Now());
+  }
 }
 
 }  // namespace media
