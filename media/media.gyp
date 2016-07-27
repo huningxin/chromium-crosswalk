@@ -752,11 +752,9 @@
         ['OS=="linux"', {
           'conditions': [
             ['use_librealsense==1', {
-              'link_settings': {
-                'libraries': [
-                  '-L/usr/local/lib -lrealsense',
-                ],
-              },
+              'dependencies': [
+                '../third_party/rscs/rscs.gyp:rscs',
+              ]
             }],
             ['use_x11==1', {
               'dependencies': [
