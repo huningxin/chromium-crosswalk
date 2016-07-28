@@ -41,7 +41,11 @@ void VideoCaptureDeviceLibrealsense::GetDeviceNames(Names* device_names) {
         int mode_count = rs_get_stream_mode_count(dev, strm, nullptr);
         if(mode_count == 0) continue;
 
-        if (!(strm == RS_STREAM_DEPTH || strm == RS_STREAM_COLOR))
+        if (!(strm == RS_STREAM_DEPTH || 
+              strm == RS_STREAM_COLOR || 
+              strm == RS_STREAM_INFRARED ||
+              strm == RS_STREAM_INFRARED2 ||
+              strm == RS_STREAM_FISHEYE))
           continue;
 
         // Show each available mode for this stream
@@ -71,6 +75,12 @@ void VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats(
     requested_stream = RS_STREAM_COLOR;
   } else if (stream == "DEPTH") {
     requested_stream = RS_STREAM_DEPTH;
+  } else if (stream == "INFRARED") {
+    requested_stream = RS_STREAM_INFRARED;
+  } else if (stream == "INFRARED2") {
+    requested_stream = RS_STREAM_INFRARED2;
+  } else if (stream == "FISHEYE") {
+    requested_stream = RS_STREAM_FISHEYE;
   } else {
     NOTREACHED();
     return;
@@ -101,7 +111,10 @@ void VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats(
       rs_get_stream_mode(dev, requested_stream, k, &width, &height, &format, &framerate, nullptr);
 
       if ((requested_stream == RS_STREAM_DEPTH && format != RS_FORMAT_Z16) ||
-          (requested_stream == RS_STREAM_COLOR && format != RS_FORMAT_BGRA8))
+          (requested_stream == RS_STREAM_COLOR && format != RS_FORMAT_BGRA8) ||
+          (requested_stream == RS_STREAM_INFRARED && format != RS_FORMAT_Y8) ||
+          (requested_stream == RS_STREAM_INFRARED2 && format != RS_FORMAT_Y8) ||
+          (requested_stream == RS_STREAM_FISHEYE && format != RS_FORMAT_RAW8))
         continue;
 
       VideoCaptureFormat supported_format;
@@ -124,6 +137,12 @@ VideoCaptureDeviceLibrealsense::VideoCaptureDeviceLibrealsense(const Name& devic
     stream_ = RS_STREAM_COLOR;
   } else if (stream == "DEPTH") {
     stream_ = RS_STREAM_DEPTH;
+  } else if (stream == "INFRARED") {
+    stream_ = RS_STREAM_INFRARED;
+  } else if (stream == "INFRARED2") {
+    stream_ = RS_STREAM_INFRARED2;
+  } else if (stream == "FISHEYE") {
+    stream_ = RS_STREAM_FISHEYE;
   } else {
     NOTREACHED();
     return;
@@ -160,7 +179,9 @@ void VideoCaptureDeviceLibrealsense::AllocateAndStart(
   capture_format_.frame_rate = rs_get_stream_framerate(device, stream_, nullptr);
   capture_format_.pixel_format = PIXEL_FORMAT_RGB24;
 
-  if (format == RS_FORMAT_Z16) {
+  if (format == RS_FORMAT_Z16 ||
+      format == RS_FORMAT_RAW8 ||
+      format == RS_FORMAT_Y8) {
     rgb_.reset(new uint8_t[width * height * 3]);
   }
 }
@@ -194,6 +215,16 @@ inline void make_depth_histogram(uint8_t* rgb_image, const uint16_t depth_image[
     }
 }
 
+inline void make_raw8_rgb(uint8_t* rgb_image, const uint8_t raw8_image[], int width, int height) {
+  for(int i = 0; i < width*height; ++i) {
+        if(uint8_t v = raw8_image[i]) {
+            rgb_image[i*3 + 0] = v;
+            rgb_image[i*3 + 1] = v;
+            rgb_image[i*3 + 2] = v;
+        }
+    }
+}
+
 void VideoCaptureDeviceLibrealsense::OnFrame(rs_frame_ref* frame) {
   const uint8_t* data = nullptr;
   rs_format format = rs_get_detached_frame_format(frame, nullptr);
@@ -204,6 +235,18 @@ void VideoCaptureDeviceLibrealsense::OnFrame(rs_frame_ref* frame) {
     data = rgb_.get();
   } else if (format == RS_FORMAT_RGB8) {
     data = reinterpret_cast<const uint8_t *>(rs_get_detached_frame_data(frame, nullptr));
+  } else if (format == RS_FORMAT_RAW8) {
+    make_raw8_rgb(rgb_.get(),
+                  reinterpret_cast<const uint8_t *>(rs_get_detached_frame_data(frame, nullptr)),
+                  rs_get_detached_frame_width(frame, nullptr), rs_get_detached_frame_height(frame, nullptr));
+    data = rgb_.get();
+  } else if (format == RS_FORMAT_Y8) {
+    make_raw8_rgb(rgb_.get(),
+                  reinterpret_cast<const uint8_t *>(rs_get_detached_frame_data(frame, nullptr)),
+                  rs_get_detached_frame_width(frame, nullptr), rs_get_detached_frame_height(frame, nullptr));
+    data = rgb_.get();
+  } else {
+    LOG(ERROR) << "Not support format " << format;
   }
 
   if (data) {
