@@ -32,6 +32,7 @@ class SANDBOX_EXPORT Credentials {
   enum class Capability {
     SYS_CHROOT,
     SYS_ADMIN,
+    MAC_OVERRIDE,
   };
 
   // Drop all capabilities in the effective, inheritable and permitted sets for
@@ -54,6 +55,8 @@ class SANDBOX_EXPORT Credentials {
   // threads will not be changed. This is dangerous, do not use unless you nkow
   // what you are doing.
   static bool DropAllCapabilitiesOnCurrentThread() WARN_UNUSED_RESULT;
+  static bool DropAllCapabilitiesExceptMacOverrideOnCurrentThread()
+      WARN_UNUSED_RESULT;
   static bool SetCapabilitiesOnCurrentThread(
       const std::vector<Capability>& caps) WARN_UNUSED_RESULT;
 

@@ -145,6 +145,8 @@ int CapabilityToKernelValue(Credentials::Capability cap) {
       return CAP_SYS_CHROOT;
     case Credentials::Capability::SYS_ADMIN:
       return CAP_SYS_ADMIN;
+    case Credentials::Capability::MAC_OVERRIDE:
+      return CAP_MAC_OVERRIDE;
   }
 
   LOG(FATAL) << "Invalid Capability: " << static_cast<int>(cap);
@@ -172,6 +174,13 @@ bool Credentials::DropAllCapabilities() {
 // static
 bool Credentials::DropAllCapabilitiesOnCurrentThread() {
   return SetCapabilitiesOnCurrentThread(std::vector<Capability>());
+}
+
+// static
+bool Credentials::DropAllCapabilitiesExceptMacOverrideOnCurrentThread() {
+  std::vector<Capability> caps;
+  caps.push_back(Capability::MAC_OVERRIDE);
+  return SetCapabilitiesOnCurrentThread(caps);
 }
 
 // static
@@ -329,7 +338,10 @@ pid_t Credentials::ForkAndDropCapabilitiesInChild() {
   }
 
   // Since we just forked, we are single threaded.
-  PCHECK(DropAllCapabilitiesOnCurrentThread());
+  // [Ostro OS XT]: Child process receives SIGKILL if the
+  // CAP_MAC_OVERRIDE capability is not set.
+  PCHECK(DropAllCapabilitiesExceptMacOverrideOnCurrentThread());
+
   return 0;
 }
 

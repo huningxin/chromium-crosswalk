@@ -27,6 +27,9 @@
 #ifndef CAP_SYS_ADMIN
 #define CAP_SYS_ADMIN 21
 #endif
+#ifndef CAP_MAC_OVERRIDE
+#define CAP_MAC_OVERRIDE 32
+#endif
 
 struct cap_hdr {
   uint32_t version;
