@@ -42,6 +42,12 @@
 
 #ifndef MADV_FREE
 #define MADV_FREE MADV_DONTNEED
+#else
+// [Ostro OS XT] MADV_FREE has wrong value which causes madvise
+// always returns -1. Fallback to MADV_DONTNEED.
+// TODO: fix in Ostro OS XT upstream.
+#undef MADV_FREE
+#define MADV_FREE MADV_DONTNEED
 #endif
 
 #ifndef MAP_ANONYMOUS
