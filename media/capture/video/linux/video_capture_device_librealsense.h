@@ -34,7 +34,7 @@ class VideoCaptureDeviceLibrealsense : public VideoCaptureDevice,
 
   // VideoCaptureDevice implementation.
   void AllocateAndStart(const VideoCaptureParams& params,
-                        std::unique_ptr<Client> client) override;
+                        scoped_ptr<Client> client) override;
   void StopAndDeAllocate() override;
 
   // RsCaptureService::Client implementation.
@@ -47,10 +47,10 @@ class VideoCaptureDeviceLibrealsense : public VideoCaptureDevice,
 
   RsCaptureService* rs_capture_service_;
 
-  std::unique_ptr<VideoCaptureDevice::Client> client_;
+  scoped_ptr<VideoCaptureDevice::Client> client_;
   VideoCaptureFormat capture_format_;
 
-  std::unique_ptr<uint8_t[]> rgb_;
+  scoped_ptr<uint8_t[]> rgb_;
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(VideoCaptureDeviceLibrealsense);
 };

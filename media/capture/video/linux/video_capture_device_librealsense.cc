@@ -21,7 +21,8 @@ void VideoCaptureDeviceLibrealsense::GetDeviceNames(Names* device_names) {
   LOG(ERROR) << "VideoCaptureDeviceLibrealsense::GetDeviceNames";
 
   
-  rs_context* ctx = rs_create_context(RS_API_VERSION, nullptr);
+  rs_error *e = 0;
+  rs_context* ctx = rs_create_context(RS_API_VERSION, &e);
 
   int device_count = rs_get_device_count(ctx, nullptr);
   if (!device_count) LOG(ERROR) << "No device detected. Is it plugged in?";
@@ -60,7 +61,8 @@ void VideoCaptureDeviceLibrealsense::GetDeviceNames(Names* device_names) {
 void VideoCaptureDeviceLibrealsense::GetDeviceSupportedFormats(
     const Name& device,
     VideoCaptureFormats* formats) {
-  rs_context* ctx = rs_create_context(RS_API_VERSION, nullptr);
+  rs_error *e = 0;
+  rs_context* ctx = rs_create_context(RS_API_VERSION, &e);
 
   std::string delimiter("-");
   std::string name = device.name().substr(0, device.name().find(delimiter));
@@ -143,7 +145,7 @@ void FrameCallback(rs_device* dev, rs_frame_ref* frame, void* user) {
 
 void VideoCaptureDeviceLibrealsense::AllocateAndStart(
     const VideoCaptureParams& params,
-    std::unique_ptr<VideoCaptureDevice::Client> client) {
+    scoped_ptr<VideoCaptureDevice::Client> client) {
 
   client_ = std::move(client);
 
